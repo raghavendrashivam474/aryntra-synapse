@@ -1,0 +1,43 @@
+﻿Aryntra Synapse Baseline Knowledge Source
+==========================================
+This document is the sample knowledge base used during Sprint 0.2 baseline testing.
+
+Retrieval-Augmented Generation
+--------------------------------
+Retrieval-Augmented Generation, commonly known as RAG, is a technique that combines information retrieval with large language model generation. Instead of relying solely on the knowledge encoded in the model's parameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.
+
+The main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.
+
+FAISS
+------
+FAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.
+
+In a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.
+
+Sentence Transformers
+----------------------
+Sentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vector space.
+
+The model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.
+
+Ollama
+-------
+Ollama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.
+
+Synapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.
+
+Mistral
+--------
+Mistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.
+
+Chunking
+---------
+Chunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire document.
+
+In Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.
+
+Baseline and Experimental Control
+-----------------------------------
+In scientific experiments, a control condition is a version of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.
+
+In Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.
