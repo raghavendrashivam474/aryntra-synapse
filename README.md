@@ -26,7 +26,7 @@ Context Assembly
 Ollama / Mistral
     ↓
 Answer
-
+```
 The v0.2.0 baseline is the control implementation for future Synapse experiments.
 
 Research Direction
@@ -51,6 +51,7 @@ NumPy
 Pandas
 Pytest
 Git / GitHub
+```
 Repository Structure
 aryntra-synapse/
 ├── app/
@@ -65,11 +66,17 @@ aryntra-synapse/
 ├── main.py
 ├── requirements.txt
 └── README.md
+
+```
+---
+
 Development Principle
 
 Synapse is developed experimentally.
 
 The baseline is kept simple and reproducible so that future changes can be evaluated independently rather than assuming that additional complexity produces better results.
+
+---
 
 Documentation
 
