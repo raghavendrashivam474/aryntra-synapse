@@ -79,7 +79,7 @@ The baseline is kept simple and reproducible so that future changes can be evalu
 ---
 
 Documentation
-
+```
 Sprint reports and research documentation are maintained under docs/.
 
 Roadmap
@@ -89,6 +89,8 @@ S1    Context Representation          → Next
 S2    Context Compression             → Planned
 S3    Progressive Expansion           → Planned
 S4    Adaptive / Hybrid Strategies    → Planned
+
+```
 Project Status
 
 Research / Experimental
