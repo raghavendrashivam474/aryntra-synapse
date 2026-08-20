@@ -1,0 +1,298 @@
+{
+  "experiment": "S1",
+  "phase": "baseline-diagnostic",
+  "query_set": "S1 Query Set v1",
+  "baseline": "v0.2.0",
+  "top_k": 3,
+  "health": {
+    "status": "ok",
+    "app_name": "Aryntra Synapse",
+    "version": "0.2.0",
+    "retriever_ready": true,
+    "chunk_count": 10,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "llm_model": "mistral"
+  },
+  "results": [
+    {
+      "id": "Q1",
+      "question": "What is Retrieval-Augmented Generation (RAG)?",
+      "status": "PASS",
+      "answer": "Retrieval-Augmented Generation (RAG) is a technique that combines information retrieval with large language model generation. It allows language models to access up-to-date or domain-specific information without requiring the model to be retrained, using relevant documents or passages from an external knowledge source as context when generating an answer.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0349,
+      "generation_latency": 50.5709,
+      "total_latency": 50.6063,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_000",
+          "text": "﻿Aryntra Synapse Baseline Knowledge Source\n==========================================\nThis document is the sample knowledge base used during Sprint 0.2 baseline testing.\n\nRetrieval-Augmented Generation\n--------------------------------\nRetrieval-Augmented Generation, commonly known as RAG, is a technique that combines information retrieval with large language model generation. Instead of relying solely on the knowledge encoded in the model's parameters, RAG systems first retrieve relevant documents or passag",
+          "score": 0.5893
+        },
+        {
+          "chunk_id": "doc1_chunk_008",
+          "text": "ion of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.\n\nIn Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.",
+          "score": 0.5299
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.5248
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "question": "What embedding model does Synapse use in Sprint 0.2?",
+      "status": "PASS",
+      "answer": "The embedding model that Synapse uses in Sprint 0.2 is all-MiniLM-L6-v2.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0246,
+      "generation_latency": 20.9297,
+      "total_latency": 20.9544,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.6003
+        },
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.5318
+        },
+        {
+          "chunk_id": "doc1_chunk_008",
+          "text": "ion of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.\n\nIn Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.",
+          "score": 0.5238
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "question": "How do Sentence Transformers and FAISS work together in the Synapse retrieval pipeline?",
+      "status": "PASS",
+      "answer": "In the Synapse retrieval pipeline, Sentence Transformers and FAISS work together by first creating dense vector representations, or embeddings, of text using the Sentence Transformers library. These embeddings capture the semantic meaning of the text. Then, FAISS is used to store these vector embeddings of document chunks. When a query arrives, it is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics like L2 distance or inner product. This process allows for efficient retrieval of relevant document chunks, aiming to provide more useful results than retrieving an entire document.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0241,
+      "generation_latency": 34.4766,
+      "total_latency": 34.5016,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.5227
+        },
+        {
+          "chunk_id": "doc1_chunk_002",
+          "text": "ctual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.\n\nIn a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS find",
+          "score": 0.4828
+        },
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.4684
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "question": "How does a query move from text to retrieved document chunks in the baseline?",
+      "status": "PASS",
+      "answer": "In the Synapse baseline, the process of moving a query from text to retrieved document chunks involves embedding the query into a vector, and then using FAISS (a library for efficient similarity search and clustering of dense vectors) to find the closest stored vectors in the document chunks using distance metrics such as L2 distance or inner product. This is based on the context provided in Chunk 3.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0246,
+      "generation_latency": 28.7547,
+      "total_latency": 28.7794,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.5179
+        },
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.4796
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.4533
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "question": "Why is chunking necessary, and how does chunk overlap help retrieval?",
+      "status": "PASS",
+      "answer": "Chunking is necessary because embedding models have a maximum input length, and dividing a long document into smaller chunks makes it possible to index and process the document more efficiently. In the Synapse system, each chunk receives a deterministic identifier based on its document and position.\n\nThe chunk overlap ensures that information near chunk boundaries is not lost during the process. This means that when retrieving relevant passages or documents, the system can ensure that it includes context from adjacent chunks if necessary, thus improving the overall retrieval process.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0427,
+      "generation_latency": 23.2306,
+      "total_latency": 23.2735,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.5694
+        },
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.5172
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.4356
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "question": "What roles do FAISS, Sentence Transformers, and Ollama each play in the baseline RAG pipeline?",
+      "status": "PASS",
+      "answer": "From the provided context, the roles of the components in the baseline RAG pipeline are as follows:\n\n1. FAISS (Facebook A Rymer Distance indexing strategy) is not explicitly mentioned as a component in the RAG pipeline in the provided context. However, it is mentioned in Chunk 1 as a potential external knowledge source that RAG systems can use to retrieve relevant documents or passages.\n\n2. Sentence Transformers are not explicitly mentioned in the provided context. However, they are often used for tasks like information retrieval, text similarity, and semantic analysis, which are important components of RAG systems.\n\n3. Ollama is not mentioned in the provided context. Therefore, it is not clear what role it plays in the RAG pipeline described here. However, it is a large language model developed by Mistral AI, and in Chunk 3, Mistral is mentioned as the generation component of the RAG pipeline in the Synapse baseline.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0315,
+      "generation_latency": 47.7587,
+      "total_latency": 47.7903,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.5175
+        },
+        {
+          "chunk_id": "doc1_chunk_000",
+          "text": "﻿Aryntra Synapse Baseline Knowledge Source\n==========================================\nThis document is the sample knowledge base used during Sprint 0.2 baseline testing.\n\nRetrieval-Augmented Generation\n--------------------------------\nRetrieval-Augmented Generation, commonly known as RAG, is a technique that combines information retrieval with large language model generation. Instead of relying solely on the knowledge encoded in the model's parameters, RAG systems first retrieve relevant documents or passag",
+          "score": 0.4416
+        },
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.4333
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "question": "What are the respective purposes of RAG, FAISS, Sentence Transformers, and Ollama in Synapse?",
+      "status": "PASS",
+      "answer": "In Synapse, the respective purposes are as follows:\n\n1. RAG (Retrieval-Augmented Generation) serves to retrieve relevant documents or passages from an external knowledge source and use them as context when generating an answer. This is done to improve the factual accuracy and reduce hallucination in the generated responses.\n\n2. FAISS (Facebook A\n\n3. Sentence Transformers are not explicitly mentioned in the provided context.\n\n4. Ollama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive generated responses. In Synapse, Ollama is used to run the Mistral language model locally, keeping all computation on the developer's machine during the baseline research phase.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0279,
+      "generation_latency": 44.1193,
+      "total_latency": 44.1473,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.5407
+        },
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.5108
+        },
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.4795
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "question": "Why does Synapse use local Ollama/Mistral instead of relying on cloud-based model APIs during baseline research?",
+      "status": "PASS",
+      "answer": "Synapse uses local Ollama/Mistral during baseline research to keep all computation on the developer's machine. This approach is taken to avoid relying on cloud-based model APIs, enabling local development and research without the need for external resources.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.034,
+      "generation_latency": 31.2736,
+      "total_latency": 31.3077,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.6589
+        },
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.54
+        },
+        {
+          "chunk_id": "doc1_chunk_008",
+          "text": "ion of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.\n\nIn Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.",
+          "score": 0.4689
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "question": "What is the population of France?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about the population of France.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0238,
+      "generation_latency": 17.2566,
+      "total_latency": 17.2806,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_002",
+          "text": "ctual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.\n\nIn a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS find",
+          "score": 0.3803
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.3479
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3459
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "question": "What accuracy percentage did the Synapse baseline achieve in Sprint 0.2?",
+      "status": "PASS",
+      "answer": "The provided context does not contain information about the accuracy percentage achieved by the Synapse baseline in Sprint 0.2.",
+      "num_chunks_retrieved": 3,
+      "retrieval_latency": 0.0264,
+      "generation_latency": 19.3998,
+      "total_latency": 19.4264,
+      "context_length": 1570,
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_008",
+          "text": "ion of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.\n\nIn Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.",
+          "score": 0.5533
+        },
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.518
+        },
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.4679
+        }
+      ]
+    }
+  ]
+}
