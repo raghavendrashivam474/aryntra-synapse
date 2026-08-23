@@ -1,22 +1,21 @@
-﻿"""
+"""
 app/llm/ollama_provider.py
 
-Aryntra Synapse — Sprint 0.2
-Isolated LLM layer.
+Aryntra Synapse — Sprint 1
+Isolated LLM layer with pluggable context representation.
 
 Responsibilities:
-- Accept a question and a context string
+- Accept a question and retrieved chunks
+- Delegate context representation to ContextRepresenter
 - Construct a generic RAG prompt
 - Call Ollama
-- Return the answer and generation latency
-
-This module knows nothing about retrieval, FAISS, chunking or FastAPI.
-It receives a question and a context string. It returns an answer.
+- Return the answer, generation latency, and representation metadata
 """
 
 import time
 import ollama
 from app.core.config import settings
+from app.context.representation import BaseContextRepresenter, get_representer
 
 
 PROMPT_TEMPLATE = """\
@@ -35,18 +34,7 @@ Answer:"""
 
 def assemble_context(retrieved_chunks: list[dict]) -> str:
     """
-    Convert a list of retrieval result dicts into a plain context string.
-
-    This is intentionally simple — the baseline concatenates Top-K chunks
-    with labeled separators. No compression, no summarisation, no ranking.
-
-    Parameters
-    ----------
-    retrieved_chunks : list of dicts with at least a "text" key
-
-    Returns
-    -------
-    Formatted context string.
+    Legacy Sprint 0.2 flat assembly function preserved for reference and equivalence testing.
     """
     if not retrieved_chunks:
         return "No relevant context found."
@@ -61,20 +49,17 @@ def assemble_context(retrieved_chunks: list[dict]) -> str:
 class OllamaProvider:
     """
     Thin wrapper around the Ollama Python client.
-
-    Usage
-    -----
-        provider = OllamaProvider()
-        result = provider.generate(question, retrieved_chunks)
     """
 
     def __init__(
         self,
         model: str = settings.llm_model,
         host: str = settings.ollama_host,
+        representer: BaseContextRepresenter = None,
     ):
         self.model = model
         self._client = ollama.Client(host=host)
+        self.representer = representer or get_representer()
 
     def generate(
         self,
@@ -83,21 +68,10 @@ class OllamaProvider:
     ) -> dict:
         """
         Generate an answer from a question and retrieved context chunks.
-
-        Parameters
-        ----------
-        question         : the user question string
-        retrieved_chunks : list of retrieval result dicts
-
-        Returns
-        -------
-        dict with keys:
-            "answer"              : generated answer string
-            "generation_latency"  : seconds taken for generation
-            "context_length"      : character length of assembled context
-            "model"               : model name used
         """
-        context = assemble_context(retrieved_chunks)
+        represented = self.representer.represent(question, retrieved_chunks)
+        context = represented["context_string"]
+
         prompt = PROMPT_TEMPLATE.format(
             context=context,
             question=question,
@@ -111,12 +85,14 @@ class OllamaProvider:
         )
 
         generation_latency = time.perf_counter() - t0
-
         answer = response.get("response", "").strip()
 
         return {
-            "answer":             answer,
+            "answer": answer,
             "generation_latency": round(generation_latency, 4),
-            "context_length":     len(context),
-            "model":              self.model,
+            "context_length": len(context),
+            "model": self.model,
+            "representation_type": represented["representation_type"],
+            "representation_metadata": represented["representation_metadata"],
+            "representation_build_latency": represented["build_latency"],
         }

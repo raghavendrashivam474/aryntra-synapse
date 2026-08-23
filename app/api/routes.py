@@ -1,15 +1,12 @@
-﻿"""
+"""
 app/api/routes.py
 
-Aryntra Synapse — Sprint 0.2
+Aryntra Synapse — Sprint 1
 FastAPI route definitions.
 
 Exposes:
     GET  /health
     POST /ask
-
-This module wires the API layer to the retrieval and LLM layers.
-It does not contain business logic.
 """
 
 import time
@@ -24,7 +21,6 @@ router = APIRouter()
 
 # ---------------------------------------------------------------------------
 # Module-level singletons
-# Loaded once at startup. Retriever holds the FAISS index in memory.
 # ---------------------------------------------------------------------------
 
 _retriever = Retriever()
@@ -69,6 +65,9 @@ class AskResponse(BaseModel):
     context_length: int
     num_chunks_retrieved: int
     model: str
+    representation_type: str = "flat"
+    representation_metadata: dict = Field(default_factory=dict)
+    representation_build_latency: float = 0.0
 
 
 class HealthResponse(BaseModel):
@@ -79,6 +78,7 @@ class HealthResponse(BaseModel):
     chunk_count: int
     embedding_model: str
     llm_model: str
+    context_representation: str
 
 
 # ---------------------------------------------------------------------------
@@ -98,6 +98,7 @@ def health():
         chunk_count=_retriever.chunk_count,
         embedding_model=settings.embedding_model,
         llm_model=settings.llm_model,
+        context_representation=settings.context_representation,
     )
 
 
@@ -141,4 +142,7 @@ def ask(request: AskRequest):
         context_length=llm_result["context_length"],
         num_chunks_retrieved=len(retrieved_chunks),
         model=llm_result["model"],
+        representation_type=llm_result.get("representation_type", "flat"),
+        representation_metadata=llm_result.get("representation_metadata", {}),
+        representation_build_latency=llm_result.get("representation_build_latency", 0.0),
     )
