@@ -14,7 +14,7 @@ Aryntra Synapse now contains three validated context representation strategies:
 3. `compressed_v1` (Sprint 2 deterministic selective context compression)
 
 Configuration is controlled via environment variable:
-```bash
+
 CONTEXT_REPRESENTATION=flat | structured_v1 | compressed_v1
 2. Summary of S2 Findings
 Context reduced by 34.42% on average.
