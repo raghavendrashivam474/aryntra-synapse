@@ -1,0 +1,170 @@
+﻿"""
+Aryntra Synapse — S2 Baseline Diagnostic
+
+Purpose:
+    Run the frozen flat baseline against the canonical S2 Query Set v1.
+
+Requirements:
+    - Synapse API running with CONTEXT_REPRESENTATION=flat:
+        uvicorn main:app --reload
+    - Ollama running with Mistral available
+    - httpx installed
+"""
+
+import json
+import re
+import sys
+import time
+from pathlib import Path
+
+try:
+    import httpx
+except ImportError:
+    print("ERROR: httpx is required. Run: pip install httpx")
+    sys.exit(1)
+
+BASE_URL = "http://127.0.0.1:8000"
+QUERY_FILE = Path("docs/experiments/S2/QUERY_SET.md")
+RESULT_FILE = Path("experiments/S2_baseline_results_v1.json")
+TOP_K = 3
+TIMEOUT = 120.0
+
+
+def load_queries():
+    if not QUERY_FILE.exists():
+        raise FileNotFoundError(f"Query set not found: {QUERY_FILE}")
+    text = QUERY_FILE.read_text(encoding="utf-8")
+    pattern = re.compile(r"\|\s*(Q\d+)\s*\|[^|]+\|\s*(.*?)\s*\|")
+    queries = []
+    for match in pattern.finditer(text):
+        query_id = match.group(1)
+        question = match.group(2).strip()
+        if query_id.startswith("Q"):
+            queries.append({"id": query_id, "question": question})
+    if len(queries) != 10:
+        raise ValueError(f"Expected 10 queries, found {len(queries)}.")
+    return queries
+
+
+def health_check(client):
+    print("\n" + "=" * 70)
+    print("  ARYNTRA SYNAPSE — S2 BASELINE DIAGNOSTIC (flat)")
+    print("=" * 70)
+    print("\n[1/3] Health Check")
+    print("-" * 40)
+    response = client.get(f"{BASE_URL}/health", timeout=TIMEOUT)
+    response.raise_for_status()
+    data = response.json()
+    print(f"  Status:                 {data.get('status')}")
+    print(f"  App:                    {data.get('app_name')}")
+    print(f"  Version:                {data.get('version')}")
+    print(f"  Retriever ready:        {data.get('retriever_ready')}")
+    print(f"  Chunk count:            {data.get('chunk_count')}")
+    print(f"  Embedding model:        {data.get('embedding_model')}")
+    print(f"  LLM model:              {data.get('llm_model')}")
+    print(f"  Context representation: {data.get('context_representation')}")
+    return data
+
+
+def run_queries(client, queries):
+    print("\n[2/3] Running S2 Query Set v1 (Baseline flat)")
+    print("-" * 40)
+    results = []
+
+    for item in queries:
+        query_id = item["id"]
+        question = item["question"]
+        print(f"\n{query_id}: {question}")
+        print("." * 70)
+
+        started = time.perf_counter()
+        try:
+            response = client.post(
+                f"{BASE_URL}/ask",
+                json={"text": question, "top_k": TOP_K},
+                timeout=TIMEOUT,
+            )
+            elapsed = time.perf_counter() - started
+            response.raise_for_status()
+            data = response.json()
+
+            retrieved_chunks = data.get("retrieved_chunks", [])
+            result = {
+                "id": query_id,
+                "question": question,
+                "status": "PASS",
+                "answer": data.get("answer"),
+                "num_chunks_retrieved": data.get("num_chunks_retrieved", len(retrieved_chunks)),
+                "representation_type": data.get("representation_type", "flat"),
+                "representation_build_latency": data.get("representation_build_latency", 0.0),
+                "retrieval_latency": data.get("retrieval_latency"),
+                "generation_latency": data.get("generation_latency"),
+                "total_latency": data.get("total_latency", round(elapsed, 4)),
+                "context_length": data.get("context_length"),
+                "retrieved_chunks": retrieved_chunks,
+                "representation_metadata": data.get("representation_metadata", {}),
+            }
+
+            print(f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)")
+            print(f"  Retrieval:      {result['retrieval_latency']}s")
+            print(f"  Generation:     {result['generation_latency']}s")
+            print(f"  Total:          {result['total_latency']}s")
+            print(f"  Context:        {result['context_length']} chars")
+            results.append(result)
+        except Exception as exc:
+            print(f"  FAILED: {exc}")
+            results.append({"id": query_id, "question": question, "status": "FAIL", "error": str(exc)})
+
+    return results
+
+
+def save_results(health, results):
+    output = {
+        "experiment": "S2",
+        "phase": "baseline-diagnostic",
+        "query_set": "S2 Query Set v1",
+        "baseline": "flat",
+        "context_representation": health.get("context_representation"),
+        "top_k": TOP_K,
+        "health": health,
+        "results": results,
+    }
+    RESULT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    RESULT_FILE.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"\nResults saved to: {RESULT_FILE}")
+
+
+def print_summary(results):
+    passed = sum(1 for r in results if r["status"] == "PASS")
+    retrieval_times = [r["retrieval_latency"] for r in results if r["status"] == "PASS" and r.get("retrieval_latency") is not None]
+    generation_times = [r["generation_latency"] for r in results if r["status"] == "PASS" and r.get("generation_latency") is not None]
+
+    print("\n[3/3] Summary")
+    print("-" * 40)
+    print(f"  Questions:        {len(results)}")
+    print(f"  Passed:           {passed}")
+    print(f"  Failed:           {len(results) - passed}")
+    if retrieval_times:
+        print(f"  Avg retrieval:    {sum(retrieval_times) / len(retrieval_times):.4f}s")
+    if generation_times:
+        print(f"  Avg generation:   {sum(generation_times) / len(generation_times):.4f}s")
+    print("\n" + "=" * 70)
+    print("  S2 BASELINE DIAGNOSTIC COMPLETE")
+    print("=" * 70)
+
+
+def main():
+    queries = load_queries()
+    print(f"Loaded {len(queries)} queries from {QUERY_FILE}")
+    with httpx.Client() as client:
+        health = health_check(client)
+        if health.get("status") != "ok":
+            print("\nERROR: Synapse health check failed.")
+            sys.exit(1)
+        results = run_queries(client, queries)
+        save_results(health, results)
+        print_summary(results)
+
+
+if __name__ == "__main__":
+    main()

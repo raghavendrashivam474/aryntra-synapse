@@ -1,13 +1,14 @@
-"""
+﻿"""
 app/context/representation.py
 
-Aryntra Synapse — Sprint 1
+Aryntra Synapse — Sprint 1 & Sprint 2
 Context representation layer.
 
 Responsibilities:
 - Transform retrieved chunks into a represented context structure
-- Support Flat representation (control / baseline byte-identical)
-- Support Structured representation (S1 experimental: relational & topological structure)
+- Support Flat representation (Sprint 0.2 / control baseline)
+- Support Structured representation (Sprint 1 experimental: relational & topological structure)
+- Support Compressed representation (Sprint 2 experimental: deterministic selective compression)
 - Measure representation build latency
 """
 
@@ -15,6 +16,7 @@ import time
 import re
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
+from app.context.compressor import build_compressed_context, compress_chunks
 
 
 class BaseContextRepresenter(ABC):
@@ -41,8 +43,8 @@ class BaseContextRepresenter(ABC):
         -------
         dict with keys:
             'context_string': str (the actual context injected into the prompt)
-            'representation_type': str ('flat', 'structured_v1', etc.)
-            'representation_metadata': dict (relational graph, adjacency, concept links)
+            'representation_type': str ('flat', 'structured_v1', 'compressed_v1', etc.)
+            'representation_metadata': dict (metadata, compression stats, graph)
             'build_latency': float (latency in seconds)
         """
         pass
@@ -94,12 +96,10 @@ class StructuredRepresenterV1(BaseContextRepresenter):
         return "structured_v1"
 
     def _extract_chunk_index(self, chunk_id: str) -> int:
-        """Extract numerical sequence index from chunk IDs like 'doc1_chunk_003'."""
         match = re.search(r"chunk_(\d+)", chunk_id)
         return int(match.group(1)) if match else -1
 
     def _extract_keywords(self, text: str) -> set:
-        """Extract non-trivial conceptual tokens for relationship discovery."""
         stopwords = {
             "the", "and", "for", "that", "with", "this", "from",
             "which", "have", "been", "were", "when", "where", "what",
@@ -121,7 +121,6 @@ class StructuredRepresenterV1(BaseContextRepresenter):
                 "build_latency": build_latency,
             }
 
-        # 1. Analyze sequential adjacency & shared concepts
         nodes = []
         chunk_keywords = []
         chunk_indices = []
@@ -141,11 +140,9 @@ class StructuredRepresenterV1(BaseContextRepresenter):
                 "sequence_index": seq_idx,
             })
 
-        # 2. Build pairwise relationships / edges
         edges = []
         relationship_notes = []
 
-        # Check sequential continuity
         for i in range(len(chunks)):
             for j in range(len(chunks)):
                 if i != j and chunk_indices[i] >= 0 and chunk_indices[j] >= 0:
@@ -159,11 +156,9 @@ class StructuredRepresenterV1(BaseContextRepresenter):
                             f"• Document Continuity: [{nodes[i]['chunk_id']}] is immediately followed by [{nodes[j]['chunk_id']}] in source document."
                         )
 
-        # Check shared conceptual anchors
         for i in range(len(chunks)):
             for j in range(i + 1, len(chunks)):
                 shared = chunk_keywords[i].intersection(chunk_keywords[j])
-                # Filter to prominent shared keywords
                 shared_sample = sorted(list(shared))[:4]
                 if shared_sample:
                     edges.append({
@@ -176,7 +171,6 @@ class StructuredRepresenterV1(BaseContextRepresenter):
                         f"• Conceptual Link [{nodes[i]['chunk_id']} & {nodes[j]['chunk_id']}]: relates via ({', '.join(shared_sample)})"
                     )
 
-        # 3. Assemble structured context string for prompt
         lines = []
         lines.append("=== Structured Context Relationships ===")
         if relationship_notes:
@@ -209,6 +203,75 @@ class StructuredRepresenterV1(BaseContextRepresenter):
         }
 
 
+class CompressedRepresenterV1(BaseContextRepresenter):
+    """
+    S2 Experimental Compressed Context Representation.
+
+    Performs deterministic post-retrieval context compression:
+    1. Whitespace & delimiter normalization
+    2. Structural marker removal
+    3. Sentence-boundary truncation (per chunk cap)
+    4. Cross-chunk semantic sentence deduplication
+    """
+
+    def __init__(self, max_chunk_chars: int = 400, dedup_threshold: float = 0.90):
+        self.max_chunk_chars = max_chunk_chars
+        self.dedup_threshold = dedup_threshold
+
+    @property
+    def representation_type(self) -> str:
+        return "compressed_v1"
+
+    def represent(self, query: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+        t0 = time.perf_counter()
+
+        if not chunks:
+            build_latency = round(time.perf_counter() - t0, 6)
+            return {
+                "context_string": "No relevant context found.",
+                "representation_type": self.representation_type,
+                "representation_metadata": {"reduction_pct": 0.0, "original_length": 0, "compressed_length": 0},
+                "build_latency": build_latency,
+            }
+
+        # Calculate original flat length for reduction metric
+        flat_parts = [f"[Chunk {i}]\n{chunk['text']}" for i, chunk in enumerate(chunks, 1)]
+        original_length = len("\n\n".join(flat_parts))
+
+        # Build compressed context
+        context_string = build_compressed_context(
+            chunks=chunks,
+            max_chunk_chars=self.max_chunk_chars,
+            dedup_threshold=self.dedup_threshold,
+        )
+
+        compressed_length = len(context_string)
+        reduction_pct = (
+            round((original_length - compressed_length) / original_length * 100, 2)
+            if original_length > 0 else 0.0
+        )
+        compression_ratio = (
+            round(compressed_length / original_length, 4)
+            if original_length > 0 else 1.0
+        )
+
+        build_latency = round(time.perf_counter() - t0, 6)
+
+        return {
+            "context_string": context_string,
+            "representation_type": self.representation_type,
+            "representation_metadata": {
+                "original_length": original_length,
+                "compressed_length": compressed_length,
+                "reduction_pct": reduction_pct,
+                "compression_ratio": compression_ratio,
+                "max_chunk_chars": self.max_chunk_chars,
+                "dedup_threshold": self.dedup_threshold,
+            },
+            "build_latency": build_latency,
+        }
+
+
 def get_representer(name: str = None) -> BaseContextRepresenter:
     """Factory function to obtain the configured context representer."""
     from app.core.config import settings
@@ -218,5 +281,9 @@ def get_representer(name: str = None) -> BaseContextRepresenter:
         return FlatRepresenter()
     elif rep_name == "structured_v1":
         return StructuredRepresenterV1()
+    elif rep_name == "compressed_v1":
+        return CompressedRepresenterV1()
     else:
-        raise ValueError(f"Unknown context representation type: '{rep_name}'. Supported: 'flat', 'structured_v1'")
+        raise ValueError(
+            f"Unknown context representation type: '{rep_name}'. Supported: 'flat', 'structured_v1', 'compressed_v1'"
+        )
