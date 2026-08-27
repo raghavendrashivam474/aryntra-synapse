@@ -136,3 +136,141 @@ class SufficiencyEngine:
             f"(score={top_score:.3f}, coverage={coverage_ratio:.2f})"
         )
         return result
+
+# ============================================================
+# S6 EXTENSION: Semantic-Aware Sufficiency
+# ============================================================
+# These classes compose the S5 SufficiencyEngine (lexical) with
+# the S6 SemanticGate (semantic). S5 code is not modified.
+# See S6 spec §13: "S5 SufficiencyEngine + S6 semantic signal"
+# ============================================================
+
+from app.context.semantic_gate import SemanticGate, SemanticResult
+
+
+class SemanticSufficiencyResult:
+    """
+    Extended sufficiency result incorporating both lexical and semantic signals.
+
+    Preserves full S5 lexical metrics for observability and comparison.
+    Adds semantic metrics and a combined score.
+    """
+
+    def __init__(
+        self,
+        is_sufficient: bool,
+        reason: str,
+        lexical_result: "SufficiencyResult",
+        semantic_score: float,
+        max_chunk_similarity: float,
+        mean_chunk_similarity: float,
+        combined_score: float,
+    ):
+        self.is_sufficient = is_sufficient
+        self.reason = reason
+        self.lexical_result = lexical_result
+        self.semantic_score = semantic_score
+        self.max_chunk_similarity = max_chunk_similarity
+        self.mean_chunk_similarity = mean_chunk_similarity
+        self.combined_score = combined_score
+
+    def to_dict(self) -> dict:
+        return {
+            "is_sufficient": self.is_sufficient,
+            "reason": self.reason,
+            "lexical": self.lexical_result.to_dict(),
+            "semantic_score": round(self.semantic_score, 4),
+            "max_chunk_similarity": round(self.max_chunk_similarity, 4),
+            "mean_chunk_similarity": round(self.mean_chunk_similarity, 4),
+            "combined_score": round(self.combined_score, 4),
+        }
+
+
+class SemanticSufficiencyEngine:
+    """
+    S6 semantic-aware sufficiency engine.
+
+    Composes the S5 SufficiencyEngine (lexical) with the S6 SemanticGate
+    (semantic) to produce a blended sufficiency decision.
+
+    Modes:
+    - semantic_only: Sufficiency based on semantic score alone (S6-A ablation)
+    - blended: Sufficiency requires BOTH lexical AND semantic signals (S6-B)
+
+    The lexical engine is preserved exactly as S5 shipped it.
+    The semantic gate uses cosine similarity via existing embeddings.
+    Zero additional LLM calls.
+    """
+
+    def __init__(
+        self,
+        lexical_engine: SufficiencyEngine,
+        semantic_gate: SemanticGate,
+        semantic_threshold: float = 0.50,
+        mode: str = "blended",
+    ):
+        self._lexical = lexical_engine
+        self._semantic = semantic_gate
+        self.semantic_threshold = semantic_threshold
+        if mode not in ("semantic_only", "blended"):
+            raise ValueError(f"Unknown mode: {mode}. Use 'semantic_only' or 'blended'.")
+        self.mode = mode
+
+    def evaluate(
+        self,
+        query: str,
+        active_chunks: List[Dict[str, Any]],
+    ) -> SemanticSufficiencyResult:
+        """
+        Evaluate sufficiency using both lexical and semantic signals.
+
+        Both signals are always computed for observability, even in
+        semantic_only mode, so we can compare them in experiments.
+        """
+        # Always compute both signals for observability (§17)
+        lexical_result = self._lexical.evaluate(query, active_chunks)
+        semantic_result = self._semantic.evaluate(query, active_chunks)
+
+        semantic_pass = semantic_result.semantic_score >= self.semantic_threshold
+
+        # Decision logic
+        if self.mode == "semantic_only":
+            is_sufficient = semantic_pass
+            if is_sufficient:
+                reason = "semantic_sufficient"
+            else:
+                reason = "semantic_insufficient"
+
+        else:  # blended
+            is_sufficient = lexical_result.is_sufficient and semantic_pass
+            if is_sufficient:
+                reason = "lexical_and_semantic_sufficient"
+            elif not lexical_result.is_sufficient and not semantic_pass:
+                reason = "lexical_and_semantic_insufficient"
+            elif not lexical_result.is_sufficient:
+                reason = "lexical_insufficient_semantic_pass"
+            else:
+                reason = "lexical_pass_semantic_insufficient"
+
+        # Combined score for observability (simple average, not used for decision)
+        combined = (
+            lexical_result.coverage_ratio + semantic_result.semantic_score
+        ) / 2.0
+
+        result = SemanticSufficiencyResult(
+            is_sufficient=is_sufficient,
+            reason=reason,
+            lexical_result=lexical_result,
+            semantic_score=semantic_result.semantic_score,
+            max_chunk_similarity=semantic_result.max_chunk_similarity,
+            mean_chunk_similarity=semantic_result.mean_chunk_similarity,
+            combined_score=combined,
+        )
+
+        logger.info(
+            f"SemanticSufficiency [{self.mode}]: {reason} "
+            f"(lex={lexical_result.is_sufficient}, "
+            f"sem={semantic_pass}, "
+            f"sem_score={semantic_result.semantic_score:.4f})"
+        )
+        return result

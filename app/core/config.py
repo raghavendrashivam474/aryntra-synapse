@@ -1,10 +1,10 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+﻿from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     # Application
     app_name: str = "Aryntra Synapse"
-    app_version: str = "0.6.0"
+    app_version: str = "0.8.0"
 
     # Knowledge Source
     sample_document: str = "data/sample.txt"
@@ -21,7 +21,8 @@ class Settings(BaseSettings):
 
     # Context Representation
     # flat | structured_v1 | compressed_v1 | progressive_v1 |
-    # evidence_workspace_v1 | selective_v1
+    # evidence_workspace_v1 | selective_v1 |
+    # semantic_v1 | blended_v1          <-- S6 modes
     context_representation: str = "selective_v1"
 
     # S3 Progressive Parameters (retained)
@@ -32,9 +33,13 @@ class Settings(BaseSettings):
     max_active_chunks: int = 3
     reuse_ollama_context: bool = False
 
-    # S5 Sufficiency Parameters
+    # S5 Sufficiency Parameters (retained, frozen)
     sufficiency_score_threshold: float = 0.45
     sufficiency_coverage_threshold: float = 0.25
+
+    # S6 Semantic Sufficiency Parameters (calibrated)
+    semantic_sufficiency_threshold: float = 0.60
+    semantic_sufficiency_mode: str = "blended"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -44,3 +49,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

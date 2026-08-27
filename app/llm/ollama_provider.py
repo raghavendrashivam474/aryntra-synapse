@@ -1,11 +1,13 @@
-import time
+﻿import time
 import logging
 import ollama
 from app.core.config import settings
 from app.context.representation import BaseContextRepresenter, get_representer
 from app.context.progressive import ProgressiveContextEngine, SUFFICIENCY_PROMPT_TEMPLATE
 from app.context.workspace import EvidenceWorkspace
-from app.context.sufficiency import SufficiencyEngine
+from app.context.sufficiency import SufficiencyEngine, SemanticSufficiencyEngine
+from app.context.semantic_gate import SemanticGate
+from app.retrieval.embeddings import EmbeddingModel
 from app.context.compressor import build_compressed_context
 
 logger = logging.getLogger(__name__)
@@ -36,7 +38,8 @@ def assemble_context(retrieved_chunks: list[dict]) -> str:
 class OllamaProvider:
     """
     Thin wrapper around the Ollama Python client.
-    Supports static, progressive (S3), workspace (S4), and selective (S5) modes.
+    Supports static, progressive (S3), workspace (S4), selective (S5),
+    and semantic/blended sufficiency modes (S6).
     """
 
     def __init__(
@@ -44,11 +47,18 @@ class OllamaProvider:
         model: str = settings.llm_model,
         host: str = settings.ollama_host,
         representer: BaseContextRepresenter = None,
+        embedding_model: EmbeddingModel = None,
     ):
         self.model = model
         self._client = ollama.Client(host=host)
         rep_name = settings.context_representation
-        if rep_name in ("progressive_v1", "evidence_workspace_v1", "selective_v1"):
+        if rep_name in (
+            "progressive_v1",
+            "evidence_workspace_v1",
+            "selective_v1",
+            "semantic_v1",
+            "blended_v1",
+        ):
             rep_name = "compressed_v1"
         self.representer = representer or get_representer(rep_name)
 
@@ -61,6 +71,24 @@ class OllamaProvider:
         self.sufficiency_engine = SufficiencyEngine(
             score_threshold=settings.sufficiency_score_threshold,
             coverage_threshold=settings.sufficiency_coverage_threshold,
+        )
+
+        # S6: Reuse embedding model or instantiate default
+        self._embedder = embedding_model or EmbeddingModel()
+        self.semantic_gate = SemanticGate(self._embedder)
+
+        self.semantic_engine = SemanticSufficiencyEngine(
+            lexical_engine=self.sufficiency_engine,
+            semantic_gate=self.semantic_gate,
+            semantic_threshold=settings.semantic_sufficiency_threshold,
+            mode="semantic_only",
+        )
+
+        self.blended_engine = SemanticSufficiencyEngine(
+            lexical_engine=self.sufficiency_engine,
+            semantic_gate=self.semantic_gate,
+            semantic_threshold=settings.semantic_sufficiency_threshold,
+            mode="blended",
         )
 
     def generate_raw(self, prompt: str, context: list = None) -> dict:
@@ -77,7 +105,9 @@ class OllamaProvider:
     def generate(self, question: str, retrieved_chunks: list[dict]) -> dict:
         rep_type = settings.context_representation.lower().strip()
 
-        if rep_type == "selective_v1":
+        if rep_type in ("semantic_v1", "blended_v1"):
+            return self._generate_semantic_aware(question, retrieved_chunks, mode=rep_type)
+        elif rep_type == "selective_v1":
             return self._generate_selective(question, retrieved_chunks)
         elif rep_type == "evidence_workspace_v1":
             return self._generate_workspace(question, retrieved_chunks)
@@ -85,6 +115,92 @@ class OllamaProvider:
             return self._generate_progressive(question, retrieved_chunks)
         else:
             return self._generate_static(question, retrieved_chunks)
+
+    # ── S6: Semantic-Aware Sufficiency Mode ──
+
+    def _generate_semantic_aware(
+        self, question: str, retrieved_chunks: list[dict], mode: str = "blended_v1"
+    ) -> dict:
+        """
+        S6 semantic-aware selective promotion.
+        Evaluates evidence sufficiency using semantic similarity (semantic_v1)
+        or a hybrid lexical+semantic signal (blended_v1).
+        Zero LLM calls for sufficiency gate.
+        """
+        engine = self.blended_engine if mode == "blended_v1" else self.semantic_engine
+
+        workspace = EvidenceWorkspace(
+            chunks=retrieved_chunks,
+            max_active=settings.max_active_chunks,
+        )
+
+        workspace.promote_initial(count=settings.initial_chunk_count)
+        expansion_steps = 0
+        stop_reason = "unknown"
+        sufficiency_log = []
+
+        while True:
+            active = workspace.active()
+
+            # S6: Semantic / Blended Sufficiency Check (Zero LLM calls)
+            suff_result = engine.evaluate(question, active)
+            sufficiency_log.append(suff_result.to_dict())
+
+            if suff_result.is_sufficient:
+                stop_reason = "evidence_sufficient"
+                break
+
+            if not workspace.has_available():
+                stop_reason = "no_more_evidence"
+                break
+
+            if expansion_steps >= settings.max_expansion_steps:
+                stop_reason = "max_expansion_reached"
+                break
+
+            # Promote next chunk
+            workspace.promote_next(reason=suff_result.reason)
+            expansion_steps += 1
+
+        # Final generation (exactly 1 LLM call)
+        final_context = workspace.build_active_context()
+        gen_prompt = PROMPT_TEMPLATE.format(
+            context=final_context, question=question
+        )
+
+        total_model_calls = 1  # Only the final answer generation call
+        t0 = time.perf_counter()
+        gen_result = self.generate_raw(gen_prompt)
+        gen_latency = round(time.perf_counter() - t0, 4)
+        answer = gen_result["text"]
+
+        ws_summary = workspace.summary()
+        final_ctx_len = len(final_context)
+
+        return {
+            "answer": answer,
+            "generation_latency": gen_latency,
+            "context_length": final_ctx_len,
+            "model": self.model,
+            "representation_type": mode,
+            "representation_metadata": ws_summary,
+            "representation_build_latency": 0.0,
+            "expansion_steps": expansion_steps,
+            "total_model_calls": total_model_calls,
+            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"] if ws_summary["promotion_history"] else 0,
+            "final_context_length": final_ctx_len,
+            "peak_context_length": final_ctx_len,
+            "cumulative_context_length": final_ctx_len,
+            "sufficiency_latency": 0.0,
+            "new_context_length": ws_summary["total_new_context"],
+            "repeated_context_length": 0,
+            "workspace_active_chunks": ws_summary["active_chunks"],
+            "workspace_available_chunks": ws_summary["available_chunks"],
+            "promotion_history": ws_summary["promotion_history"],
+            "reuse_ollama_context": False,
+            "stop_reason": stop_reason,
+            "sufficiency_log": sufficiency_log,
+        }
 
     # ── S5: Selective Promotion Mode ──
 
@@ -94,7 +210,7 @@ class OllamaProvider:
         """
         S5 selective promotion: uses deterministic sufficiency signals
         instead of LLM-based sufficiency checks. Zero LLM calls for
-        sufficiency evaluation. Fixes the S4 4-call loop bug.
+        sufficiency evaluation.
         """
         workspace = EvidenceWorkspace(
             chunks=retrieved_chunks,
@@ -118,7 +234,6 @@ class OllamaProvider:
                 stop_reason = "evidence_sufficient"
                 break
 
-            # FIX: Check availability BEFORE expanding (prevents S4 4-call bug)
             if not workspace.has_available():
                 stop_reason = "no_more_evidence"
                 break
