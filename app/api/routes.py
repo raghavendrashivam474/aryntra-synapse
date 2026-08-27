@@ -1,14 +1,3 @@
-"""
-app/api/routes.py
-
-Aryntra Synapse — Sprint 1
-FastAPI route definitions.
-
-Exposes:
-    GET  /health
-    POST /ask
-"""
-
 import time
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -19,26 +8,15 @@ from app.core.config import settings
 
 router = APIRouter()
 
-# ---------------------------------------------------------------------------
-# Module-level singletons
-# ---------------------------------------------------------------------------
-
 _retriever = Retriever()
 _llm = OllamaProvider()
 
 
 def initialise_retriever() -> None:
-    """
-    Load the sample document, chunk it, and build the FAISS index.
-    Called once at application startup.
-    """
+    """Load the sample document, chunk it, and build the FAISS index."""
     chunks = load_and_chunk(settings.sample_document)
     _retriever.index_chunks(chunks)
 
-
-# ---------------------------------------------------------------------------
-# Request / Response models
-# ---------------------------------------------------------------------------
 
 class AskRequest(BaseModel):
     text: str = Field(..., description="The question to ask.")
@@ -68,6 +46,14 @@ class AskResponse(BaseModel):
     representation_type: str = "flat"
     representation_metadata: dict = Field(default_factory=dict)
     representation_build_latency: float = 0.0
+    # S3 Progressive Context Additions
+    expansion_steps: int = 0
+    total_model_calls: int = 1
+    initial_context_length: int = 0
+    final_context_length: int = 0
+    peak_context_length: int = 0
+    cumulative_context_length: int = 0
+    sufficiency_latency: float = 0.0
 
 
 class HealthResponse(BaseModel):
@@ -81,15 +67,8 @@ class HealthResponse(BaseModel):
     context_representation: str
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
 @router.get("/health", response_model=HealthResponse)
 def health():
-    """
-    Return system status and configuration summary.
-    """
     return HealthResponse(
         status="ok",
         app_name=settings.app_name,
@@ -104,9 +83,6 @@ def health():
 
 @router.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest):
-    """
-    Receive a question, retrieve relevant context, generate an answer.
-    """
     if not request.text or not request.text.strip():
         raise HTTPException(status_code=400, detail="Question text cannot be empty.")
 
@@ -145,4 +121,11 @@ def ask(request: AskRequest):
         representation_type=llm_result.get("representation_type", "flat"),
         representation_metadata=llm_result.get("representation_metadata", {}),
         representation_build_latency=llm_result.get("representation_build_latency", 0.0),
+        expansion_steps=llm_result.get("expansion_steps", 0),
+        total_model_calls=llm_result.get("total_model_calls", 1),
+        initial_context_length=llm_result.get("initial_context_length", llm_result["context_length"]),
+        final_context_length=llm_result.get("final_context_length", llm_result["context_length"]),
+        peak_context_length=llm_result.get("peak_context_length", llm_result["context_length"]),
+        cumulative_context_length=llm_result.get("cumulative_context_length", llm_result["context_length"]),
+        sufficiency_latency=llm_result.get("sufficiency_latency", 0.0),
     )
