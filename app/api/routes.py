@@ -13,18 +13,13 @@ _llm = OllamaProvider()
 
 
 def initialise_retriever() -> None:
-    """Load the sample document, chunk it, and build the FAISS index."""
     chunks = load_and_chunk(settings.sample_document)
     _retriever.index_chunks(chunks)
 
 
 class AskRequest(BaseModel):
     text: str = Field(..., description="The question to ask.")
-    top_k: int = Field(
-        default=settings.top_k,
-        ge=1,
-        description="Number of chunks to retrieve.",
-    )
+    top_k: int = Field(default=settings.top_k, ge=1)
 
 
 class RetrievedChunk(BaseModel):
@@ -46,7 +41,7 @@ class AskResponse(BaseModel):
     representation_type: str = "flat"
     representation_metadata: dict = Field(default_factory=dict)
     representation_build_latency: float = 0.0
-    # S3 Progressive Context Additions
+    # S3 fields
     expansion_steps: int = 0
     total_model_calls: int = 1
     initial_context_length: int = 0
@@ -54,6 +49,13 @@ class AskResponse(BaseModel):
     peak_context_length: int = 0
     cumulative_context_length: int = 0
     sufficiency_latency: float = 0.0
+    # S4 fields
+    new_context_length: int = 0
+    repeated_context_length: int = 0
+    workspace_active_chunks: int = 0
+    workspace_available_chunks: int = 0
+    promotion_history: list = Field(default_factory=list)
+    reuse_ollama_context: bool = False
 
 
 class HealthResponse(BaseModel):
@@ -85,31 +87,22 @@ def health():
 def ask(request: AskRequest):
     if not request.text or not request.text.strip():
         raise HTTPException(status_code=400, detail="Question text cannot be empty.")
-
     if not _retriever.is_ready:
-        raise HTTPException(status_code=503, detail="Retriever is not ready. No documents indexed.")
+        raise HTTPException(status_code=503, detail="Retriever is not ready.")
 
     t0 = time.perf_counter()
-
-    # Retrieval
     retrieval_result = _retriever.query(request.text, top_k=request.top_k)
     retrieved_chunks = retrieval_result["results"]
     retrieval_latency = retrieval_result["retrieval_latency"]
 
-    # Generation
     llm_result = _llm.generate(request.text, retrieved_chunks)
-
     total_latency = round(time.perf_counter() - t0, 4)
 
     return AskResponse(
         question=request.text,
         answer=llm_result["answer"],
         retrieved_chunks=[
-            RetrievedChunk(
-                chunk_id=c["chunk_id"],
-                text=c["text"],
-                score=c["score"],
-            )
+            RetrievedChunk(chunk_id=c["chunk_id"], text=c["text"], score=c["score"])
             for c in retrieved_chunks
         ],
         retrieval_latency=retrieval_latency,
@@ -123,9 +116,15 @@ def ask(request: AskRequest):
         representation_build_latency=llm_result.get("representation_build_latency", 0.0),
         expansion_steps=llm_result.get("expansion_steps", 0),
         total_model_calls=llm_result.get("total_model_calls", 1),
-        initial_context_length=llm_result.get("initial_context_length", llm_result["context_length"]),
-        final_context_length=llm_result.get("final_context_length", llm_result["context_length"]),
-        peak_context_length=llm_result.get("peak_context_length", llm_result["context_length"]),
-        cumulative_context_length=llm_result.get("cumulative_context_length", llm_result["context_length"]),
+        initial_context_length=llm_result.get("initial_context_length", 0),
+        final_context_length=llm_result.get("final_context_length", 0),
+        peak_context_length=llm_result.get("peak_context_length", 0),
+        cumulative_context_length=llm_result.get("cumulative_context_length", 0),
         sufficiency_latency=llm_result.get("sufficiency_latency", 0.0),
+        new_context_length=llm_result.get("new_context_length", 0),
+        repeated_context_length=llm_result.get("repeated_context_length", 0),
+        workspace_active_chunks=llm_result.get("workspace_active_chunks", 0),
+        workspace_available_chunks=llm_result.get("workspace_available_chunks", 0),
+        promotion_history=llm_result.get("promotion_history", []),
+        reuse_ollama_context=llm_result.get("reuse_ollama_context", False),
     )
