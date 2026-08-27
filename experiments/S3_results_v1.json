@@ -1,0 +1,659 @@
+{
+  "experiment": "S3",
+  "phase": "progressive-evaluation",
+  "query_set": "S3 Query Set v1",
+  "context_representation": "progressive_v1",
+  "top_k": 3,
+  "health": {
+    "status": "ok",
+    "app_name": "Aryntra Synapse",
+    "version": "0.4.0",
+    "retriever_ready": true,
+    "chunk_count": 10,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "llm_model": "mistral",
+    "context_representation": "progressive_v1"
+  },
+  "results": [
+    {
+      "id": "Q1",
+      "question": "What is the capital of France?",
+      "status": "PASS",
+      "answer": "The context provided does not contain enough information to answer the question \"What is the capital of France?\" as it does not provide any information about geography or countries. Therefore, I cannot provide an answer to this question.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0903,
+      "sufficiency_latency": 31.126,
+      "generation_latency": 21.3276,
+      "total_latency": 52.6272,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 345,
+      "final_context_length": 983,
+      "peak_context_length": 983,
+      "cumulative_context_length": 2985,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 345,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 25.966
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 674,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.16
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 983,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_002",
+          "text": "ctual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.\n\nIn a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS find",
+          "score": 0.3888
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.356
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3459
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "question": "Who wrote the theory of relativity?",
+      "status": "PASS",
+      "answer": "The context does not contain information about who wrote the theory of relativity.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0261,
+      "sufficiency_latency": 11.1039,
+      "generation_latency": 15.359,
+      "total_latency": 26.5744,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 323,
+      "final_context_length": 961,
+      "peak_context_length": 961,
+      "cumulative_context_length": 2877,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 323,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 6.4728
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 632,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 4.6311
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 961,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_007",
+          "text": "used passage is often more useful than retrieving an entire document.\n\nIn Synapse Sprint 0.2, chunking is character-based with a configurable chunk size and overlap. The overlap ensures that information near chunk boundaries is not lost. Each chunk receives a deterministic identifier based on its document and position.\n\nBaseline and Experimental Control\n-----------------------------------\nIn scientific experiments, a control condition is a version of the system where no experimental intervention is applied.",
+          "score": 0.3513
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3481
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.3454
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "question": "What are the main causes of climate change?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about the main causes of climate change.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0298,
+      "sufficiency_latency": 14.3075,
+      "generation_latency": 19.5899,
+      "total_latency": 34.0904,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 394,
+      "final_context_length": 1066,
+      "peak_context_length": 1066,
+      "cumulative_context_length": 3249,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 394,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 9.1693
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 723,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.1382
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 1066,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.3554
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.3551
+        },
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.3535
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "question": "How does photosynthesis work?",
+      "status": "PASS",
+      "answer": "The context does not contain enough information to answer the question about how photosynthesis works.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0387,
+      "sufficiency_latency": 13.8176,
+      "generation_latency": 19.0825,
+      "total_latency": 33.0424,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 341,
+      "final_context_length": 976,
+      "peak_context_length": 976,
+      "cumulative_context_length": 3030,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 341,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 8.2012
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 737,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.6164
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 976,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.3768
+        },
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.368
+        },
+        {
+          "chunk_id": "doc1_chunk_008",
+          "text": "ion of the system where no experimental intervention is applied. All other conditions are compared against the control to measure the effect of each intervention.\n\nIn Aryntra Synapse, the Sprint 0.2 RAG baseline serves as the control. It implements the simplest possible retrieval-augmented generation pipeline with no graph relationships, no compression, no adaptive strategies, and no recursive retrieval. Future Synapse experiments will modify one variable at a time and compare results against this baseline.",
+          "score": 0.3534
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "question": "What is the relationship between supply and demand?",
+      "status": "PASS",
+      "answer": "The context provided does not contain any information about the relationship between supply and demand.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0355,
+      "sufficiency_latency": 12.7519,
+      "generation_latency": 16.7865,
+      "total_latency": 29.65,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 307,
+      "final_context_length": 997,
+      "peak_context_length": 997,
+      "cumulative_context_length": 2951,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 307,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 7.5252
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 650,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.2267
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 997,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3632
+        },
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.3512
+        },
+        {
+          "chunk_id": "doc1_chunk_002",
+          "text": "ctual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.\n\nIn a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS find",
+          "score": 0.349
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "question": "How does inflation affect interest rates?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about how inflation affects interest rates.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0329,
+      "sufficiency_latency": 10.9604,
+      "generation_latency": 13.925,
+      "total_latency": 24.998,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 68,
+      "final_context_length": 724,
+      "peak_context_length": 724,
+      "cumulative_context_length": 1931,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 68,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 4.736
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 415,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 6.2244
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 724,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_009",
+          "text": "ne variable at a time and compare results against this baseline.",
+          "score": 0.3705
+        },
+        {
+          "chunk_id": "doc1_chunk_002",
+          "text": "ctual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook AI Similarity Search, is an open-source library developed by Meta AI Research. It is designed for efficient similarity search and clustering of dense vectors. FAISS is widely used in retrieval systems because it can search through millions of vectors quickly, even on a single machine.\n\nIn a RAG pipeline, FAISS is used to store the vector embeddings of document chunks. When a query arrives, the query is also embedded into a vector, and FAISS find",
+          "score": 0.3487
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3464
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "question": "Compare renewable and non-renewable energy sources.",
+      "status": "PASS",
+      "answer": "The context provided does not contain information to compare renewable and non-renewable energy sources.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.1127,
+      "sufficiency_latency": 10.3068,
+      "generation_latency": 10.1716,
+      "total_latency": 20.6475,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 68,
+      "final_context_length": 773,
+      "peak_context_length": 773,
+      "cumulative_context_length": 2078,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 68,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 4.8434
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 464,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.4634
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 773,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_009",
+          "text": "ne variable at a time and compare results against this baseline.",
+          "score": 0.3707
+        },
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.3648
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3624
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "question": "What are the advantages and disadvantages of remote work?",
+      "status": "PASS",
+      "answer": "The provided context does not contain information about the advantages and disadvantages of remote work.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0292,
+      "sufficiency_latency": 12.8537,
+      "generation_latency": 10.3171,
+      "total_latency": 23.3208,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 394,
+      "final_context_length": 1096,
+      "peak_context_length": 1096,
+      "cumulative_context_length": 3353,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 394,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 7.2071
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 767,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 5.6466
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 1096,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.386
+        },
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.3666
+        },
+        {
+          "chunk_id": "doc1_chunk_001",
+          "text": "ameters, RAG systems first retrieve relevant documents or passages from an external knowledge source and then use those passages as context when generating an answer.\n\nThe main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained. The retrieved context grounds the model's response in actual source material, which can reduce hallucination and improve factual accuracy.\n\nFAISS\n------\nFAISS, which stands for Facebook A",
+          "score": 0.3652
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "question": "What is the meaning of life according to the document?",
+      "status": "PASS",
+      "answer": "The document does not provide information about the meaning of life.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0238,
+      "sufficiency_latency": 11.6419,
+      "generation_latency": 8.6562,
+      "total_latency": 20.4007,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 341,
+      "final_context_length": 1001,
+      "peak_context_length": 1001,
+      "cumulative_context_length": 3035,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 341,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 6.661
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 692,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 4.9809
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 1001,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_006",
+          "text": "mance relative to its size. It is capable of following instructions, answering questions, and generating coherent text across a wide range of topics. In the Synapse baseline, Mistral serves as the generation component of the RAG pipeline.\n\nChunking\n---------\nChunking is the process of dividing a long document into smaller pieces before indexing. This is necessary because embedding models have a maximum input length, and because retrieving a focused passage is often more useful than retrieving an entire docu",
+          "score": 0.3789
+        },
+        {
+          "chunk_id": "doc1_chunk_000",
+          "text": "﻿Aryntra Synapse Baseline Knowledge Source\n==========================================\nThis document is the sample knowledge base used during Sprint 0.2 baseline testing.\n\nRetrieval-Augmented Generation\n--------------------------------\nRetrieval-Augmented Generation, commonly known as RAG, is a technique that combines information retrieval with large language model generation. Instead of relying solely on the knowledge encoded in the model's parameters, RAG systems first retrieve relevant documents or passag",
+          "score": 0.3644
+        },
+        {
+          "chunk_id": "doc1_chunk_003",
+          "text": "rrives, the query is also embedded into a vector, and FAISS finds the closest stored vectors using distance metrics such as L2 distance or inner product.\n\nSentence Transformers\n----------------------\nSentence Transformers is a Python library that provides pretrained models for generating dense vector representations of text. These representations, also called embeddings, capture the semantic meaning of sentences and paragraphs. Texts with similar meaning will have embeddings that are close together in vecto",
+          "score": 0.3633
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "question": "Who will win the next presidential election?",
+      "status": "PASS",
+      "answer": "The context provided does not contain any information about a presidential election. Therefore, I cannot answer the question about who will win the next presidential election.",
+      "num_chunks_retrieved": 3,
+      "representation_type": "progressive_v1",
+      "retrieval_latency": 0.0252,
+      "sufficiency_latency": 9.6735,
+      "generation_latency": 9.957,
+      "total_latency": 19.7283,
+      "expansion_steps": 2,
+      "total_model_calls": 3,
+      "initial_context_length": 394,
+      "final_context_length": 837,
+      "peak_context_length": 837,
+      "cumulative_context_length": 2532,
+      "representation_metadata": {
+        "stages": [
+          {
+            "stage": 1,
+            "chunks_exposed": 1,
+            "context_length": 394,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 6.9545
+          },
+          {
+            "stage": 2,
+            "chunks_exposed": 2,
+            "context_length": 464,
+            "sufficiency": "INSUFFICIENT",
+            "raw_judgment": "INSUFFICIENT",
+            "sufficiency_latency": 2.719
+          },
+          {
+            "stage": 3,
+            "chunks_exposed": 3,
+            "context_length": 837,
+            "sufficiency": "MAX_CHUNKS_REACHED",
+            "sufficiency_latency": 0.0
+          }
+        ],
+        "initial_context_chunks": 1,
+        "final_context_chunks": 3
+      },
+      "retrieved_chunks": [
+        {
+          "chunk_id": "doc1_chunk_005",
+          "text": "e API that applications can use to send prompts and receive generated responses. Ollama removes the need to use cloud-based model APIs for local development and research.\n\nSynapse uses Ollama to run the Mistral language model locally. This keeps all computation on the developer's machine during the baseline research phase.\n\nMistral\n--------\nMistral is a family of open-weight large language models. The Mistral 7B model is known for strong performance relative to its size. It is capable of following instructi",
+          "score": 0.3619
+        },
+        {
+          "chunk_id": "doc1_chunk_009",
+          "text": "ne variable at a time and compare results against this baseline.",
+          "score": 0.3561
+        },
+        {
+          "chunk_id": "doc1_chunk_004",
+          "text": "ar meaning will have embeddings that are close together in vector space.\n\nThe model used in Synapse Sprint 0.2 is all-MiniLM-L6-v2. This model is lightweight and fast while still producing high-quality embeddings for retrieval tasks. It produces embeddings with 384 dimensions.\n\nOllama\n-------\nOllama is a tool for running large language models locally on a personal computer. It manages model downloads, hardware acceleration, and provides a simple API that applications can use to send prompts and receive gene",
+          "score": 0.3553
+        }
+      ]
+    }
+  ]
+}
