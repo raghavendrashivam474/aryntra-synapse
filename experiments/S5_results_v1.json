@@ -1,0 +1,439 @@
+{
+  "experiment": "S5",
+  "phase": "selective-promotion-evaluation",
+  "query_set": "S5 Query Set v1",
+  "context_representation": "selective_v1",
+  "top_k": 3,
+  "health": {
+    "status": "ok",
+    "app_name": "Aryntra Synapse",
+    "version": "0.6.0",
+    "retriever_ready": true,
+    "chunk_count": 10,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "llm_model": "mistral",
+    "context_representation": "selective_v1"
+  },
+  "results": [
+    {
+      "id": "Q1",
+      "question": "What is the capital of France?",
+      "status": "PASS",
+      "answer": "The context does not provide information about the capital of France.",
+      "retrieval_latency": 0.03,
+      "generation_latency": 34.0687,
+      "total_latency": 34.1655,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 345,
+      "final_context_length": 983,
+      "cumulative_context_length": 983,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3888,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3888,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3888,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "question": "Who wrote the theory of relativity?",
+      "status": "PASS",
+      "answer": "The context does not provide information about who wrote the theory of relativity.",
+      "retrieval_latency": 0.0234,
+      "generation_latency": 13.3583,
+      "total_latency": 13.441,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 323,
+      "final_context_length": 961,
+      "cumulative_context_length": 961,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3513,
+          "coverage_ratio": 0.0,
+          "query_keywords": 3,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3513,
+          "coverage_ratio": 0.0,
+          "query_keywords": 3,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3513,
+          "coverage_ratio": 0.0,
+          "query_keywords": 3,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "question": "What are the main causes of climate change?",
+      "status": "PASS",
+      "answer": "The provided context does not contain information about the main causes of climate change. The text discusses Ollama, Mistral, RAG systems, and chunking, but there is no mention of climate change or its causes.",
+      "retrieval_latency": 0.026,
+      "generation_latency": 20.3645,
+      "total_latency": 20.4734,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 394,
+      "final_context_length": 1066,
+      "cumulative_context_length": 1066,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3554,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_insufficient",
+          "top_score": 0.3554,
+          "coverage_ratio": 0.25,
+          "query_keywords": 4,
+          "matched_keywords": 1
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_insufficient",
+          "top_score": 0.3554,
+          "coverage_ratio": 0.25,
+          "query_keywords": 4,
+          "matched_keywords": 1
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "question": "How does photosynthesis work?",
+      "status": "PASS",
+      "answer": "The provided context does not contain any information about photosynthesis. I cannot answer the question based on the provided context.",
+      "retrieval_latency": 0.0324,
+      "generation_latency": 15.9025,
+      "total_latency": 16.0152,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 341,
+      "final_context_length": 976,
+      "cumulative_context_length": 976,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3768,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3768,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3768,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "question": "What is the relationship between supply and demand?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about the relationship between supply and demand.",
+      "retrieval_latency": 0.0212,
+      "generation_latency": 13.9038,
+      "total_latency": 14.0525,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 307,
+      "final_context_length": 997,
+      "cumulative_context_length": 997,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3632,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3632,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3632,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "question": "How does inflation affect interest rates?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about how inflation affects interest rates.",
+      "retrieval_latency": 0.0231,
+      "generation_latency": 10.7258,
+      "total_latency": 10.7819,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 68,
+      "final_context_length": 724,
+      "cumulative_context_length": 724,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3705,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3705,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3705,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "question": "Compare renewable and non-renewable energy sources.",
+      "status": "PASS",
+      "answer": "The provided context does not contain enough information to compare renewable and non-renewable energy sources.",
+      "retrieval_latency": 0.0194,
+      "generation_latency": 13.405,
+      "total_latency": 13.467,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 68,
+      "final_context_length": 773,
+      "cumulative_context_length": 773,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3707,
+          "coverage_ratio": 0.2,
+          "query_keywords": 5,
+          "matched_keywords": 1
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3707,
+          "coverage_ratio": 0.2,
+          "query_keywords": 5,
+          "matched_keywords": 1
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3707,
+          "coverage_ratio": 0.2,
+          "query_keywords": 5,
+          "matched_keywords": 1
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "question": "What are the advantages and disadvantages of remote work?",
+      "status": "PASS",
+      "answer": "The context provided does not contain information about the advantages and disadvantages of remote work.",
+      "retrieval_latency": 0.0298,
+      "generation_latency": 11.9651,
+      "total_latency": 12.0931,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 394,
+      "final_context_length": 1096,
+      "cumulative_context_length": 1096,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.386,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.386,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.386,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "question": "What is the meaning of life according to the document?",
+      "status": "PASS",
+      "answer": "The document does not contain any information that suggests the meaning of life. It is focused on discussing the Synapse Baseline, Chunking, Retrieval-Augmented Generation (RAG), and Sentence Transformers, not the philosophical or religious concept of the meaning of life.",
+      "retrieval_latency": 0.0198,
+      "generation_latency": 17.6049,
+      "total_latency": 17.6847,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 341,
+      "final_context_length": 1001,
+      "cumulative_context_length": 1001,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_insufficient",
+          "top_score": 0.3789,
+          "coverage_ratio": 0.25,
+          "query_keywords": 4,
+          "matched_keywords": 1
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_insufficient",
+          "top_score": 0.3789,
+          "coverage_ratio": 0.25,
+          "query_keywords": 4,
+          "matched_keywords": 1
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_insufficient",
+          "top_score": 0.3789,
+          "coverage_ratio": 0.5,
+          "query_keywords": 4,
+          "matched_keywords": 2
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "question": "Who will win the next presidential election?",
+      "status": "PASS",
+      "answer": "The context does not provide information about a presidential election, so I cannot answer this question.",
+      "retrieval_latency": 0.0356,
+      "generation_latency": 9.3496,
+      "total_latency": 9.4505,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 394,
+      "final_context_length": 837,
+      "cumulative_context_length": 837,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3619,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3619,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3619,
+          "coverage_ratio": 0.0,
+          "query_keywords": 4,
+          "matched_keywords": 0
+        }
+      ]
+    }
+  ]
+}
