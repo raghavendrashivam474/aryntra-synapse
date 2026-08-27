@@ -41,7 +41,6 @@ class AskResponse(BaseModel):
     representation_type: str = "flat"
     representation_metadata: dict = Field(default_factory=dict)
     representation_build_latency: float = 0.0
-    # S3 fields
     expansion_steps: int = 0
     total_model_calls: int = 1
     initial_context_length: int = 0
@@ -49,13 +48,15 @@ class AskResponse(BaseModel):
     peak_context_length: int = 0
     cumulative_context_length: int = 0
     sufficiency_latency: float = 0.0
-    # S4 fields
     new_context_length: int = 0
     repeated_context_length: int = 0
     workspace_active_chunks: int = 0
     workspace_available_chunks: int = 0
     promotion_history: list = Field(default_factory=list)
     reuse_ollama_context: bool = False
+    # S5 additions
+    stop_reason: str = "unknown"
+    sufficiency_log: list = Field(default_factory=list)
 
 
 class HealthResponse(BaseModel):
@@ -72,13 +73,9 @@ class HealthResponse(BaseModel):
 @router.get("/health", response_model=HealthResponse)
 def health():
     return HealthResponse(
-        status="ok",
-        app_name=settings.app_name,
-        version=settings.app_version,
-        retriever_ready=_retriever.is_ready,
-        chunk_count=_retriever.chunk_count,
-        embedding_model=settings.embedding_model,
-        llm_model=settings.llm_model,
+        status="ok", app_name=settings.app_name, version=settings.app_version,
+        retriever_ready=_retriever.is_ready, chunk_count=_retriever.chunk_count,
+        embedding_model=settings.embedding_model, llm_model=settings.llm_model,
         context_representation=settings.context_representation,
     )
 
@@ -99,8 +96,7 @@ def ask(request: AskRequest):
     total_latency = round(time.perf_counter() - t0, 4)
 
     return AskResponse(
-        question=request.text,
-        answer=llm_result["answer"],
+        question=request.text, answer=llm_result["answer"],
         retrieved_chunks=[
             RetrievedChunk(chunk_id=c["chunk_id"], text=c["text"], score=c["score"])
             for c in retrieved_chunks
@@ -127,4 +123,6 @@ def ask(request: AskRequest):
         workspace_available_chunks=llm_result.get("workspace_available_chunks", 0),
         promotion_history=llm_result.get("promotion_history", []),
         reuse_ollama_context=llm_result.get("reuse_ollama_context", False),
+        stop_reason=llm_result.get("stop_reason", "unknown"),
+        sufficiency_log=llm_result.get("sufficiency_log", []),
     )
