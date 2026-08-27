@@ -1,0 +1,303 @@
+{
+  "experiment": "S6",
+  "phase": "semantic-sufficiency-evaluation",
+  "query_set": "S6 Query Set v1",
+  "context_representation": "selective_v1",
+  "top_k": 3,
+  "health": {
+    "status": "ok",
+    "app_name": "Aryntra Synapse",
+    "version": "0.8.0-dev",
+    "retriever_ready": true,
+    "chunk_count": 10,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "llm_model": "mistral",
+    "context_representation": "selective_v1"
+  },
+  "results": [
+    {
+      "id": "Q1",
+      "question": "What is Retrieval-Augmented Generation (RAG)?",
+      "status": "PASS",
+      "answer": "Retrieval-Augmented Generation (RAG) is a technique that combines information retrieval with large language model generation.",
+      "retrieval_latency": 0.0257,
+      "generation_latency": 21.9475,
+      "total_latency": 21.9779,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 349,
+      "final_context_length": 349,
+      "cumulative_context_length": 349,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5893,
+          "coverage_ratio": 1.0,
+          "query_keywords": 4,
+          "matched_keywords": 4
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "question": "What embedding model does Synapse use in Sprint 0.2?",
+      "status": "PASS",
+      "answer": "The Synapse Sprint 0.2 uses the all-MiniLM-L6-v2 embedding model.",
+      "retrieval_latency": 0.0434,
+      "generation_latency": 8.6941,
+      "total_latency": 8.7473,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 371,
+      "final_context_length": 371,
+      "cumulative_context_length": 371,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.6003,
+          "coverage_ratio": 0.8,
+          "query_keywords": 5,
+          "matched_keywords": 4
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "question": "How do Sentence Transformers and FAISS work together in the Synapse retrieval pipeline?",
+      "status": "PASS",
+      "answer": "In the Synapse retrieval pipeline, Sentence Transformers and FAISS work together by first generating dense vector representations of text using Sentence Transformers for the given query and stored documents. Then, FAISS, a library that offers efficient similarity search and clustering of datasets using a variety of distance metrics like L2 distance or inner product, finds the closest stored vectors to the query vector. This process helps in retrieving the most relevant documents or sentences based on the given query.",
+      "retrieval_latency": 0.0201,
+      "generation_latency": 19.3835,
+      "total_latency": 19.4079,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 307,
+      "final_context_length": 307,
+      "cumulative_context_length": 307,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5227,
+          "coverage_ratio": 0.5,
+          "query_keywords": 8,
+          "matched_keywords": 4
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "question": "How does a query move from text to retrieved document chunks in the baseline?",
+      "status": "PASS",
+      "answer": "The context provided does not detail the exact process of how a query moves from text to retrieved document chunks in the baseline. However, it suggests that the Synapse baseline, which includes Mistral, is involved in the process of generating coherent text, possibly including document summaries or chunks. But the specific method for query-document interaction is not explicitly stated.",
+      "retrieval_latency": 0.0227,
+      "generation_latency": 14.7905,
+      "total_latency": 14.823,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 341,
+      "final_context_length": 341,
+      "cumulative_context_length": 341,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5179,
+          "coverage_ratio": 0.4286,
+          "query_keywords": 7,
+          "matched_keywords": 3
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "question": "Why is chunking necessary, and how does chunk overlap help retrieval?",
+      "status": "PASS",
+      "answer": "Chunking is necessary for efficient indexing of long documents, as it allows the data to be divided into smaller, more manageable pieces. This process reduces the computational complexity and improves the speed of indexing.\n\nChunk overlap helps retrieval by allowing overlapping sections between adjacent chunks. This overlap ensures that when a query matches a term within the overlap, the query can be retrieved from multiple chunks, increasing the likelihood of a successful search and improving the accuracy of the results.",
+      "retrieval_latency": 0.0223,
+      "generation_latency": 15.219,
+      "total_latency": 15.2494,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 341,
+      "final_context_length": 341,
+      "cumulative_context_length": 341,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5694,
+          "coverage_ratio": 0.3333,
+          "query_keywords": 6,
+          "matched_keywords": 2
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "question": "What roles do FAISS, Sentence Transformers, and Ollama each play in the baseline RAG pipeline?",
+      "status": "PASS",
+      "answer": "The context does not provide specific roles for FAISS, Sentence Transformers, and Ollama in the baseline RAG pipeline. The text mentions Retrieval-Augmented Generation (RAG) as a technique that combines information retrieval with large language model generation, but does not specify the exact components used in the pipeline.",
+      "retrieval_latency": 0.0254,
+      "generation_latency": 18.9416,
+      "total_latency": 18.9828,
+      "expansion_steps": 1,
+      "total_model_calls": 1,
+      "initial_context_length": 327,
+      "final_context_length": 678,
+      "cumulative_context_length": 678,
+      "workspace_active_chunks": 2,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "coverage_insufficient",
+          "top_score": 0.5175,
+          "coverage_ratio": 0.2222,
+          "query_keywords": 9,
+          "matched_keywords": 2
+        },
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5175,
+          "coverage_ratio": 0.3333,
+          "query_keywords": 9,
+          "matched_keywords": 3
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "question": "What are the respective purposes of RAG, FAISS, Sentence Transformers, and Ollama in Synapse?",
+      "status": "PASS",
+      "answer": "The context does not provide specific information about FAISS, Sentence Transformers, or Ollama within the context of Synapse. However, based on general knowledge, FAISS is a library for efficient similarity search and clustering of dense vectors, Sentence Transformers are models that convert sentences into vectors, and Ollama is a research project on large language models.\n\nRAG, as mentioned in the context, is a system used in Synapse to retrieve relevant documents or passages from an external knowledge source and use those passages as context when generating an answer. The main advantage of RAG is that it allows language models to access up-to-date or domain-specific information without requiring the model to be retrained.",
+      "retrieval_latency": 0.0258,
+      "generation_latency": 24.4059,
+      "total_latency": 24.436,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 327,
+      "final_context_length": 327,
+      "cumulative_context_length": 327,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5407,
+          "coverage_ratio": 0.25,
+          "query_keywords": 8,
+          "matched_keywords": 2
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "question": "Why does Synapse use local Ollama/Mistral instead of relying on cloud-based model APIs during baseline research?",
+      "status": "PASS",
+      "answer": "Synapse uses local Ollama/Mistral during baseline research to keep all computation on the developer's machine, eliminating the need for cloud-based model APIs. This approach is adopted for local development and research purposes.",
+      "retrieval_latency": 0.0203,
+      "generation_latency": 12.173,
+      "total_latency": 12.2061,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 394,
+      "final_context_length": 394,
+      "cumulative_context_length": 394,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.6589,
+          "coverage_ratio": 0.8571,
+          "query_keywords": 14,
+          "matched_keywords": 12
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "question": "What is the population of France?",
+      "status": "PASS",
+      "answer": "The context does not contain information about the population of France.",
+      "retrieval_latency": 0.0213,
+      "generation_latency": 11.5191,
+      "total_latency": 11.5998,
+      "expansion_steps": 2,
+      "total_model_calls": 1,
+      "initial_context_length": 345,
+      "final_context_length": 983,
+      "cumulative_context_length": 983,
+      "workspace_active_chunks": 3,
+      "stop_reason": "no_more_evidence",
+      "sufficiency_log": [
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3803,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3803,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        },
+        {
+          "is_sufficient": false,
+          "reason": "score_and_coverage_insufficient",
+          "top_score": 0.3803,
+          "coverage_ratio": 0.0,
+          "query_keywords": 2,
+          "matched_keywords": 0
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "question": "What accuracy percentage did the Synapse baseline achieve in Sprint 0.2?",
+      "status": "PASS",
+      "answer": "The context does not provide information about the accuracy percentage of the Synapse baseline in Sprint 0.2.",
+      "retrieval_latency": 0.0221,
+      "generation_latency": 7.1615,
+      "total_latency": 7.1872,
+      "expansion_steps": 0,
+      "total_model_calls": 1,
+      "initial_context_length": 237,
+      "final_context_length": 237,
+      "cumulative_context_length": 237,
+      "workspace_active_chunks": 1,
+      "stop_reason": "evidence_sufficient",
+      "sufficiency_log": [
+        {
+          "is_sufficient": true,
+          "reason": "score_and_coverage_sufficient",
+          "top_score": 0.5533,
+          "coverage_ratio": 0.4286,
+          "query_keywords": 7,
+          "matched_keywords": 3
+        }
+      ]
+    }
+  ]
+}
