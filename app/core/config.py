@@ -1,17 +1,10 @@
-"""
-app/core/config.py
-
-Aryntra Synapse — Sprint 0.2 / Sprint 1
-Centralised application settings.
-"""
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     # Application
     app_name: str = "Aryntra Synapse"
-    app_version: str = "0.2.0"
+    app_version: str = "0.4.0"
 
     # Knowledge Source
     sample_document: str = "data/sample.txt"
@@ -26,8 +19,12 @@ class Settings(BaseSettings):
     llm_model: str = "mistral"
     ollama_host: str = "http://localhost:11434"
 
-    # Context Representation (S1)
-    context_representation: str = "flat"
+    # Context Representation (flat | structured_v1 | compressed_v1 | progressive_v1)
+    context_representation: str = "progressive_v1"
+
+    # S3 Progressive Parameters
+    max_expansion_steps: int = 2
+    initial_chunk_count: int = 1
 
     model_config = SettingsConfigDict(
         env_file=".env",
