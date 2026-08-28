@@ -1,11 +1,13 @@
 ﻿"""
 app/context/evidence_priority.py
 
-Aryntra Synapse — Sprint 8
-Evidence relevance and priority management engine.
+Aryntra Synapse — Sprint 8 / Sprint 9
+Evidence relevance and priority management engine with efficiency optimizations.
 
 Responsibilities:
 - Calculate individual priority signals (semantic, lexical, reuse)
+- Support conditional semantic evaluation via lexical fast-path gating (S9)
+- Support query and chunk embedding caching (S9)
 - Compute deterministic unified priority score
 - Classify evidence into HIGH, MEDIUM, LOW classes
 - Route/partition evidence into active and retained states
@@ -15,11 +17,13 @@ Responsibilities:
 import time
 import logging
 from enum import Enum
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, Set
 import numpy as np
 from app.context.sufficiency import extract_keywords
 from app.context.semantic_gate import cosine_similarity
 from app.retrieval.embeddings import EmbeddingModel
+from app.optimization.embedding_cache import EmbeddingCache, fingerprint_text
+from app.optimization.semantic_gate import LexicalSemanticGate, FastPathDecision
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +35,7 @@ class PriorityClass(str, Enum):
 
 
 class EvidencePriorityWeights:
-    """Configurable weights and thresholds for S8 Priority scoring."""
+    """Configurable weights and thresholds for S8/S9 Priority scoring."""
 
     def __init__(
         self,
@@ -113,6 +117,16 @@ class PriorityMetrics:
         active_evidence_count: int,
         retained_evidence_count: int,
         average_priority_score: float,
+        # S9 Efficiency Telemetry
+        semantic_calls: int = 0,
+        semantic_cache_hits: int = 0,
+        semantic_cache_misses: int = 0,
+        query_cache_hits: int = 0,
+        query_cache_misses: int = 0,
+        lexical_fast_path_hits: int = 0,
+        semantic_fallback_count: int = 0,
+        semantic_latency: float = 0.0,
+        cache_lookup_latency: float = 0.0,
     ):
         self.priority_latency = priority_latency
         self.high_priority_count = high_priority_count
@@ -121,6 +135,15 @@ class PriorityMetrics:
         self.active_evidence_count = active_evidence_count
         self.retained_evidence_count = retained_evidence_count
         self.average_priority_score = average_priority_score
+        self.semantic_calls = semantic_calls
+        self.semantic_cache_hits = semantic_cache_hits
+        self.semantic_cache_misses = semantic_cache_misses
+        self.query_cache_hits = query_cache_hits
+        self.query_cache_misses = query_cache_misses
+        self.lexical_fast_path_hits = lexical_fast_path_hits
+        self.semantic_fallback_count = semantic_fallback_count
+        self.semantic_latency = semantic_latency
+        self.cache_lookup_latency = cache_lookup_latency
 
     def to_dict(self) -> dict:
         return {
@@ -131,28 +154,45 @@ class PriorityMetrics:
             "active_evidence_count": self.active_evidence_count,
             "retained_evidence_count": self.retained_evidence_count,
             "average_priority_score": round(self.average_priority_score, 4),
+            "semantic_calls": self.semantic_calls,
+            "semantic_cache_hits": self.semantic_cache_hits,
+            "semantic_cache_misses": self.semantic_cache_misses,
+            "query_cache_hits": self.query_cache_hits,
+            "query_cache_misses": self.query_cache_misses,
+            "lexical_fast_path_hits": self.lexical_fast_path_hits,
+            "semantic_fallback_count": self.semantic_fallback_count,
+            "semantic_latency": round(self.semantic_latency, 6),
+            "cache_lookup_latency": round(self.cache_lookup_latency, 6),
         }
 
 
 class EvidencePriorityEngine:
     """
-    S8 Evidence Priority Engine.
+    S8 / S9 Evidence Priority Engine.
 
-    Scores each candidate evidence chunk using:
+    Scores candidate evidence chunks using:
     - Semantic Similarity (via cosine similarity with query embedding)
     - Lexical Similarity (query keyword matching/overlap)
     - Reuse Value (S7 metadata indicating whether chunk was already processed)
 
-    Then ranks and classifies each chunk into HIGH, MEDIUM, or LOW priority.
+    S9 Optimizations:
+    - EmbeddingCache for query & chunk vector embeddings
+    - LexicalSemanticGate for conditional semantic evaluation
     """
 
     def __init__(
         self,
         embedding_model: Optional[EmbeddingModel] = None,
         weights: Optional[EvidencePriorityWeights] = None,
+        query_cache: Optional[EmbeddingCache] = None,
+        evidence_cache: Optional[EmbeddingCache] = None,
+        semantic_gate: Optional[LexicalSemanticGate] = None,
     ):
         self._embedder = embedding_model or EmbeddingModel()
         self.weights = weights or EvidencePriorityWeights()
+        self.query_cache = query_cache
+        self.evidence_cache = evidence_cache
+        self.semantic_gate = semantic_gate
 
     def rank(
         self,
@@ -175,26 +215,80 @@ class EvidencePriorityEngine:
             return [], metrics
 
         t0 = time.perf_counter()
-
-        # Batch encode if semantic weighting is active
-        compute_semantic = self.weights.semantic_weight > 0.0
-        if compute_semantic:
-            query_vec = self._embedder.embed(query)
-            texts = [c.get("text", "") for c in chunks]
-            valid_indices = [i for i, t in enumerate(texts) if t.strip()]
-            valid_texts = [texts[i] for i in valid_indices]
-
-            if valid_texts:
-                batch_vecs = self._embedder.embed_batch(valid_texts)
-                chunk_vec_map = {valid_indices[k]: batch_vecs[k] for k in range(len(valid_indices))}
-            else:
-                chunk_vec_map = {}
-        else:
-            query_vec = None
-            chunk_vec_map = {}
+        sem_latency = 0.0
+        cache_latency = 0.0
+        semantic_calls = 0
+        q_hits_start = self.query_cache.hits if self.query_cache else 0
+        q_miss_start = self.query_cache.misses if self.query_cache else 0
+        ev_hits_start = self.evidence_cache.hits if self.evidence_cache else 0
+        ev_miss_start = self.evidence_cache.misses if self.evidence_cache else 0
+        fast_path_hits_start = self.semantic_gate.fast_path_hits if self.semantic_gate else 0
+        fallbacks_start = self.semantic_gate.semantic_fallbacks if self.semantic_gate else 0
 
         query_keywords = extract_keywords(query)
+        compute_semantic = self.weights.semantic_weight > 0.0
 
+        # Step 1: Pre-filter chunks using LexicalSemanticGate (if enabled)
+        gate_decisions: Dict[int, FastPathDecision] = {}
+        chunks_requiring_semantic: List[Tuple[int, str]] = []
+
+        for i, chunk in enumerate(chunks):
+            chunk_text = chunk.get("text", "")
+            if not chunk_text.strip():
+                continue
+
+            if compute_semantic:
+                if self.semantic_gate:
+                    decision = self.semantic_gate.decide(query_keywords, chunk_text)
+                    gate_decisions[i] = decision
+                    if decision.needs_semantic:
+                        chunks_requiring_semantic.append((i, chunk_text))
+                else:
+                    chunks_requiring_semantic.append((i, chunk_text))
+
+        # Step 2: Resolve Query Embedding (if any chunks require semantic scoring)
+        query_vec: Optional[np.ndarray] = None
+        if compute_semantic and chunks_requiring_semantic:
+            t_sem_0 = time.perf_counter()
+            if self.query_cache is not None:
+                t_c0 = time.perf_counter()
+                query_vec = self.query_cache.get_or_compute(query, self._embedder.embed)
+                cache_latency += (time.perf_counter() - t_c0)
+            else:
+                query_vec = self._embedder.embed(query)
+                semantic_calls += 1
+            sem_latency += (time.perf_counter() - t_sem_0)
+
+        # Step 3: Resolve Chunk Embeddings (only for chunks requiring semantic scoring)
+        chunk_vec_map: Dict[int, np.ndarray] = {}
+        if compute_semantic and chunks_requiring_semantic and query_vec is not None:
+            indices_to_fetch = [idx for idx, _ in chunks_requiring_semantic]
+            texts_to_fetch = [txt for _, txt in chunks_requiring_semantic]
+
+            t_sem_1 = time.perf_counter()
+            if self.evidence_cache is not None:
+                t_c1 = time.perf_counter()
+                fingerprints = [
+                    chunks[idx].get("fingerprint") or fingerprint_text(texts_to_fetch[k])
+                    for k, idx in enumerate(indices_to_fetch)
+                ]
+                vectors = self.evidence_cache.get_or_compute_batch(
+                    texts=texts_to_fetch,
+                    compute_batch_fn=self._embedder.embed_batch,
+                    precomputed_keys=fingerprints,
+                )
+                cache_latency += (time.perf_counter() - t_c1)
+                for idx, vec in zip(indices_to_fetch, vectors):
+                    chunk_vec_map[idx] = vec
+            else:
+                batch_vecs = self._embedder.embed_batch(texts_to_fetch)
+                semantic_calls += len(texts_to_fetch)
+                for k, idx in enumerate(indices_to_fetch):
+                    chunk_vec_map[idx] = batch_vecs[k]
+
+            sem_latency += (time.perf_counter() - t_sem_1)
+
+        # Step 4: Scoring and Classification
         prioritized = []
         high_cnt = 0
         med_cnt = 0
@@ -205,13 +299,20 @@ class EvidencePriorityEngine:
             chunk_text = chunk.get("text", "")
 
             # 1. Semantic score calculation
-            if compute_semantic and i in chunk_vec_map:
-                semantic_score = cosine_similarity(query_vec, chunk_vec_map[i])
+            if compute_semantic:
+                if i in chunk_vec_map and query_vec is not None:
+                    semantic_score = float(cosine_similarity(query_vec, chunk_vec_map[i]))
+                elif i in gate_decisions and not gate_decisions[i].needs_semantic:
+                    semantic_score = float(gate_decisions[i].suggested_semantic_score or 0.0)
+                else:
+                    semantic_score = 0.0
             else:
                 semantic_score = 0.0
 
             # 2. Lexical score calculation
-            if query_keywords and chunk_text.strip():
+            if i in gate_decisions:
+                lexical_score = float(gate_decisions[i].lexical_score)
+            elif query_keywords and chunk_text.strip():
                 chunk_keywords = extract_keywords(chunk_text)
                 matched = query_keywords & chunk_keywords
                 lexical_score = len(matched) / len(query_keywords)
@@ -248,14 +349,12 @@ class EvidencePriorityEngine:
                 reuse_score=reuse_score,
                 priority_score=priority_score,
                 priority_class=p_class,
+                state="retained",
             )
             prioritized.append(p_chunk)
 
         # Sort descending by priority score
         prioritized.sort(key=lambda x: x.priority_score, reverse=True)
-        priority_latency = time.perf_counter() - t0
-
-        avg_score = total_score / len(chunks) if chunks else 0.0
 
         # Mark state: HIGH is active by default (up to high_cnt), rest retained
         active_cnt = high_cnt if high_cnt > 0 else (1 if chunks else 0)
@@ -269,20 +368,41 @@ class EvidencePriorityEngine:
                 p_chunk.state = "retained"
             ranked_dict_chunks.append(p_chunk.to_dict())
 
+        total_latency = time.perf_counter() - t0
+        avg_score = total_score / len(prioritized) if prioritized else 0.0
+
+        # Calculate delta telemetry
+        q_hits = (self.query_cache.hits - q_hits_start) if self.query_cache else 0
+        q_miss = (self.query_cache.misses - q_miss_start) if self.query_cache else 0
+        ev_hits = (self.evidence_cache.hits - ev_hits_start) if self.evidence_cache else 0
+        ev_miss = (self.evidence_cache.misses - ev_miss_start) if self.evidence_cache else 0
+        fast_path = (self.semantic_gate.fast_path_hits - fast_path_hits_start) if self.semantic_gate else 0
+        fallbacks = (self.semantic_gate.semantic_fallbacks - fallbacks_start) if self.semantic_gate else 0
+
         metrics = PriorityMetrics(
-            priority_latency=priority_latency,
+            priority_latency=total_latency,
             high_priority_count=high_cnt,
             medium_priority_count=med_cnt,
             low_priority_count=low_cnt,
             active_evidence_count=active_cnt,
             retained_evidence_count=retained_cnt,
             average_priority_score=avg_score,
+            semantic_calls=semantic_calls,
+            semantic_cache_hits=ev_hits,
+            semantic_cache_misses=ev_miss,
+            query_cache_hits=q_hits,
+            query_cache_misses=q_miss,
+            lexical_fast_path_hits=fast_path,
+            semantic_fallback_count=fallbacks,
+            semantic_latency=sem_latency,
+            cache_lookup_latency=cache_latency,
         )
 
         logger.info(
             f"EvidencePriorityEngine: Ranked {len(chunks)} chunks -> "
-            f"HIGH={high_cnt}, MED={med_cnt}, LOW={low_cnt}, "
-            f"avg_score={avg_score:.4f}, latency={priority_latency:.6f}s"
+            f"HIGH={high_cnt}, MEDIUM={med_cnt}, LOW={low_cnt} "
+            f"[Active={active_cnt}, Retained={retained_cnt}] "
+            f"in {total_latency*1000:.3f}ms"
         )
 
         return ranked_dict_chunks, metrics
