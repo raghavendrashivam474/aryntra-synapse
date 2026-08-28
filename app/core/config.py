@@ -1,4 +1,4 @@
-﻿from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     lexical_gate_high_confidence: float = 0.60
     lexical_gate_low_confidence: float = 0.05
     embedding_cache_max_entries: int = 4096
+    # S10 Adaptive Strategy Selection Parameters
+    enable_adaptive_strategy: bool = True
+    s10_mode: str = "control"
+    s10_primary_candidate: str = "candidate_e"
+    s10_fallback_candidate: str = "candidate_d"
 
     model_config = SettingsConfigDict(
         env_file=".env",
