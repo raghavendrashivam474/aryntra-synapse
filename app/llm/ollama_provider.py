@@ -7,6 +7,7 @@ from app.context.progressive import ProgressiveContextEngine, SUFFICIENCY_PROMPT
 from app.context.workspace import EvidenceWorkspace
 from app.context.sufficiency import SufficiencyEngine, SemanticSufficiencyEngine
 from app.context.semantic_gate import SemanticGate
+from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriorityWeights
 from app.retrieval.embeddings import EmbeddingModel
 from app.context.compressor import build_compressed_context
 
@@ -39,7 +40,7 @@ class OllamaProvider:
     """
     Thin wrapper around the Ollama Python client.
     Supports static, progressive (S3), workspace (S4), selective (S5),
-    and semantic/blended sufficiency modes (S6).
+    semantic/blended sufficiency modes (S6), and priority management (S8).
     """
 
     def __init__(
@@ -58,6 +59,7 @@ class OllamaProvider:
             "selective_v1",
             "semantic_v1",
             "blended_v1",
+            "priority_v1",
         ):
             rep_name = "compressed_v1"
         self.representer = representer or get_representer(rep_name)
@@ -73,7 +75,7 @@ class OllamaProvider:
             coverage_threshold=settings.sufficiency_coverage_threshold,
         )
 
-        # S6: Reuse embedding model or instantiate default
+        # S6/S8: Reuse embedding model or instantiate default
         self._embedder = embedding_model or EmbeddingModel()
         self.semantic_gate = SemanticGate(self._embedder)
 
@@ -91,6 +93,19 @@ class OllamaProvider:
             mode="blended",
         )
 
+        # S8: Priority weights and engine
+        weights = EvidencePriorityWeights(
+            semantic_weight=settings.priority_semantic_weight,
+            lexical_weight=settings.priority_lexical_weight,
+            reuse_weight=settings.priority_reuse_weight,
+            high_threshold=settings.priority_high_threshold,
+            medium_threshold=settings.priority_medium_threshold,
+        )
+        self.priority_engine = EvidencePriorityEngine(
+            embedding_model=self._embedder,
+            weights=weights,
+        )
+
     def generate_raw(self, prompt: str, context: list = None) -> dict:
         """Direct model generation for arbitrary prompts."""
         kwargs = {"model": self.model, "prompt": prompt}
@@ -105,8 +120,9 @@ class OllamaProvider:
     def generate(self, question: str, retrieved_chunks: list[dict]) -> dict:
         rep_type = settings.context_representation.lower().strip()
 
-        if rep_type in ("semantic_v1", "blended_v1"):
-            return self._generate_semantic_aware(question, retrieved_chunks, mode=rep_type)
+        if rep_type in ("semantic_v1", "blended_v1", "priority_v1"):
+            mode = "blended_v1" if rep_type in ("blended_v1", "priority_v1") else "semantic_v1"
+            return self._generate_semantic_aware(question, retrieved_chunks, mode=mode)
         elif rep_type == "selective_v1":
             return self._generate_selective(question, retrieved_chunks)
         elif rep_type == "evidence_workspace_v1":
@@ -116,13 +132,13 @@ class OllamaProvider:
         else:
             return self._generate_static(question, retrieved_chunks)
 
-    # ── S6: Semantic-Aware Sufficiency Mode ──
+    # ── S6 / S8: Semantic-Aware Sufficiency Mode ──
 
     def _generate_semantic_aware(
         self, question: str, retrieved_chunks: list[dict], mode: str = "blended_v1"
     ) -> dict:
         """
-        S6 semantic-aware selective promotion.
+        S6 / S8 semantic-aware selective promotion.
         Evaluates evidence sufficiency using semantic similarity (semantic_v1)
         or a hybrid lexical+semantic signal (blended_v1).
         Zero LLM calls for sufficiency gate.
@@ -134,7 +150,11 @@ class OllamaProvider:
             max_active=settings.max_active_chunks,
         )
 
-        workspace.promote_initial(count=settings.initial_chunk_count)
+        if settings.enable_priority_routing:
+            workspace.promote_priority_initial(fallback_count=settings.initial_chunk_count)
+        else:
+            workspace.promote_initial(count=settings.initial_chunk_count)
+
         expansion_steps = 0
         stop_reason = "unknown"
         sufficiency_log = []
@@ -142,7 +162,7 @@ class OllamaProvider:
         while True:
             active = workspace.active()
 
-            # S6: Semantic / Blended Sufficiency Check (Zero LLM calls)
+            # Sufficiency Check (Zero LLM calls)
             suff_result = engine.evaluate(question, active)
             sufficiency_log.append(suff_result.to_dict())
 
@@ -168,7 +188,7 @@ class OllamaProvider:
             context=final_context, question=question
         )
 
-        total_model_calls = 1  # Only the final answer generation call
+        total_model_calls = 1
         t0 = time.perf_counter()
         gen_result = self.generate_raw(gen_prompt)
         gen_latency = round(time.perf_counter() - t0, 4)
@@ -209,15 +229,18 @@ class OllamaProvider:
     ) -> dict:
         """
         S5 selective promotion: uses deterministic sufficiency signals
-        instead of LLM-based sufficiency checks. Zero LLM calls for
-        sufficiency evaluation.
+        instead of LLM-based sufficiency checks.
         """
         workspace = EvidenceWorkspace(
             chunks=retrieved_chunks,
             max_active=settings.max_active_chunks,
         )
 
-        workspace.promote_initial(count=settings.initial_chunk_count)
+        if settings.enable_priority_routing:
+            workspace.promote_priority_initial(fallback_count=settings.initial_chunk_count)
+        else:
+            workspace.promote_initial(count=settings.initial_chunk_count)
+
         total_model_calls = 0
         expansion_steps = 0
         stop_reason = "unknown"
@@ -252,7 +275,7 @@ class OllamaProvider:
             context=final_context, question=question
         )
 
-        total_model_calls = 1  # Only the final generation call
+        total_model_calls = 1
         t0 = time.perf_counter()
         gen_result = self.generate_raw(gen_prompt)
         gen_latency = round(time.perf_counter() - t0, 4)

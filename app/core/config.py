@@ -44,6 +44,14 @@ class Settings(BaseSettings):
     # S7 Evidence Reuse Parameters
     evidence_reuse_enabled: bool = True
 
+    # S8 Evidence Priority Parameters
+    enable_priority_routing: bool = True
+    priority_semantic_weight: float = 0.50
+    priority_lexical_weight: float = 0.30
+    priority_reuse_weight: float = 0.20
+    priority_high_threshold: float = 0.60
+    priority_medium_threshold: float = 0.30
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -52,3 +60,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
