@@ -1,4 +1,4 @@
-# Aryntra Synapse — Current Project Status
+﻿# Aryntra Synapse â€” Current Project Status
 
 > Concise snapshot of the current state of the Aryntra Synapse research
 > project.
@@ -26,20 +26,20 @@ Language Models
 ## 2. Current Research State
 
 ```text
-S0.2 — Conventional RAG Baseline
-        │
-        │  v0.2.0
-        ▼
-S1 — Structured Context Representation
-        │
-        │  v0.3.0
-        ▼
+S0.2 â€” Conventional RAG Baseline
+        â”‚
+        â”‚  v0.2.0
+        â–¼
+S1 â€” Structured Context Representation
+        â”‚
+        â”‚  v0.3.0
+        â–¼
 CURRENT
-        │
-        ▼
-S2 — Context Compression
-        │
-        ▼
+        â”‚
+        â–¼
+S2 â€” Context Compression
+        â”‚
+        â–¼
 Future Context Engineering Experiments
 ```
 
@@ -91,8 +91,8 @@ Future Context Engineering Experiments
 
 | Release  | Meaning                          | Status    |
 | -------- | -------------------------------- | --------- |
-| `v0.2.0` | Conventional RAG baseline        | 🔒 Frozen |
-| `v0.3.0` | S1 structured context experiment | 🔒 Frozen |
+| `v0.2.0` | Conventional RAG baseline        | ðŸ”’ Frozen |
+| `v0.3.0` | S1 structured context experiment | ðŸ”’ Frozen |
 
 ---
 
@@ -108,10 +108,10 @@ Future Context Engineering Experiments
 
 ```text
 Retrieval
-    ≈ unchanged
+    â‰ˆ unchanged
 
 Representation build cost
-    ≈ very small
+    â‰ˆ very small
 
 Context size
     increased
@@ -138,13 +138,13 @@ change how retrieved evidence is supplied to the LLM.
 
 ```text
 Structured Context
-        │
-        ├── Potential benefit
-        │      └── more explicit evidence organization
-        │
-        └── Measured cost
-               ├── larger context
-               └── higher generation latency
+        â”‚
+        â”œâ”€â”€ Potential benefit
+        â”‚      â””â”€â”€ more explicit evidence organization
+        â”‚
+        â””â”€â”€ Measured cost
+               â”œâ”€â”€ larger context
+               â””â”€â”€ higher generation latency
 ```
 
 This trade-off motivates the next experiment.
@@ -153,7 +153,7 @@ This trade-off motivates the next experiment.
 
 ## 7. Next Experiment
 
-### S2 — Context Compression
+### S2 â€” Context Compression
 
 **Working research question:**
 
@@ -231,15 +231,15 @@ Current strategy:
 
 ```text
 Experiment
-    ↓
+    â†“
 Evidence
-    ↓
+    â†“
 Research Finding
-    ↓
+    â†“
 Accumulated Research Record
-    ↓
+    â†“
 Cross-Experiment Analysis
-    ↓
+    â†“
 Paper Draft
 ```
 
@@ -266,7 +266,7 @@ to language models.
 The immediate next objective is:
 
 ```text
-S2 — Context Compression
+S2 â€” Context Compression
 ```
 
 ---
