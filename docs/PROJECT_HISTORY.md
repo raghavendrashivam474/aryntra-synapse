@@ -559,3 +559,13 @@ required.
   - Full ablation evaluation across Semantic-only, Lexical-only, Semantic+Lexical, and Full Blend.
   - Live /ask endpoint priority observability and accounting metrics.
 - **Tests**: 149/149 passing (10 new S8 tests, 0 regressions).
+
+## Sprint 9 — Evidence Processing Efficiency
+- **Release**: `v1.1.0`
+- **Capabilities Added**:
+  - `EmbeddingCache`: Thread-safe, fingerprint-keyed LRU caching for query and evidence chunk vector embeddings.
+  - `LexicalSemanticGate`: Jaccard-based lexical pre-filter that routes obvious high/low relevance chunks around deep embedding models.
+  - S9 Integration in `EvidencePriorityEngine`: Conditional semantic evaluation and vector reuse.
+  - Full API telemetry exposure for semantic calls, cache hits/misses, and gate fast-path hit rates.
+  - 6-configuration ablation benchmark validating that Exp E (Full Blend) slashes priority latency by 68.8% cold and 99.7% warm.
+- **Tests**: 158/158 passing (19 new tests, 0 regressions).

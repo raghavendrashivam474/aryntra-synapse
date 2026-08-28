@@ -1,7 +1,6 @@
-﻿# Aryntra Synapse â€” Current Project Status
+﻿# Aryntra Synapse — Current Project Status
 
-> Concise snapshot of the current state of the Aryntra Synapse research
-> project.
+> Concise snapshot of the current state of the Aryntra Synapse research project.
 
 ---
 
@@ -9,15 +8,13 @@
 
 **Name:** Aryntra Synapse
 
-**Research Direction:** Context Engineering for Knowledge-Augmented
-Language Models
+**Research Direction:** Context Engineering for Knowledge-Augmented Language Models
 
-**Repository:**
-`github.com/raghavendrashivam474/aryntra-synapse`
+**Repository:** `github.com/raghavendrashivam474/aryntra-synapse`
 
 **Current Branch:** `main`
 
-**Current Release:** `v0.3.0`
+**Current Release:** `v1.1.0`
 
 **Working Tree:** Clean
 
@@ -26,257 +23,67 @@ Language Models
 ## 2. Current Research State
 
 ```text
-S0.2 â€” Conventional RAG Baseline
-        â”‚
-        â”‚  v0.2.0
-        â–¼
-S1 â€” Structured Context Representation
-        â”‚
-        â”‚  v0.3.0
-        â–¼
-CURRENT
-        â”‚
-        â–¼
-S2 â€” Context Compression
-        â”‚
-        â–¼
-Future Context Engineering Experiments
-```
-
-**Current completed experiment:** S1
-
-**Current research phase:** Post-S1 / Pre-S2
-
----
-
-## 3. What Exists
-
-### Baseline
-
-* Conventional RAG pipeline
-* FastAPI application
-* FAISS retrieval
-* `all-MiniLM-L6-v2` embeddings
-* Ollama / Mistral generation
-* Configurable Top-K retrieval
-* Automated tests
-* Manual baseline diagnostic
-
-### Research Infrastructure
-
-* Research questions
-* Experiment specifications
-* Fixed evaluation query sets
-* Baseline control records
-* Experimental result records
-* Research findings
-* Sprint completion reports
-* Sprint handoff reports
-* Chronological project history
-* Research overview
-
-### S1
-
-* Context representation abstraction
-* Flat control representation
-* `structured_v1` experimental representation
-* S1 experiment runner
-* S1 baseline diagnostic
-* S1 result dataset
-* S1 research findings
-
----
-
-## 4. Important Releases
-
-| Release  | Meaning                          | Status    |
-| -------- | -------------------------------- | --------- |
-| `v0.2.0` | Conventional RAG baseline        | ðŸ”’ Frozen |
-| `v0.3.0` | S1 structured context experiment | ðŸ”’ Frozen |
-
----
-
-## 5. S1 Result
-
-### Research Question
-
-> Does structured representation of retrieved context improve the
-> usefulness of context supplied to the LLM compared with flat
-> Top-K context?
-
-### Main Evidence
-
-```text
-Retrieval
-    â‰ˆ unchanged
-
-Representation build cost
-    â‰ˆ very small
-
-Context size
-    increased
-
-Generation latency
-    increased on 9 / 10 queries
-
-Qualitative behavior
-    changed on several queries
-```
-
-### Current Finding
-
-**PARTIALLY SUPPORTED / INCONCLUSIVE**
-
-S1 did not establish an overall answer-quality advantage.
-
-It did establish that context representation can independently
-change how retrieved evidence is supplied to the LLM.
-
----
-
-## 6. Key S1 Trade-off
-
-```text
-Structured Context
-        â”‚
-        â”œâ”€â”€ Potential benefit
-        â”‚      â””â”€â”€ more explicit evidence organization
-        â”‚
-        â””â”€â”€ Measured cost
-               â”œâ”€â”€ larger context
-               â””â”€â”€ higher generation latency
-```
-
-This trade-off motivates the next experiment.
-
----
-
-## 7. Next Experiment
-
-### S2 â€” Context Compression
-
-**Working research question:**
-
-> Can useful contextual information be retained while reducing the
-> amount of context supplied to the language model?
-
-### Current motivation
-
-S1 increased context size and generally increased generation cost.
-
-S2 will investigate whether context can be made more compact without
-losing useful evidence.
-
-**Status:**
-
-```
-NOT STARTED
-```
-
-The S2 specification and hypothesis must be established before
-implementation begins.
-
----
-
-## 8. Experimental Rules
-
-Synapse currently follows these rules:
-
-1. Establish a control before experimentation.
-2. Freeze important baselines.
-3. Change one major variable at a time.
-4. Keep the evaluation set controlled.
-5. Preserve raw experimental results.
-6. Record both benefits and costs.
-7. Separate measurements from interpretation.
-8. Do not claim improvements without supporting evidence.
-9. Version completed experiments.
-10. Preserve historical experimental records.
-
----
-
-## 9. Research Documentation
-
-### Chronological Record
-
-`docs/PROJECT_HISTORY.md`
-
-Contains the development and experimental history from the project
-foundation through the current release.
-
-### Research Overview
-
-`docs/RESEARCH_OVERVIEW.md`
-
-Explains the research problem, methodology, experiments, findings,
-limitations, and broader research direction.
-
-### Current Status
-
-`docs/PROJECT_STATUS.md`
-
-This document.
-
-Provides a concise current-state snapshot.
-
----
-
-## 10. Paper Status
-
-**Status:** Evidence collection phase
-
-The final research paper is intentionally not being finalized yet.
-
-Current strategy:
-
-```text
-Experiment
-    â†“
-Evidence
-    â†“
-Research Finding
-    â†“
-Accumulated Research Record
-    â†“
-Cross-Experiment Analysis
-    â†“
-Paper Draft
-```
-
-S0.2 and S1 currently provide the first experimental evidence.
-
----
-
-## 11. Current Position
-
-Aryntra Synapse has evolved from:
-
-```text
-A conventional RAG implementation
-```
-
-into:
-
-```text
-A controlled research framework for investigating
-how retrieved context is represented and supplied
-to language models.
-```
-
-The immediate next objective is:
-
-```text
-S2 â€” Context Compression
-```
-
----
-
-## Status
-
-**Last completed experiment:** S1
-
-**Latest release:** `v0.3.0`
-
-**Next planned experiment:** S2
-
-**Overall project status:** ACTIVE RESEARCH
+S0.2 — Conventional RAG Baseline (v0.2.0)
+        │
+S1 — Structured Context Representation (v0.3.0)
+        │
+S2 — Context Compression (v0.4.0)
+        │
+S3 — Progressive Context Expansion (v0.5.0)
+        │
+S4 — Evidence Workspace Architecture (v0.6.0)
+        │
+S5 — Deterministic Evidence Sufficiency (v0.7.0)
+        │
+S6 — Semantic Sufficiency Gate (v0.8.0)
+        │
+S7 — Cross-Query Evidence Reuse (v0.9.0)
+        │
+S8 — Evidence Relevance & Priority Management (v1.0.0 Architecture Milestone)
+        │
+S9 — Evidence Processing Efficiency (v1.1.0 Optimization Milestone)
+        │
+        ▼
+CURRENT (v1.1.0)
+        │
+        ▼
+S10 — LLM Execution Optimization & Context Pruning
+Current completed experiment: S9 (Evidence Processing Efficiency)
+
+Current research phase: Post-S9 / Pre-S10
+
+3. Important Releases
+Release    Meaning    Status
+v0.2.0    Conventional RAG baseline    🔒 Frozen
+v0.3.0    S1 structured context experiment    🔒 Frozen
+v0.4.0    S2 context compression    🔒 Frozen
+v0.5.0    S3 progressive context expansion    🔒 Frozen
+v0.6.0    S4 evidence workspace architecture    🔒 Frozen
+v0.7.0    S5 deterministic evidence sufficiency    🔒 Frozen
+v0.8.0    S6 semantic sufficiency gate    🔒 Frozen
+v0.9.0    S7 cross-query evidence reuse    🔒 Frozen
+v1.0.0    S8 evidence relevance & priority management    🔒 Frozen
+v1.1.0    S9 evidence processing efficiency    🔒 Active
+4. Sprint 9 Result
+Research Question
+Can Synapse reduce S8 semantic evidence-processing overhead through caching, cheap pre-filtering, conditional evaluation, or a minimal combination of these mechanisms while preserving evidence-selection and sufficiency behavior?
+
+Empirical Evidence
+Cold Priority Latency: Reduced from 153.16 ms to 47.73 ms (-68.8%).
+Warm Priority Latency: Reduced from 153.16 ms to 0.40 ms (-99.7%).
+Semantic Model Evaluations: Reduced from 42 calls down to 0 on repeated sequences (-100%).
+Downstream Sufficiency Rate: 29% (100% agreement with S8).
+Active Chunks Count: 2.43 (100% agreement with S8).
+Current Finding
+CONFIRMED AND DEPLOYED
+The dual-layer LRU embedding cache (query + evidence) combined with the Jaccard lexical pre-filter gate drastically reduces computational overhead while maintaining strict algorithmic parity with the unoptimized baseline.
+
+5. Next Planned Sprint
+S10 — LLM Execution Optimization & Context Pruning
+Focus: Mitigate the remaining system bottleneck in downstream LLM generation latency (~1,500ms to 3,000ms) via early speculative generation triggers, streaming context evaluation, and prompt template attention minimization.
+
+6. Overall Status
+Last completed sprint: S9
+Latest release: v1.1.0
+Test Suite: 158/158 tests passing green (100% pass rate).
+Overall project status: ACTIVE RESEARCH & OPTIMIZATION
