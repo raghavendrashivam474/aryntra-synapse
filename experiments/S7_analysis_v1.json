@@ -1,0 +1,41 @@
+{
+  "experiment": "S7",
+  "analyses": {
+    "A_repeated": {
+      "name": "A_repeated",
+      "passed": 3,
+      "total": 3,
+      "total_candidates": 9,
+      "total_reused": 6,
+      "total_new": 3,
+      "reuse_rate": 0.6667,
+      "avg_total_latency": 15.4425,
+      "avg_fingerprinting_latency": 0.000299,
+      "avg_lookup_latency": 1e-05
+    },
+    "B_distinct": {
+      "name": "B_distinct",
+      "passed": 3,
+      "total": 3,
+      "total_candidates": 9,
+      "total_reused": 5,
+      "total_new": 4,
+      "reuse_rate": 0.5556,
+      "avg_total_latency": 12.4093,
+      "avg_fingerprinting_latency": 0.000233,
+      "avg_lookup_latency": 7e-06
+    },
+    "C_mixed": {
+      "name": "C_mixed",
+      "passed": 5,
+      "total": 5,
+      "total_candidates": 15,
+      "total_reused": 15,
+      "total_new": 0,
+      "reuse_rate": 1.0,
+      "avg_total_latency": 3.2103,
+      "avg_fingerprinting_latency": 0.000232,
+      "avg_lookup_latency": 6e-06
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import time
+﻿import time
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from app.retrieval.chunking import load_and_chunk
@@ -6,10 +6,14 @@ from app.retrieval.retriever import Retriever
 from app.llm.ollama_provider import OllamaProvider
 from app.core.config import settings
 
+# S7: Cross-query evidence reuse
+from app.context.evidence_store import EvidenceStore
+
 router = APIRouter()
 
 _retriever = Retriever()
 _llm = OllamaProvider()
+_evidence_store = EvidenceStore()  # S7: persistent across queries
 
 
 def initialise_retriever() -> None:
@@ -57,6 +61,16 @@ class AskResponse(BaseModel):
     # S5 additions
     stop_reason: str = "unknown"
     sufficiency_log: list = Field(default_factory=list)
+    # S7 additions — Evidence Reuse
+    evidence_reuse_enabled: bool = False
+    total_evidence_candidates: int = 0
+    unique_evidence_candidates: int = 0
+    reused_evidence_count: int = 0
+    new_evidence_count: int = 0
+    reuse_rate: float = 0.0
+    fingerprinting_latency: float = 0.0
+    workspace_lookup_latency: float = 0.0
+    evidence_store_size: int = 0
 
 
 class HealthResponse(BaseModel):
@@ -68,6 +82,9 @@ class HealthResponse(BaseModel):
     embedding_model: str
     llm_model: str
     context_representation: str
+    # S7
+    evidence_reuse_enabled: bool = False
+    evidence_store_size: int = 0
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -77,6 +94,8 @@ def health():
         retriever_ready=_retriever.is_ready, chunk_count=_retriever.chunk_count,
         embedding_model=settings.embedding_model, llm_model=settings.llm_model,
         context_representation=settings.context_representation,
+        evidence_reuse_enabled=settings.evidence_reuse_enabled,
+        evidence_store_size=_evidence_store.size,
     )
 
 
@@ -91,6 +110,24 @@ def ask(request: AskRequest):
     retrieval_result = _retriever.query(request.text, top_k=request.top_k)
     retrieved_chunks = retrieval_result["results"]
     retrieval_latency = retrieval_result["retrieval_latency"]
+
+    # ── S7: Evidence Reuse ──────────────────────────────────────────
+    reuse_metrics_dict = {
+        "total_candidates": 0,
+        "unique_candidates": 0,
+        "reused_count": 0,
+        "new_count": 0,
+        "reuse_rate": 0.0,
+        "fingerprinting_latency": 0.0,
+        "lookup_latency": 0.0,
+    }
+
+    if settings.evidence_reuse_enabled:
+        tagged_chunks, reuse_metrics = _evidence_store.process(retrieved_chunks)
+        reuse_metrics_dict = reuse_metrics.to_dict()
+        # Pass tagged chunks downstream (extra keys are ignored by LLM provider)
+        retrieved_chunks = tagged_chunks
+    # ────────────────────────────────────────────────────────────────
 
     llm_result = _llm.generate(request.text, retrieved_chunks)
     total_latency = round(time.perf_counter() - t0, 4)
@@ -125,4 +162,14 @@ def ask(request: AskRequest):
         reuse_ollama_context=llm_result.get("reuse_ollama_context", False),
         stop_reason=llm_result.get("stop_reason", "unknown"),
         sufficiency_log=llm_result.get("sufficiency_log", []),
+        # S7 fields
+        evidence_reuse_enabled=settings.evidence_reuse_enabled,
+        total_evidence_candidates=reuse_metrics_dict["total_candidates"],
+        unique_evidence_candidates=reuse_metrics_dict["unique_candidates"],
+        reused_evidence_count=reuse_metrics_dict["reused_count"],
+        new_evidence_count=reuse_metrics_dict["new_count"],
+        reuse_rate=reuse_metrics_dict["reuse_rate"],
+        fingerprinting_latency=reuse_metrics_dict["fingerprinting_latency"],
+        workspace_lookup_latency=reuse_metrics_dict["lookup_latency"],
+        evidence_store_size=_evidence_store.size,
     )
