@@ -4,7 +4,7 @@
 class Settings(BaseSettings):
     # Application
     app_name: str = "Aryntra Synapse"
-    app_version: str = "0.9.0"
+    app_version: str = "1.1.0"
 
     # Knowledge Source
     sample_document: str = "data/sample.txt"
@@ -52,6 +52,14 @@ class Settings(BaseSettings):
     priority_high_threshold: float = 0.60
     priority_medium_threshold: float = 0.30
 
+    # S9 Evidence Processing Efficiency Parameters
+    enable_query_embedding_cache: bool = True
+    enable_evidence_embedding_cache: bool = True
+    enable_lexical_semantic_gate: bool = True
+    lexical_gate_high_confidence: float = 0.60
+    lexical_gate_low_confidence: float = 0.05
+    embedding_cache_max_entries: int = 4096
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -60,4 +68,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

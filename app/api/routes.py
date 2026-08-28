@@ -10,14 +10,25 @@ from app.core.config import settings
 # S7: Cross-query evidence reuse
 from app.context.evidence_store import EvidenceStore
 
-# S8: Evidence Priority Engine
+# S8 / S9: Evidence Priority Engine with Optimization
 from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriorityWeights
+from app.optimization.embedding_cache import EmbeddingCache
+from app.optimization.semantic_gate import LexicalSemanticGate
 
 router = APIRouter()
 
 _retriever = Retriever()
 _llm = OllamaProvider()
 _evidence_store = EvidenceStore()  # S7: persistent across queries
+
+# S9 Caches & Fast-path Gate
+_query_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_query_embedding_cache else None
+_evidence_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_evidence_embedding_cache else None
+_semantic_gate = LexicalSemanticGate(
+    high_confidence=settings.lexical_gate_high_confidence,
+    low_confidence=settings.lexical_gate_low_confidence,
+) if settings.enable_lexical_semantic_gate else None
+
 _priority_engine = EvidencePriorityEngine(
     embedding_model=_retriever._embedding_model,
     weights=EvidencePriorityWeights(
@@ -27,6 +38,9 @@ _priority_engine = EvidencePriorityEngine(
         high_threshold=settings.priority_high_threshold,
         medium_threshold=settings.priority_medium_threshold,
     ),
+    query_cache=_query_cache,
+    evidence_cache=_evidence_cache,
+    semantic_gate=_semantic_gate,
 )
 
 
@@ -102,6 +116,16 @@ class AskResponse(BaseModel):
     active_evidence_count: int = 0
     retained_evidence_count: int = 0
     average_priority_score: float = 0.0
+    # S9 additions — Processing Efficiency Telemetry
+    semantic_calls: int = 0
+    semantic_cache_hits: int = 0
+    semantic_cache_misses: int = 0
+    query_cache_hits: int = 0
+    query_cache_misses: int = 0
+    lexical_fast_path_hits: int = 0
+    semantic_fallback_count: int = 0
+    semantic_latency: float = 0.0
+    cache_lookup_latency: float = 0.0
 
 
 class HealthResponse(BaseModel):
@@ -118,6 +142,10 @@ class HealthResponse(BaseModel):
     evidence_store_size: int = 0
     # S8
     enable_priority_routing: bool = True
+    # S9
+    enable_query_embedding_cache: bool = True
+    enable_evidence_embedding_cache: bool = True
+    enable_lexical_semantic_gate: bool = True
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -130,6 +158,9 @@ def health():
         evidence_reuse_enabled=settings.evidence_reuse_enabled,
         evidence_store_size=_evidence_store.size,
         enable_priority_routing=settings.enable_priority_routing,
+        enable_query_embedding_cache=settings.enable_query_embedding_cache,
+        enable_evidence_embedding_cache=settings.enable_evidence_embedding_cache,
+        enable_lexical_semantic_gate=settings.enable_lexical_semantic_gate,
     )
 
 
@@ -161,7 +192,7 @@ def ask(request: AskRequest):
         reuse_metrics_dict = reuse_metrics.to_dict()
         retrieved_chunks = tagged_chunks
 
-    # ── S8: Evidence Priority Ranking ──────────────────────────────
+    # ── S8 / S9: Evidence Priority Ranking ─────────────────────────
     priority_metrics_dict = {
         "priority_latency": 0.0,
         "high_priority_count": 0,
@@ -170,6 +201,15 @@ def ask(request: AskRequest):
         "active_evidence_count": 0,
         "retained_evidence_count": 0,
         "average_priority_score": 0.0,
+        "semantic_calls": 0,
+        "semantic_cache_hits": 0,
+        "semantic_cache_misses": 0,
+        "query_cache_hits": 0,
+        "query_cache_misses": 0,
+        "lexical_fast_path_hits": 0,
+        "semantic_fallback_count": 0,
+        "semantic_latency": 0.0,
+        "cache_lookup_latency": 0.0,
     }
 
     if settings.enable_priority_routing:
@@ -240,4 +280,14 @@ def ask(request: AskRequest):
         active_evidence_count=priority_metrics_dict["active_evidence_count"],
         retained_evidence_count=priority_metrics_dict["retained_evidence_count"],
         average_priority_score=priority_metrics_dict["average_priority_score"],
+        # S9 fields
+        semantic_calls=priority_metrics_dict["semantic_calls"],
+        semantic_cache_hits=priority_metrics_dict["semantic_cache_hits"],
+        semantic_cache_misses=priority_metrics_dict["semantic_cache_misses"],
+        query_cache_hits=priority_metrics_dict["query_cache_hits"],
+        query_cache_misses=priority_metrics_dict["query_cache_misses"],
+        lexical_fast_path_hits=priority_metrics_dict["lexical_fast_path_hits"],
+        semantic_fallback_count=priority_metrics_dict["semantic_fallback_count"],
+        semantic_latency=priority_metrics_dict["semantic_latency"],
+        cache_lookup_latency=priority_metrics_dict["cache_lookup_latency"],
     )
