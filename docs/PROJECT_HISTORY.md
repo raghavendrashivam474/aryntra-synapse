@@ -1,4 +1,4 @@
-# Aryntra Synapse — Project History
+﻿# Aryntra Synapse â€” Project History
 
 > Chronological record of the development, experimentation, and research
 > evolution of Aryntra Synapse.
@@ -32,11 +32,11 @@ The project does not treat retrieval alone as the complete problem.
 Instead, it investigates the layer between:
 
     Retrieved Evidence
-            ↓
+            â†“
     Context Representation
-            ↓
+            â†“
     Language Model
-            ↓
+            â†“
           Answer
 
 The long-term objective is to understand whether context can be made
@@ -65,7 +65,7 @@ outcome if it produces useful evidence for subsequent work.
 
 ---
 
-# 4. Sprint 0.2 — Conventional RAG Baseline
+# 4. Sprint 0.2 â€” Conventional RAG Baseline
 
 ## 4.1 Objective
 
@@ -76,17 +76,17 @@ future Synapse research.
 ## 4.2 Baseline Architecture
 
     User Query
-        ↓
+        â†“
     Sentence Transformers
-        ↓
+        â†“
     FAISS Retrieval
-        ↓
+        â†“
     Top-K Retrieved Chunks
-        ↓
+        â†“
     Flat Context Assembly
-        ↓
+        â†“
     Ollama / Mistral
-        ↓
+        â†“
     Generated Answer
 
 ## 4.3 Technology
@@ -188,7 +188,7 @@ compared under consistent conditions.
 
 ---
 
-# 6. Sprint 1 — Structured Context Representation
+# 6. Sprint 1 â€” Structured Context Representation
 
 ## 6.1 Research Question
 
@@ -225,7 +225,7 @@ The following remained controlled:
 The primary experimental change was:
 
     Flat Context
-        ↓
+        â†“
     Structured Context Representation
 
 ## 6.4 Architectural Change
@@ -235,15 +235,15 @@ The representation layer was separated from retrieval and generation.
 The conceptual pipeline became:
 
     User Query
-        ↓
+        â†“
     Retriever
-        ↓
+        â†“
     Retrieved Chunks
-        ↓
+        â†“
     Context Representation
-        ↓
+        â†“
     LLM
-        ↓
+        â†“
     Answer
 
 S1 introduced a representation abstraction allowing the context
@@ -302,7 +302,7 @@ The baseline context length was:
 
 The S1 structured representation produced contexts ranging from:
 
-    2068 — 2288 characters
+    2068 â€” 2288 characters
 
 Therefore, structured representation increased the amount of context
 supplied to the language model.
@@ -360,9 +360,9 @@ advantage for structured context.
 
 The clearest measured effects were:
 
-    Context size       ↑
-    Generation cost    ↑
-    Retrieval           ≈ unchanged
+    Context size       â†‘
+    Generation cost    â†‘
+    Retrieval           â‰ˆ unchanged
     Representation cost Low
 
 Some queries also showed potentially improved evidence-aware or
@@ -403,9 +403,9 @@ S1 produced an important design observation:
 This motivates the next research direction:
 
     Preserve useful information
-            ↓
+            â†“
     Reduce unnecessary context
-            ↓
+            â†“
     Reduce generation cost
 
 This provides the experimental motivation for S2.
@@ -416,13 +416,13 @@ This provides the experimental motivation for S2.
 
 | Milestone | Description | Status |
 |---|---|---|
-| `v0.2.0` | Conventional RAG baseline | 🔒 Frozen |
-| S1 foundation | Research questions, hypothesis, specification, query set | ✅ |
-| S1 control | Frozen baseline evaluation | ✅ |
-| S1 implementation | Structured context representation | ✅ |
-| S1 evaluation | Baseline vs structured representation | ✅ |
-| S1 findings | Evidence-based research record | ✅ |
-| `v0.3.0` | S1 experiment complete | 🔒 Frozen |
+| `v0.2.0` | Conventional RAG baseline | ðŸ”’ Frozen |
+| S1 foundation | Research questions, hypothesis, specification, query set | âœ… |
+| S1 control | Frozen baseline evaluation | âœ… |
+| S1 implementation | Structured context representation | âœ… |
+| S1 evaluation | Baseline vs structured representation | âœ… |
+| S1 findings | Evidence-based research record | âœ… |
+| `v0.3.0` | S1 experiment complete | ðŸ”’ Frozen |
 
 ---
 
@@ -431,14 +431,14 @@ This provides the experimental motivation for S2.
 At the end of S1, Synapse has established:
 
     Conventional RAG
-            ↓
+            â†“
     Controlled experimentation
-            ↓
+            â†“
     Context representation as an
     independent architectural layer
-            ↓
+            â†“
     Measured structured-context experiment
-            ↓
+            â†“
     Evidence of a cost / usefulness trade-off
 
 The project has therefore moved from:
@@ -459,9 +459,9 @@ The next planned experiment is S2.
 The working direction is:
 
     S1 Structured Context
-            ↓
+            â†“
     Context Compression
-            ↓
+            â†“
     Reduced context cost
             while attempting to preserve
             useful evidence
@@ -482,15 +482,15 @@ The full research paper is intentionally not finalized yet.
 Current strategy:
 
     Experiment
-        ↓
+        â†“
     Evidence
-        ↓
+        â†“
     Research Finding
-        ↓
+        â†“
     Historical Record
-        ↓
+        â†“
     Accumulated Research Story
-        ↓
+        â†“
     Formal Paper
 
 S0.2 and S1 provide the first substantive experimental records.
@@ -503,40 +503,40 @@ is constructed.
 # 15. Chronological Summary
 
     S0.2
-      │
-      ├── Conventional RAG baseline established
-      ├── FAISS retrieval implemented
-      ├── MiniLM embeddings established
-      ├── Ollama / Mistral generation established
-      ├── Automated tests completed
-      └── v0.2.0 frozen
-             │
-             ▼
+      â”‚
+      â”œâ”€â”€ Conventional RAG baseline established
+      â”œâ”€â”€ FAISS retrieval implemented
+      â”œâ”€â”€ MiniLM embeddings established
+      â”œâ”€â”€ Ollama / Mistral generation established
+      â”œâ”€â”€ Automated tests completed
+      â””â”€â”€ v0.2.0 frozen
+             â”‚
+             â–¼
     Research Foundation
-      │
-      ├── Research questions
-      ├── Hypotheses
-      ├── S1 specification
-      └── S1 Query Set v1
-             │
-             ▼
+      â”‚
+      â”œâ”€â”€ Research questions
+      â”œâ”€â”€ Hypotheses
+      â”œâ”€â”€ S1 specification
+      â””â”€â”€ S1 Query Set v1
+             â”‚
+             â–¼
     S1
-      │
-      ├── Baseline control recorded
-      ├── Structured representation implemented
-      ├── Baseline and S1 evaluated
-      ├── Results preserved
-      └── Findings documented
-             │
-             ▼
+      â”‚
+      â”œâ”€â”€ Baseline control recorded
+      â”œâ”€â”€ Structured representation implemented
+      â”œâ”€â”€ Baseline and S1 evaluated
+      â”œâ”€â”€ Results preserved
+      â””â”€â”€ Findings documented
+             â”‚
+             â–¼
     v0.3.0
-      │
-      └── S1 frozen
-             │
-             ▼
+      â”‚
+      â””â”€â”€ S1 frozen
+             â”‚
+             â–¼
     S2
-      │
-      └── Context compression research
+      â”‚
+      â””â”€â”€ Context compression research
 
 ---
 **Document Status**
@@ -550,7 +550,7 @@ is constructed.
 Future completed sprints should append to this history without
 rewriting historical findings except when a factual correction is
 required.
-## Sprint 8 � Evidence Relevance & Priority Management
+## Sprint 8 — Evidence Relevance & Priority Management
 - **Release**: 1.0.0
 - **Capabilities Added**:
   - EvidencePriorityEngine with deterministic semantic, lexical, and S7 reuse scoring signals.
@@ -560,7 +560,7 @@ required.
   - Live /ask endpoint priority observability and accounting metrics.
 - **Tests**: 149/149 passing (10 new S8 tests, 0 regressions).
 
-## Sprint 9 — Evidence Processing Efficiency
+## Sprint 9 â€” Evidence Processing Efficiency
 - **Release**: `v1.1.0`
 - **Capabilities Added**:
   - `EmbeddingCache`: Thread-safe, fingerprint-keyed LRU caching for query and evidence chunk vector embeddings.
@@ -569,3 +569,13 @@ required.
   - Full API telemetry exposure for semantic calls, cache hits/misses, and gate fast-path hit rates.
   - 6-configuration ablation benchmark validating that Exp E (Full Blend) slashes priority latency by 68.8% cold and 99.7% warm.
 - **Tests**: 158/158 passing (19 new tests, 0 regressions).
+
+## Sprint 10 — Adaptive Evidence Strategy Selection (v1.2.0)
+* **Status:** Completed
+* **Tests:** 179 / 179 passing
+* **Core Contribution:**
+  * Implemented deterministic adaptive strategy selector (pp/strategy/).
+  * Evaluated 5 candidate routing strategies (Lexical Complexity, Cache Warmth, Reuse Confidence, Priority Pre-screen, Composite Score).
+  * Selected Candidate E (Composite) as Primary and Candidate D (Pre-screen) as Fallback.
+  * Achieved 68.4% priority latency reduction and 40.8% total query latency reduction across benchmark workloads.
+  * Added full observability telemetry to /ask and /health endpoints.
