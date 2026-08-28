@@ -1,4 +1,4 @@
-import time
+﻿import time
 import logging
 from typing import List, Dict, Any, Optional, Tuple
 from app.context.compressor import build_compressed_context
@@ -182,6 +182,26 @@ class EvidenceWorkspace:
         events = []
         for _ in range(min(count, len(self._available_ids))):
             event = self.promote_next(reason="initial_exposure")
+            if event:
+                events.append(event)
+        return events
+
+    def promote_priority_initial(self, fallback_count: int = 1) -> List[PromotionEvent]:
+        """
+        S8 Priority Initial Promotion:
+        Promotes all HIGH priority chunks (up to max_active).
+        If no chunks are HIGH priority, promotes fallback_count chunks.
+        """
+        high_ids = [
+            cid for cid in self._available_ids
+            if self._chunk_map[cid].get("priority_class") == "HIGH"
+        ]
+        promote_count = len(high_ids) if high_ids else fallback_count
+        promote_count = min(promote_count, self._max_active)
+
+        events = []
+        for _ in range(min(promote_count, len(self._available_ids))):
+            event = self.promote_next(reason="priority_high_initial")
             if event:
                 events.append(event)
         return events
