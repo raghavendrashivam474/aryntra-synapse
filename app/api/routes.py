@@ -15,13 +15,15 @@ from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriori
 from app.optimization.embedding_cache import EmbeddingCache
 from app.optimization.semantic_gate import LexicalSemanticGate
 
+# S10: Adaptive Evidence Strategy Selection
+from app.strategy.selector import AdaptiveSelector
+
 router = APIRouter()
 
 _retriever = Retriever()
 _llm = OllamaProvider()
-_evidence_store = EvidenceStore()  # S7: persistent across queries
+_evidence_store = EvidenceStore()
 
-# S9 Caches & Fast-path Gate
 _query_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_query_embedding_cache else None
 _evidence_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_evidence_embedding_cache else None
 _semantic_gate = LexicalSemanticGate(
@@ -43,6 +45,12 @@ _priority_engine = EvidencePriorityEngine(
     semantic_gate=_semantic_gate,
 )
 
+_strategy_selector = AdaptiveSelector(
+    mode=settings.s10_mode,
+    primary_candidate=settings.s10_primary_candidate,
+    fallback_candidate=settings.s10_fallback_candidate,
+) if settings.enable_adaptive_strategy else None
+
 
 def initialise_retriever() -> None:
     chunks = load_and_chunk(settings.sample_document)
@@ -58,7 +66,6 @@ class RetrievedChunk(BaseModel):
     chunk_id: str
     text: str
     score: float
-    # Optional S7 / S8 metadata
     fingerprint: Optional[str] = None
     evidence_status: Optional[str] = None
     priority_score: Optional[float] = None
@@ -94,10 +101,8 @@ class AskResponse(BaseModel):
     workspace_available_chunks: int = 0
     promotion_history: list = Field(default_factory=list)
     reuse_ollama_context: bool = False
-    # S5 additions
     stop_reason: str = "unknown"
     sufficiency_log: list = Field(default_factory=list)
-    # S7 additions — Evidence Reuse
     evidence_reuse_enabled: bool = False
     total_evidence_candidates: int = 0
     unique_evidence_candidates: int = 0
@@ -107,7 +112,6 @@ class AskResponse(BaseModel):
     fingerprinting_latency: float = 0.0
     workspace_lookup_latency: float = 0.0
     evidence_store_size: int = 0
-    # S8 additions — Evidence Priority
     enable_priority_routing: bool = True
     priority_latency: float = 0.0
     high_priority_count: int = 0
@@ -116,7 +120,6 @@ class AskResponse(BaseModel):
     active_evidence_count: int = 0
     retained_evidence_count: int = 0
     average_priority_score: float = 0.0
-    # S9 additions — Processing Efficiency Telemetry
     semantic_calls: int = 0
     semantic_cache_hits: int = 0
     semantic_cache_misses: int = 0
@@ -126,6 +129,11 @@ class AskResponse(BaseModel):
     semantic_fallback_count: int = 0
     semantic_latency: float = 0.0
     cache_lookup_latency: float = 0.0
+    enable_adaptive_strategy: bool = False
+    selected_strategy_path: str = "standard"
+    selected_strategy_candidate: str = "control"
+    strategy_selection_reason: str = ""
+    strategy_signals: dict = Field(default_factory=dict)
 
 
 class HealthResponse(BaseModel):
@@ -137,15 +145,14 @@ class HealthResponse(BaseModel):
     embedding_model: str
     llm_model: str
     context_representation: str
-    # S7
     evidence_reuse_enabled: bool = False
     evidence_store_size: int = 0
-    # S8
     enable_priority_routing: bool = True
-    # S9
     enable_query_embedding_cache: bool = True
     enable_evidence_embedding_cache: bool = True
     enable_lexical_semantic_gate: bool = True
+    enable_adaptive_strategy: bool = True
+    s10_mode: str = "control"
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -161,6 +168,8 @@ def health():
         enable_query_embedding_cache=settings.enable_query_embedding_cache,
         enable_evidence_embedding_cache=settings.enable_evidence_embedding_cache,
         enable_lexical_semantic_gate=settings.enable_lexical_semantic_gate,
+        enable_adaptive_strategy=settings.enable_adaptive_strategy,
+        s10_mode=settings.s10_mode,
     )
 
 
@@ -176,7 +185,6 @@ def ask(request: AskRequest):
     retrieved_chunks = retrieval_result["results"]
     retrieval_latency = retrieval_result["retrieval_latency"]
 
-    # ── S7: Evidence Reuse ──────────────────────────────────────────
     reuse_metrics_dict = {
         "total_candidates": 0,
         "unique_candidates": 0,
@@ -192,7 +200,11 @@ def ask(request: AskRequest):
         reuse_metrics_dict = reuse_metrics.to_dict()
         retrieved_chunks = tagged_chunks
 
-    # ── S8 / S9: Evidence Priority Ranking ─────────────────────────
+    selected_path = "standard"
+    selected_candidate = "control"
+    strategy_reason = ""
+    strategy_signals = {}
+
     priority_metrics_dict = {
         "priority_latency": 0.0,
         "high_priority_count": 0,
@@ -212,7 +224,27 @@ def ask(request: AskRequest):
         "cache_lookup_latency": 0.0,
     }
 
-    if settings.enable_priority_routing:
+    if settings.enable_adaptive_strategy and _strategy_selector is not None:
+        cache_stats = _query_cache.stats() if _query_cache else {}
+        decision = _strategy_selector.select(
+            query=request.text,
+            chunks=retrieved_chunks,
+            reuse_metrics=reuse_metrics_dict,
+            cache_stats=cache_stats,
+        )
+        selected_path = decision.path.value
+        selected_candidate = decision.candidate
+        strategy_reason = decision.reason
+        strategy_signals = decision.signals
+
+        if settings.enable_priority_routing:
+            retrieved_chunks, priority_metrics_dict = _strategy_selector.execute_path(
+                decision=decision,
+                query=request.text,
+                chunks=retrieved_chunks,
+                priority_engine=_priority_engine,
+            )
+    elif settings.enable_priority_routing:
         ranked_chunks, priority_metrics = _priority_engine.rank(request.text, retrieved_chunks)
         priority_metrics_dict = priority_metrics.to_dict()
         retrieved_chunks = ranked_chunks
@@ -261,7 +293,6 @@ def ask(request: AskRequest):
         reuse_ollama_context=llm_result.get("reuse_ollama_context", False),
         stop_reason=llm_result.get("stop_reason", "unknown"),
         sufficiency_log=llm_result.get("sufficiency_log", []),
-        # S7 fields
         evidence_reuse_enabled=settings.evidence_reuse_enabled,
         total_evidence_candidates=reuse_metrics_dict["total_candidates"],
         unique_evidence_candidates=reuse_metrics_dict["unique_candidates"],
@@ -271,7 +302,6 @@ def ask(request: AskRequest):
         fingerprinting_latency=reuse_metrics_dict["fingerprinting_latency"],
         workspace_lookup_latency=reuse_metrics_dict["lookup_latency"],
         evidence_store_size=_evidence_store.size,
-        # S8 fields
         enable_priority_routing=settings.enable_priority_routing,
         priority_latency=priority_metrics_dict["priority_latency"],
         high_priority_count=priority_metrics_dict["high_priority_count"],
@@ -280,7 +310,6 @@ def ask(request: AskRequest):
         active_evidence_count=priority_metrics_dict["active_evidence_count"],
         retained_evidence_count=priority_metrics_dict["retained_evidence_count"],
         average_priority_score=priority_metrics_dict["average_priority_score"],
-        # S9 fields
         semantic_calls=priority_metrics_dict["semantic_calls"],
         semantic_cache_hits=priority_metrics_dict["semantic_cache_hits"],
         semantic_cache_misses=priority_metrics_dict["semantic_cache_misses"],
@@ -290,4 +319,9 @@ def ask(request: AskRequest):
         semantic_fallback_count=priority_metrics_dict["semantic_fallback_count"],
         semantic_latency=priority_metrics_dict["semantic_latency"],
         cache_lookup_latency=priority_metrics_dict["cache_lookup_latency"],
+        enable_adaptive_strategy=settings.enable_adaptive_strategy,
+        selected_strategy_path=selected_path,
+        selected_strategy_candidate=selected_candidate,
+        strategy_selection_reason=strategy_reason,
+        strategy_signals=strategy_signals,
     )
