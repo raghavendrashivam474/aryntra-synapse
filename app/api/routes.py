@@ -1,4 +1,5 @@
 ﻿import time
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from app.retrieval.chunking import load_and_chunk
@@ -9,11 +10,24 @@ from app.core.config import settings
 # S7: Cross-query evidence reuse
 from app.context.evidence_store import EvidenceStore
 
+# S8: Evidence Priority Engine
+from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriorityWeights
+
 router = APIRouter()
 
 _retriever = Retriever()
 _llm = OllamaProvider()
 _evidence_store = EvidenceStore()  # S7: persistent across queries
+_priority_engine = EvidencePriorityEngine(
+    embedding_model=_retriever._embedding_model,
+    weights=EvidencePriorityWeights(
+        semantic_weight=settings.priority_semantic_weight,
+        lexical_weight=settings.priority_lexical_weight,
+        reuse_weight=settings.priority_reuse_weight,
+        high_threshold=settings.priority_high_threshold,
+        medium_threshold=settings.priority_medium_threshold,
+    ),
+)
 
 
 def initialise_retriever() -> None:
@@ -30,6 +44,14 @@ class RetrievedChunk(BaseModel):
     chunk_id: str
     text: str
     score: float
+    # Optional S7 / S8 metadata
+    fingerprint: Optional[str] = None
+    evidence_status: Optional[str] = None
+    priority_score: Optional[float] = None
+    priority_class: Optional[str] = None
+    semantic_score: Optional[float] = None
+    lexical_score: Optional[float] = None
+    reuse_score: Optional[float] = None
 
 
 class AskResponse(BaseModel):
@@ -71,6 +93,15 @@ class AskResponse(BaseModel):
     fingerprinting_latency: float = 0.0
     workspace_lookup_latency: float = 0.0
     evidence_store_size: int = 0
+    # S8 additions — Evidence Priority
+    enable_priority_routing: bool = True
+    priority_latency: float = 0.0
+    high_priority_count: int = 0
+    medium_priority_count: int = 0
+    low_priority_count: int = 0
+    active_evidence_count: int = 0
+    retained_evidence_count: int = 0
+    average_priority_score: float = 0.0
 
 
 class HealthResponse(BaseModel):
@@ -85,6 +116,8 @@ class HealthResponse(BaseModel):
     # S7
     evidence_reuse_enabled: bool = False
     evidence_store_size: int = 0
+    # S8
+    enable_priority_routing: bool = True
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -96,6 +129,7 @@ def health():
         context_representation=settings.context_representation,
         evidence_reuse_enabled=settings.evidence_reuse_enabled,
         evidence_store_size=_evidence_store.size,
+        enable_priority_routing=settings.enable_priority_routing,
     )
 
 
@@ -125,9 +159,23 @@ def ask(request: AskRequest):
     if settings.evidence_reuse_enabled:
         tagged_chunks, reuse_metrics = _evidence_store.process(retrieved_chunks)
         reuse_metrics_dict = reuse_metrics.to_dict()
-        # Pass tagged chunks downstream (extra keys are ignored by LLM provider)
         retrieved_chunks = tagged_chunks
-    # ────────────────────────────────────────────────────────────────
+
+    # ── S8: Evidence Priority Ranking ──────────────────────────────
+    priority_metrics_dict = {
+        "priority_latency": 0.0,
+        "high_priority_count": 0,
+        "medium_priority_count": 0,
+        "low_priority_count": 0,
+        "active_evidence_count": 0,
+        "retained_evidence_count": 0,
+        "average_priority_score": 0.0,
+    }
+
+    if settings.enable_priority_routing:
+        ranked_chunks, priority_metrics = _priority_engine.rank(request.text, retrieved_chunks)
+        priority_metrics_dict = priority_metrics.to_dict()
+        retrieved_chunks = ranked_chunks
 
     llm_result = _llm.generate(request.text, retrieved_chunks)
     total_latency = round(time.perf_counter() - t0, 4)
@@ -135,7 +183,18 @@ def ask(request: AskRequest):
     return AskResponse(
         question=request.text, answer=llm_result["answer"],
         retrieved_chunks=[
-            RetrievedChunk(chunk_id=c["chunk_id"], text=c["text"], score=c["score"])
+            RetrievedChunk(
+                chunk_id=c["chunk_id"],
+                text=c["text"],
+                score=c["score"],
+                fingerprint=c.get("fingerprint"),
+                evidence_status=c.get("evidence_status"),
+                priority_score=c.get("priority_score"),
+                priority_class=c.get("priority_class"),
+                semantic_score=c.get("semantic_score"),
+                lexical_score=c.get("lexical_score"),
+                reuse_score=c.get("reuse_score"),
+            )
             for c in retrieved_chunks
         ],
         retrieval_latency=retrieval_latency,
@@ -172,4 +231,13 @@ def ask(request: AskRequest):
         fingerprinting_latency=reuse_metrics_dict["fingerprinting_latency"],
         workspace_lookup_latency=reuse_metrics_dict["lookup_latency"],
         evidence_store_size=_evidence_store.size,
+        # S8 fields
+        enable_priority_routing=settings.enable_priority_routing,
+        priority_latency=priority_metrics_dict["priority_latency"],
+        high_priority_count=priority_metrics_dict["high_priority_count"],
+        medium_priority_count=priority_metrics_dict["medium_priority_count"],
+        low_priority_count=priority_metrics_dict["low_priority_count"],
+        active_evidence_count=priority_metrics_dict["active_evidence_count"],
+        retained_evidence_count=priority_metrics_dict["retained_evidence_count"],
+        average_priority_score=priority_metrics_dict["average_priority_score"],
     )
