@@ -550,3 +550,12 @@ is constructed.
 Future completed sprints should append to this history without
 rewriting historical findings except when a factual correction is
 required.
+## Sprint 8 — Evidence Relevance & Priority Management
+- **Release**: 1.0.0
+- **Capabilities Added**:
+  - EvidencePriorityEngine with deterministic semantic, lexical, and S7 reuse scoring signals.
+  - Three-tier classification (HIGH, MEDIUM, LOW) and active/retained workspace partitioning.
+  - Priority initial promotion in EvidenceWorkspace.
+  - Full ablation evaluation across Semantic-only, Lexical-only, Semantic+Lexical, and Full Blend.
+  - Live /ask endpoint priority observability and accounting metrics.
+- **Tests**: 149/149 passing (10 new S8 tests, 0 regressions).
