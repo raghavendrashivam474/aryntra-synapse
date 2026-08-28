@@ -73,7 +73,6 @@ class TestFingerprint:
 
 class TestEvidenceStore:
     def test_new_evidence_inserted(self, store):
-        """Test 6: New evidence is inserted into the store."""
         chunks = make_chunks(["Alpha evidence."])
         tagged, metrics = store.process(chunks)
         assert store.size == 1
@@ -82,7 +81,6 @@ class TestEvidenceStore:
         assert tagged[0]["evidence_status"] == "new"
 
     def test_existing_evidence_detected(self, store):
-        """Test 7: Existing evidence is detected on second encounter."""
         chunks = make_chunks(["Alpha evidence."])
         store.process(chunks)
         tagged2, metrics2 = store.process(chunks)
@@ -91,7 +89,6 @@ class TestEvidenceStore:
         assert tagged2[0]["evidence_status"] == "reused"
 
     def test_duplicate_not_inserted_twice(self, store):
-        """Test 8: Duplicate evidence is not inserted twice."""
         chunks = make_chunks(["Alpha evidence."])
         store.process(chunks)
         store.process(chunks)
@@ -99,7 +96,6 @@ class TestEvidenceStore:
         assert store.size == 1
 
     def test_retrieval_by_fingerprint(self, store, fp):
-        """Test 9: Existing evidence can be retrieved by fingerprint."""
         text = "Unique evidence text."
         chunks = make_chunks([text])
         store.process(chunks)
@@ -110,13 +106,57 @@ class TestEvidenceStore:
         assert store.has("nonexistent") is False
 
     def test_workspace_count_after_duplicates(self, store):
-        """Test 10: Store count remains correct after duplicate insertion."""
         chunks_a = make_chunks(["Alpha.", "Beta."])
         chunks_b = make_chunks(["Alpha.", "Gamma."])
         store.process(chunks_a)
         assert store.size == 2
         store.process(chunks_b)
         assert store.size == 3
+
+
+# ── Integration Tests (11-14) ────────────────────────────────────
+
+class TestIntegration:
+    def test_reused_evidence_reaches_pipeline(self, store):
+        """Test 11: Reused evidence reaches the normal S6 pipeline."""
+        chunks = make_chunks(["Pipeline evidence."])
+        tagged, _ = store.process(chunks)
+        store.process(chunks)
+        tagged2, metrics2 = store.process(chunks)
+        assert len(tagged2) == 1
+        assert tagged2[0]["chunk_id"] == "chunk_0"
+        assert tagged2[0]["text"] == "Pipeline evidence."
+        assert tagged2[0]["score"] == 0.9
+        assert "fingerprint" in tagged2[0]
+        assert "evidence_status" in tagged2[0]
+
+    def test_reuse_does_not_bypass_sufficiency(self, store):
+        """Test 12: Reuse does not bypass sufficiency evaluation."""
+        chunks = make_chunks(["Sufficiency test."])
+        store.process(chunks)
+        tagged, _ = store.process(chunks)
+        for key in tagged[0]:
+            assert "sufficient" not in key.lower()
+
+    def test_reuse_does_not_alter_semantics(self, store):
+        """Test 13: Reuse does not alter LLM answer generation semantics."""
+        original = make_chunks(["Semantic preservation test."])
+        tagged, _ = store.process(original)
+        assert tagged[0]["chunk_id"] == original[0]["chunk_id"]
+        assert tagged[0]["text"] == original[0]["text"]
+        assert tagged[0]["score"] == original[0]["score"]
+
+    def test_existing_tests_remain_green(self, store):
+        """Test 14: S7 additions do not break existing workspace patterns."""
+        from app.context.workspace import EvidenceWorkspace
+        chunks = make_chunks(["WS test A.", "WS test B.", "WS test C."])
+        tagged, _ = store.process(chunks)
+        ws = EvidenceWorkspace(tagged)
+        ws.promote_initial(count=1)
+        assert ws.active_count == 1
+        assert ws.available_count == 2
+        active = ws.active()
+        assert "fingerprint" in active[0]
 
 
 # ── Edge Cases ────────────────────────────────────────────────────

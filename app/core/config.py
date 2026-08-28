@@ -4,7 +4,7 @@
 class Settings(BaseSettings):
     # Application
     app_name: str = "Aryntra Synapse"
-    app_version: str = "0.8.0"
+    app_version: str = "0.9.0"
 
     # Knowledge Source
     sample_document: str = "data/sample.txt"
@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     semantic_sufficiency_threshold: float = 0.60
     semantic_sufficiency_mode: str = "blended"
 
+    # S7 Evidence Reuse Parameters
+    evidence_reuse_enabled: bool = True
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -49,4 +52,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
