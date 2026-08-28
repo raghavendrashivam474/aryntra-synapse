@@ -244,4 +244,3 @@ aryntra-synapse/
 **Research / Experimental**
 
 Not intended as a production-ready RAG platform at this stage. It is an experimental framework for studying how much evidence should be retrieved, retained, reused, prioritized, expanded, compressed, and ultimately exposed to a language model — and what computational and contextual costs those decisions introduce.
-```
