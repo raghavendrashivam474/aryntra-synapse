@@ -1,0 +1,298 @@
+{
+  "sprint": "S12",
+  "experiment": "robustness_ablation",
+  "research_questions": [
+    "RQ4",
+    "RQ5"
+  ],
+  "results": {
+    "A_frozen": [
+      {
+        "query": "What is the priority score formula?",
+        "path": "none",
+        "latency_s": 2e-06,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 0
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "path": "none",
+        "latency_s": 3e-06,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 0
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "path": "none",
+        "latency_s": 2e-06,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 0
+      },
+      {
+        "query": "How does the semantic gate bypass work?",
+        "path": "none",
+        "latency_s": 2e-06,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 0
+      },
+      {
+        "query": "How does evidence reuse fingerprinting work?",
+        "path": "none",
+        "latency_s": 2e-06,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 0
+      }
+    ],
+    "B_full_priority": [
+      {
+        "query": "What is the priority score formula?",
+        "path": "deep_always",
+        "latency_s": 0.169064,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 2,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.6667
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "path": "deep_always",
+        "latency_s": 0.14429,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "path": "deep_always",
+        "latency_s": 0.140237,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does the semantic gate bypass work?",
+        "path": "deep_always",
+        "latency_s": 0.1425,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does evidence reuse fingerprinting work?",
+        "path": "deep_always",
+        "latency_s": 0.143599,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 2,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.6667
+        },
+        "semantic_calls": 26
+      }
+    ],
+    "C_adaptive": [
+      {
+        "query": "What is the priority score formula?",
+        "path": "standard",
+        "latency_s": 0.13585,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 2,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.6667
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "path": "standard",
+        "latency_s": 0.128222,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "path": "standard",
+        "latency_s": 0.136806,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does the semantic gate bypass work?",
+        "path": "standard",
+        "latency_s": 0.150934,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does evidence reuse fingerprinting work?",
+        "path": "standard",
+        "latency_s": 0.158104,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 2,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.6667
+        },
+        "semantic_calls": 26
+      }
+    ],
+    "D_calibrated": [
+      {
+        "query": "What is the priority score formula?",
+        "path": "standard+fallback_broad",
+        "latency_s": 0.147281,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "path": "standard+fallback_skip",
+        "latency_s": 0.147379,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "path": "standard",
+        "latency_s": 0.146993,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 1,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does the semantic gate bypass work?",
+        "path": "standard+fallback_broad",
+        "latency_s": 0.141816,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does evidence reuse fingerprinting work?",
+        "path": "standard+fallback_broad",
+        "latency_s": 0.139544,
+        "num_chunks_processed": 25,
+        "top3_answer_bearing": 0,
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "semantic_calls": 26
+      }
+    ]
+  }
+}

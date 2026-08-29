@@ -1,0 +1,1417 @@
+{
+  "sprint": "S12",
+  "experiment": "calibration_matrix",
+  "research_questions": [
+    "RQ2",
+    "RQ3"
+  ],
+  "results": [
+    {
+      "config": {
+        "label": "semantic_only",
+        "semantic_weight": 1.0,
+        "lexical_weight": 0.0,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c6",
+          "top1_hit": false,
+          "latency_s": 0.102745,
+          "high_count": 0,
+          "final_rate": 0.0,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.071246,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.07263,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.0789,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.070088,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.16
+      }
+    },
+    {
+      "config": {
+        "label": "lexical_only",
+        "semantic_weight": 0.0,
+        "lexical_weight": 1.0,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.000255,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.000233,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.00021,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.00021,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000213,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "reuse_only",
+        "semantic_weight": 0.0,
+        "lexical_weight": 0.0,
+        "reuse_weight": 1.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.000231,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000211,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000207,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000207,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000205,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.2,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.2_lexical_0.8",
+        "semantic_weight": 0.2,
+        "lexical_weight": 0.8,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.07689,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.077094,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.074022,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.07383,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.068537,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.4_lexical_0.6",
+        "semantic_weight": 0.4,
+        "lexical_weight": 0.6,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.073471,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.071379,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.065601,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.077199,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.066958,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.6_lexical_0.4",
+        "semantic_weight": 0.6,
+        "lexical_weight": 0.4,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.071788,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.072188,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.079041,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.06695,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.073853,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.8_lexical_0.2",
+        "semantic_weight": 0.8,
+        "lexical_weight": 0.2,
+        "reuse_weight": 0.0,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.073411,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.069032,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.06678,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.069831,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.072298,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.2_reuse_0.8",
+        "semantic_weight": 0.2,
+        "lexical_weight": 0.0,
+        "reuse_weight": 0.8,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c6",
+          "top1_hit": false,
+          "latency_s": 0.077604,
+          "high_count": 0,
+          "final_rate": 0.0,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.079335,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.077623,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.068636,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.074448,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.16
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.4_reuse_0.6",
+        "semantic_weight": 0.4,
+        "lexical_weight": 0.0,
+        "reuse_weight": 0.6,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c6",
+          "top1_hit": false,
+          "latency_s": 0.123372,
+          "high_count": 0,
+          "final_rate": 0.0,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.071826,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.075556,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.071438,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.07472,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.16
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.6_reuse_0.4",
+        "semantic_weight": 0.6,
+        "lexical_weight": 0.0,
+        "reuse_weight": 0.4,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c6",
+          "top1_hit": false,
+          "latency_s": 0.076517,
+          "high_count": 0,
+          "final_rate": 0.0,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.072146,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.07352,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.070087,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.078412,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.16
+      }
+    },
+    {
+      "config": {
+        "label": "semantic_0.8_reuse_0.2",
+        "semantic_weight": 0.8,
+        "lexical_weight": 0.0,
+        "reuse_weight": 0.2,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c6",
+          "top1_hit": false,
+          "latency_s": 0.076024,
+          "high_count": 0,
+          "final_rate": 0.0,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.071944,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.077549,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.06756,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.076813,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.16
+      }
+    },
+    {
+      "config": {
+        "label": "lexical_0.2_reuse_0.8",
+        "semantic_weight": 0.0,
+        "lexical_weight": 0.2,
+        "reuse_weight": 0.8,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.00025,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.000157,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.000146,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.000142,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000141,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "lexical_0.4_reuse_0.6",
+        "semantic_weight": 0.0,
+        "lexical_weight": 0.4,
+        "reuse_weight": 0.6,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.000182,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.000147,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.000141,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.000141,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.00014,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "lexical_0.6_reuse_0.4",
+        "semantic_weight": 0.0,
+        "lexical_weight": 0.6,
+        "reuse_weight": 0.4,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.000376,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.000227,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.000208,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.000211,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000207,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "lexical_0.8_reuse_0.2",
+        "semantic_weight": 0.0,
+        "lexical_weight": 0.8,
+        "reuse_weight": 0.2,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.00029,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.000212,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.000204,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.000219,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c1",
+          "top1_hit": false,
+          "latency_s": 0.000213,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 0
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 0.8,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.2_l0.2_r0.6",
+        "semantic_weight": 0.2,
+        "lexical_weight": 0.2,
+        "reuse_weight": 0.6,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.078211,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.070724,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.074472,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.07253,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.086327,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.2_l0.4_r0.4",
+        "semantic_weight": 0.2,
+        "lexical_weight": 0.4,
+        "reuse_weight": 0.4,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.069552,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.077239,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.073386,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.071671,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.077806,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.2_l0.6_r0.2",
+        "semantic_weight": 0.2,
+        "lexical_weight": 0.6,
+        "reuse_weight": 0.2,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.080973,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.080371,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.090673,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.077996,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.068784,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.4_l0.2_r0.4",
+        "semantic_weight": 0.4,
+        "lexical_weight": 0.2,
+        "reuse_weight": 0.4,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.070013,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.064898,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.073566,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.071826,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.066771,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.4_l0.4_r0.2",
+        "semantic_weight": 0.4,
+        "lexical_weight": 0.4,
+        "reuse_weight": 0.2,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.074076,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.077037,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.071367,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.077679,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.064756,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    },
+    {
+      "config": {
+        "label": "blend_s0.6_l0.2_r0.2",
+        "semantic_weight": 0.6,
+        "lexical_weight": 0.2,
+        "reuse_weight": 0.2,
+        "high_threshold": 0.6,
+        "medium_threshold": 0.3,
+        "valid": true
+      },
+      "queries": [
+        {
+          "query": "What is the priority score formula?",
+          "expected": "c1",
+          "top1_id": "c1",
+          "top1_hit": true,
+          "latency_s": 0.078167,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How large is the embedding cache?",
+          "expected": "c2",
+          "top1_id": "c2",
+          "top1_hit": true,
+          "latency_s": 0.071151,
+          "high_count": 1,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does progressive expansion work?",
+          "expected": "c3",
+          "top1_id": "c3",
+          "top1_hit": true,
+          "latency_s": 0.067646,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does the semantic gate bypass work?",
+          "expected": "c4",
+          "top1_id": "c4",
+          "top1_hit": true,
+          "latency_s": 0.066534,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        },
+        {
+          "query": "How does evidence reuse fingerprinting work?",
+          "expected": "c5",
+          "top1_id": "c5",
+          "top1_hit": true,
+          "latency_s": 0.073171,
+          "high_count": 0,
+          "final_rate": 0.2,
+          "semantic_calls": 11
+        }
+      ],
+      "aggregate": {
+        "top1_accuracy": 1.0,
+        "avg_final_rate": 0.2
+      }
+    }
+  ]
+}

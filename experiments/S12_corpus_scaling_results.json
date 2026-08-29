@@ -1,0 +1,392 @@
+{
+  "sprint": "S12",
+  "experiment": "corpus_scaling",
+  "research_question": "RQ1",
+  "results": {
+    "C5": [
+      {
+        "query": "What is the priority score formula?",
+        "corpus_size": 5,
+        "latency_s": 0.080831,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 4,
+        "avg_score": 0.09690885256044565,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 2,
+        "semantic_calls": 6
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "corpus_size": 5,
+        "latency_s": 0.051151,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 4,
+        "avg_score": 0.2017960204184055,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 2,
+        "semantic_calls": 6
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "corpus_size": 5,
+        "latency_s": 0.051782,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 4,
+        "avg_score": 0.11116364035755395,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 2,
+        "semantic_calls": 6
+      }
+    ],
+    "C25": [
+      {
+        "query": "What is the priority score formula?",
+        "corpus_size": 25,
+        "latency_s": 0.125994,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 24,
+        "avg_score": 0.04896001723408698,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 2,
+        "semantic_calls": 26
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "corpus_size": 25,
+        "latency_s": 0.135986,
+        "high_count": 0,
+        "medium_count": 2,
+        "low_count": 23,
+        "avg_score": 0.10280330936610699,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 26
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "corpus_size": 25,
+        "latency_s": 0.124594,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 24,
+        "avg_score": 0.060609960321336975,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 26
+      }
+    ],
+    "C50": [
+      {
+        "query": "What is the priority score formula?",
+        "corpus_size": 50,
+        "latency_s": 0.222476,
+        "high_count": 0,
+        "medium_count": 4,
+        "low_count": 46,
+        "avg_score": 0.05321700528048678,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 51
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "corpus_size": 50,
+        "latency_s": 0.242634,
+        "high_count": 0,
+        "medium_count": 4,
+        "low_count": 46,
+        "avg_score": 0.09765857835859058,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 51
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "corpus_size": 50,
+        "latency_s": 0.21567,
+        "high_count": 0,
+        "medium_count": 1,
+        "low_count": 49,
+        "avg_score": 0.05097344711609184,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 51
+      }
+    ],
+    "C100": [
+      {
+        "query": "What is the priority score formula?",
+        "corpus_size": 100,
+        "latency_s": 0.382945,
+        "high_count": 0,
+        "medium_count": 4,
+        "low_count": 96,
+        "avg_score": 0.04363480793716736,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 101
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "corpus_size": 100,
+        "latency_s": 0.465495,
+        "high_count": 0,
+        "medium_count": 7,
+        "low_count": 93,
+        "avg_score": 0.09736990600451825,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 0,
+          "final": 0,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "top1_is_answer_bearing": false,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 101
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "corpus_size": 100,
+        "latency_s": 0.442761,
+        "high_count": 0,
+        "medium_count": 3,
+        "low_count": 97,
+        "avg_score": 0.051756151702255,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 101
+      }
+    ],
+    "C250": [
+      {
+        "query": "What is the priority score formula?",
+        "corpus_size": 250,
+        "latency_s": 1.017625,
+        "high_count": 0,
+        "medium_count": 10,
+        "low_count": 240,
+        "avg_score": 0.0416369091069675,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 251
+      },
+      {
+        "query": "How large is the embedding cache?",
+        "corpus_size": 250,
+        "latency_s": 1.029039,
+        "high_count": 0,
+        "medium_count": 17,
+        "low_count": 233,
+        "avg_score": 0.09770200634449724,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 0,
+          "final": 0,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.0,
+          "final_rate": 0.0
+        },
+        "top1_is_answer_bearing": false,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 251
+      },
+      {
+        "query": "How does progressive expansion work?",
+        "corpus_size": 250,
+        "latency_s": 0.94408,
+        "high_count": 0,
+        "medium_count": 7,
+        "low_count": 243,
+        "avg_score": 0.04942810516227035,
+        "answer_bearing_stats": {
+          "retrieved": 3,
+          "survived": 3,
+          "promoted": 1,
+          "final": 1,
+          "total": 3
+        },
+        "survival_rates": {
+          "retrieval_rate": 1.0,
+          "survival_rate": 1.0,
+          "promotion_rate": 0.3333,
+          "final_rate": 0.3333
+        },
+        "top1_is_answer_bearing": true,
+        "top3_answer_bearing_count": 1,
+        "semantic_calls": 251
+      }
+    ]
+  }
+}
