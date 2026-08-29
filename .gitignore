@@ -30,3 +30,8 @@ Thumbs.db
 
 # Sentence Transformers cache
 .cache/
+
+# S16 ephemeral
+patch_s16.py
+verify_temporal.py
+s16_full_test_results.txt
