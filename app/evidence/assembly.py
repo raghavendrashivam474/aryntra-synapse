@@ -36,6 +36,9 @@ class AssemblyMetrics:
     # S15 additions (defaults preserve S14 backward compatibility)
     sufficiency_score: float = -1.0
     sufficiency_decision: str = "not_evaluated"
+    # S16 additions
+    temporal_score: float = -1.0
+    query_temporal_intent: str = "not_evaluated"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -49,6 +52,8 @@ class AssemblyMetrics:
             "assembly_decision": self.assembly_decision,
             "sufficiency_score": round(self.sufficiency_score, 4),
             "sufficiency_decision": self.sufficiency_decision,
+            "temporal_score": round(self.temporal_score, 4),
+            "query_temporal_intent": self.query_temporal_intent,
         }
 
 
@@ -92,6 +97,7 @@ class EvidenceAssembler:
             min_facet_coverage_threshold=self.config.min_coverage_target
         )
         self.sufficiency_evaluator = sufficiency_evaluator
+        self.temporal_analyzer = None  # S16: set via with_temporal()
 
     @classmethod
     def with_sufficiency(
@@ -114,6 +120,25 @@ class EvidenceAssembler:
             coverage_analyzer=ca,
             sufficiency_evaluator=evaluator,
         )
+
+    @classmethod
+    def with_temporal(
+        cls,
+        s14_config=None,
+        s15_config=None,
+        s16_config=None,
+    ) -> "EvidenceAssembler":
+        """S16: Assembler with sufficiency AND temporal awareness."""
+        from app.evidence.temporal import TemporalAnalyzer
+        from app.evidence.config import S16TemporalConfig
+
+        assembler = cls.with_sufficiency(
+            s14_config=s14_config, s15_config=s15_config
+        )
+        assembler.temporal_analyzer = TemporalAnalyzer(
+            config=s16_config or S16TemporalConfig.balanced()
+        )
+        return assembler
 
     def assemble(
         self,
@@ -149,6 +174,12 @@ class EvidenceAssembler:
                     assembly_latency=latency,
                     assembly_decision="no_candidates",
                 ),
+            )
+
+        # S16: Enrich chunks with temporal scores before assembly
+        if self.temporal_analyzer:
+            ranked_chunks = self.temporal_analyzer.enrich_chunks(
+                query, ranked_chunks
             )
 
         # Step 1: Start with strongest individual candidate
@@ -239,6 +270,11 @@ class EvidenceAssembler:
         suff_score = suff_result.sufficiency_score if suff_result else -1.0
         suff_decision = suff_result.decision.value if suff_result else "not_evaluated"
 
+        # S16: Compute aggregate temporal metrics
+        t_scores = [c.get("temporal_score", -1.0) for c in selected]
+        avg_temporal = sum(t_scores) / len(t_scores) if t_scores else -1.0
+        q_intent = selected[0].get("query_temporal_intent", "not_evaluated") if selected else "not_evaluated"
+
         metrics = AssemblyMetrics(
             total_candidates=len(ranked_chunks),
             selected_count=len(selected),
@@ -250,6 +286,8 @@ class EvidenceAssembler:
             assembly_decision=decision,
             sufficiency_score=suff_score,
             sufficiency_decision=suff_decision,
+            temporal_score=avg_temporal,
+            query_temporal_intent=q_intent,
         )
 
         return AssemblyResult(

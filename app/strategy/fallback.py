@@ -175,6 +175,21 @@ class ConfidenceGuard:
         else:
             signals["coverage_ratio"] = 1.0
 
+        # Signal 8 [S16]: Temporal coherence
+        t_scores = [
+            c.get("temporal_score", 0.5) for c in ranked_chunks
+        ]
+        if t_scores:
+            avg_temporal = sum(t_scores) / len(t_scores)
+            signals["avg_temporal_score"] = round(avg_temporal, 4)
+            if avg_temporal < 0.30:
+                confidence -= 0.05
+                reasons.append("low_temporal_coherence")
+            elif avg_temporal >= 0.80:
+                confidence += 0.05
+        else:
+            signals["avg_temporal_score"] = 0.5
+
         confidence = max(0.0, min(1.0, confidence))
 
         # Routing decision with S14 specializations

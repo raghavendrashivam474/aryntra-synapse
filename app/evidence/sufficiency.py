@@ -1,5 +1,5 @@
 ﻿"""
-Aryntra Synapse — Sprint 15
+Aryntra Synapse — Sprint 15 + Sprint 16
 Minimum Sufficient Evidence (MSE) Controller.
 
 Determines whether the current assembled evidence set is sufficient
@@ -12,10 +12,9 @@ Multi-signal evaluation (all deterministic, zero LLM calls):
   Signal 4 — Conflict state       (from ContradictionDetector)
   Signal 5 — Redundancy           (inverse of best marginal gain)
   Signal 6 — Marginal gain        (best remaining candidate contribution)
+  Signal 7 — Temporal compatibility (mean temporal score of selected chunks) [S16]
 
 Design invariant: This module NEVER calls an LLM or embedding model.
-All signals are derived from S14's existing CoverageAnalyzer and
-ContradictionDetector outputs plus chunk metadata.
 """
 import logging
 from dataclasses import dataclass, field
@@ -56,13 +55,13 @@ class SufficiencyEvaluator:
     """
     Minimum Sufficient Evidence evaluator.
 
-    Combines six deterministic signals into a sufficiency score and
+    Combines deterministic signals into a sufficiency score and
     returns a STOP / EXPAND / UNCERTAIN decision for the assembly loop.
     """
 
     def __init__(
         self,
-        config: Optional["S15SufficiencyConfig"] = None,
+        config: Optional[Any] = None,
         coverage_analyzer: Optional[CoverageAnalyzer] = None,
     ):
         from app.evidence.config import S15SufficiencyConfig
@@ -109,12 +108,16 @@ class SufficiencyEvaluator:
         # ── Signal 4: Conflict state (0-1, higher = less conflict) ──
         s_conflict = 1.0 - conflict_report.conflict_score
 
+        # ── Signal 7 [S16]: Temporal compatibility ──
+        s_temporal = self._compute_temporal_signal(selected_chunks)
+
         # ── Signals 5 & 6: Redundancy and Marginal gain ──
         s_marginal, s_redundancy = self._compute_marginal_signals(
             query, selected_chunks, remaining_candidates
         )
 
         # ── Weighted base combination ──
+        t_weight = getattr(self.config, "temporal_weight", 0.0)
         score = (
             self.config.coverage_weight * s_coverage
             + self.config.support_weight * s_support
@@ -122,6 +125,7 @@ class SufficiencyEvaluator:
             + self.config.conflict_weight * s_conflict
             + self.config.redundancy_weight * s_redundancy
             + self.config.marginal_gain_weight * s_marginal
+            + t_weight * s_temporal
         )
 
         # ── Special Rules & Priority Invariants ──
@@ -168,6 +172,7 @@ class SufficiencyEvaluator:
             "conflict": s_conflict,
             "redundancy": s_redundancy,
             "marginal_gain": s_marginal,
+            "temporal": s_temporal,
         }
 
         logger.debug(
@@ -210,6 +215,16 @@ class SufficiencyEvaluator:
         return s_marginal, s_redundancy
 
     @staticmethod
+    def _compute_temporal_signal(
+        selected_chunks: List[Dict[str, Any]],
+    ) -> float:
+        """S16: Mean temporal compatibility of selected evidence."""
+        scores = [
+            c.get("temporal_score", 0.5) for c in selected_chunks
+        ]
+        return sum(scores) / len(scores) if scores else 0.5
+
+    @staticmethod
     def _empty_signals() -> Dict[str, float]:
         return {
             "coverage": 0.0,
@@ -218,4 +233,5 @@ class SufficiencyEvaluator:
             "conflict": 1.0,
             "redundancy": 1.0,
             "marginal_gain": 0.0,
+            "temporal": 0.5,
         }

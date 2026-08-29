@@ -26,6 +26,14 @@ from app.evidence.sufficiency import (
     SufficiencyResult,
     SufficiencyEvaluator,
 )
+from app.evidence.temporal import (
+    TemporalState,
+    QueryTemporalIntent,
+    TemporalMetadata,
+    TemporalCompatibilityResult,
+    TemporalAnalyzer,
+)
+from app.evidence.config import S16TemporalConfig
 
 __all__ = [
     # S14 state
@@ -51,4 +59,11 @@ __all__ = [
     "SufficiencyDecision",
     "SufficiencyResult",
     "SufficiencyEvaluator",
+    # S16 temporal
+    "TemporalState",
+    "QueryTemporalIntent",
+    "TemporalMetadata",
+    "TemporalCompatibilityResult",
+    "TemporalAnalyzer",
+    "S16TemporalConfig",
 ]
