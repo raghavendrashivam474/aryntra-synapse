@@ -1,8 +1,9 @@
 ﻿"""
-Aryntra Synapse — Sprint 14 + Sprint 15
-Configurable Resolution, Assembly, and Sufficiency Weights.
+Aryntra Synapse — Sprint 14 + Sprint 15 + Sprint 16
+Configurable Resolution, Assembly, Sufficiency, and Temporal Weights.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional, Dict
 
 
 @dataclass
@@ -87,6 +88,7 @@ class S15SufficiencyConfig:
     conflict_weight: float = 0.15
     redundancy_weight: float = 0.10
     marginal_gain_weight: float = 0.10
+    temporal_weight: float = 0.0  # S16 extension, 0.0 preserves exact S15 scoring
 
     # Decision thresholds
     sufficient_threshold: float = 0.70
@@ -141,3 +143,103 @@ class S15SufficiencyConfig:
     def no_conflict(cls) -> "S15SufficiencyConfig":
         """Ablation: all signals except conflict."""
         return cls(conflict_weight=0.0, coverage_weight=0.35, unresolved_weight=0.25)
+
+
+# ── Sprint 16: Temporal Configuration ─────────────────────────────────
+
+@dataclass
+class S16TemporalConfig:
+    """
+    Sprint 16 - Temporal awareness thresholds and compatibility matrix.
+
+    The compatibility matrix maps (query_intent, evidence_state) pairs
+    to a 0.0-1.0 score. UNKNOWN states always return unknown_neutral_score.
+    """
+    temporal_weight: float = 0.25
+    unknown_neutral_score: float = 0.50
+    superseded_penalty: float = 0.10
+    version_boost: float = 0.05
+
+    # Stored as flat dict: "intent:state" -> score
+    _compatibility: Optional[Dict[str, float]] = None
+
+    def __post_init__(self):
+        if self._compatibility is None:
+            self._compatibility = self._default_matrix()
+
+    def get_compatibility(self, intent: str, state: str) -> float:
+        if self._compatibility is None:
+            self._compatibility = self._default_matrix()
+        return self._compatibility.get(
+            f"{intent}:{state}", self.unknown_neutral_score
+        )
+
+    @staticmethod
+    def _default_matrix() -> Dict[str, float]:
+        return {
+            # CURRENT queries
+            "current:current": 1.0,
+            "current:historical": 0.30,
+            "current:future": 0.20,
+            "current:time_bounded": 0.60,
+            "current:superseded": 0.10,
+            "current:unknown": 0.50,
+            # HISTORICAL queries
+            "historical:current": 0.30,
+            "historical:historical": 1.0,
+            "historical:future": 0.10,
+            "historical:time_bounded": 0.70,
+            "historical:superseded": 0.40,
+            "historical:unknown": 0.50,
+            # FUTURE queries
+            "future:current": 0.20,
+            "future:historical": 0.10,
+            "future:future": 1.0,
+            "future:time_bounded": 0.40,
+            "future:superseded": 0.10,
+            "future:unknown": 0.50,
+            # TIME_RANGE queries
+            "time_range:current": 0.50,
+            "time_range:historical": 0.60,
+            "time_range:future": 0.30,
+            "time_range:time_bounded": 0.90,
+            "time_range:superseded": 0.30,
+            "time_range:unknown": 0.50,
+            # POINT_IN_TIME queries
+            "point_in_time:current": 0.30,
+            "point_in_time:historical": 0.80,
+            "point_in_time:future": 0.20,
+            "point_in_time:time_bounded": 0.90,
+            "point_in_time:superseded": 0.20,
+            "point_in_time:unknown": 0.50,
+            # UNKNOWN queries (all neutral)
+            "unknown:current": 0.50,
+            "unknown:historical": 0.50,
+            "unknown:future": 0.50,
+            "unknown:time_bounded": 0.50,
+            "unknown:superseded": 0.50,
+            "unknown:unknown": 0.50,
+        }
+
+    @classmethod
+    def strict(cls) -> "S16TemporalConfig":
+        """High temporal discrimination."""
+        cfg = cls(temporal_weight=0.35, superseded_penalty=0.05)
+        cfg._compatibility["current:historical"] = 0.15
+        cfg._compatibility["current:superseded"] = 0.05
+        return cfg
+
+    @classmethod
+    def relaxed(cls) -> "S16TemporalConfig":
+        """Low temporal discrimination — near-neutral for most pairs."""
+        cfg = cls(temporal_weight=0.10, unknown_neutral_score=0.55)
+        for key in cfg._compatibility:
+            if "unknown" not in key:
+                cfg._compatibility[key] = max(
+                    cfg._compatibility[key], 0.35
+                )
+        return cfg
+
+    @classmethod
+    def balanced(cls) -> "S16TemporalConfig":
+        return cls()
