@@ -1,0 +1,123 @@
+[
+  {
+    "id": "q1_factual",
+    "query": "What is the priority score formula in Synapse?",
+    "type": "Q1_factual",
+    "distribution": "concentrated",
+    "expected_answers": [
+      "Synapse uses priority score P = alpha * semantic + beta * lexical + gamma * reuse for evidence ranking."
+    ],
+    "essential_keywords": [
+      "priority",
+      "score",
+      "formula",
+      "alpha",
+      "beta",
+      "gamma",
+      "reuse"
+    ]
+  },
+  {
+    "id": "q2_keyword_heavy",
+    "query": "bounded LRU store 4096 query chunk vectors embedding cache capacity limit",
+    "type": "Q2_keyword_heavy",
+    "distribution": "concentrated",
+    "expected_answers": [
+      "The embedding cache is a bounded LRU store holding up to 4096 query and chunk vectors."
+    ],
+    "essential_keywords": [
+      "embedding",
+      "cache",
+      "bounded",
+      "lru",
+      "4096",
+      "vectors"
+    ]
+  },
+  {
+    "id": "q3_paraphrased",
+    "query": "How does the system incrementally enlarge the context window until enough information is gathered?",
+    "type": "Q3_paraphrased",
+    "distribution": "concentrated",
+    "expected_answers": [
+      "Progressive context expansion adds chunks incrementally until sufficiency threshold is met."
+    ],
+    "essential_keywords": [
+      "progressive",
+      "expansion",
+      "incrementally",
+      "sufficiency",
+      "threshold"
+    ]
+  },
+  {
+    "id": "q4_multi_concept",
+    "query": "How do SHA-256 fingerprinting and Jaccard lexical gating together optimize evidence reuse and embedding costs?",
+    "type": "Q4_multi_concept",
+    "distribution": "distributed",
+    "expected_answers": [
+      "Evidence reuse in S7 fingerprints chunks with SHA-256 for cross-query deduplication.",
+      "The lexical semantic gate uses Jaccard index overlap to bypass expensive embedding calls."
+    ],
+    "essential_keywords": [
+      "sha-256",
+      "fingerprint",
+      "jaccard",
+      "lexical",
+      "gate",
+      "deduplication",
+      "embedding"
+    ]
+  },
+  {
+    "id": "q5_multi_hop",
+    "query": "When the priority engine ranks chunks using alpha beta gamma weights, how does the sufficiency engine determine when to stop expansion?",
+    "type": "Q5_multi_hop",
+    "distribution": "fragmented",
+    "expected_answers": [
+      "Synapse uses priority score P = alpha * semantic + beta * lexical + gamma * reuse for evidence ranking.",
+      "Progressive context expansion adds chunks incrementally until sufficiency threshold is met.",
+      "The sufficiency engine evaluates keyword coverage and semantic similarity against threshold bounds."
+    ],
+    "essential_keywords": [
+      "priority",
+      "engine",
+      "sufficiency",
+      "expansion",
+      "threshold",
+      "weights"
+    ]
+  },
+  {
+    "id": "q6_ambiguous",
+    "query": "How does caching optimize performance?",
+    "type": "Q6_ambiguous",
+    "distribution": "redundant",
+    "expected_answers": [
+      "The embedding cache is a bounded LRU store holding up to 4096 query and chunk vectors.",
+      "Cache systems reduce redundant computation by storing previously computed embeddings."
+    ],
+    "essential_keywords": [
+      "cache",
+      "embedding",
+      "lru",
+      "vectors",
+      "computation"
+    ]
+  },
+  {
+    "id": "q7_sparse",
+    "query": "What specific cryptographic hash function is employed for evidence fingerprinting?",
+    "type": "Q7_sparse",
+    "distribution": "sparse",
+    "expected_answers": [
+      "Evidence reuse in S7 fingerprints chunks with SHA-256 for cross-query deduplication."
+    ],
+    "essential_keywords": [
+      "sha-256",
+      "fingerprints",
+      "hash",
+      "cryptographic"
+    ]
+  }
+]

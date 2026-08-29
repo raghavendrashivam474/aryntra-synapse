@@ -1,0 +1,74 @@
+{
+  "D1_random": [
+    "Photosynthesis in green plants converts light energy into chemical energy stored in glucose.",
+    "The Roman Empire reached its greatest territorial extent under Emperor Trajan in 117 AD.",
+    "Deep sea hydrothermal vents support unique ecosystems independent of sunlight energy.",
+    "Baking sourdough bread requires a symbiotic culture of lactic acid bacteria and wild yeast.",
+    "The James Webb Space Telescope observes the universe primarily in the infrared spectrum.",
+    "Quantum entanglement occurs when pairs of particles interact such that physical properties correlate.",
+    "Plate tectonics describes the large-scale motion of seven large plates across Earth lithosphere.",
+    "Acoustic resonance is the tendency of an acoustic system to absorb more energy at natural frequencies.",
+    "Renaissance architecture emphasized symmetry proportion geometry and the regularity of parts.",
+    "Mitochondria generate most of the chemical energy needed to power the cell biochemical reactions."
+  ],
+  "D2_topic": [
+    "Modern database systems employ write-ahead logging to guarantee atomicity and durability.",
+    "Asynchronous event loops allow Python programs to handle thousands of concurrent I/O operations.",
+    "Continuous integration pipelines automate the testing and packaging of software artifacts.",
+    "Vector indexes support nearest-neighbor searches in high-dimensional vector spaces.",
+    "Distributed tracing provides insights into request lifecycles across microservice architectures.",
+    "Docker containers package applications with all dependencies into standardized portable units.",
+    "Redis in-memory data store provides sub-millisecond responses for key-value lookups.",
+    "Message brokers decouple message producers from consumers to handle variable traffic spikes.",
+    "Garbage collection algorithms reclaim memory occupied by objects no longer referenced.",
+    "Load balancers distribute incoming network traffic across multiple backend application servers."
+  ],
+  "D3_lexical": [
+    "The priority score formula evaluates mathematical symbols without context alpha or beta weights.",
+    "A bounded LRU store can hold temporary files on disk when system memory capacity is reached.",
+    "Progressive context expansion techniques can refer to expanding urban real estate developments.",
+    "The lexical semantic gate controls physical barrier turnstiles at corporate office entry points.",
+    "Evidence reuse in legal proceedings requires fingerprinting forensic physical evidence items.",
+    "SHA-256 deduplication is widely used by file storage utilities to eliminate duplicate backups.",
+    "Sufficiency thresholds determine whether an applicant meets minimum corporate employment criteria.",
+    "Jaccard index overlap calculations measure botanical diversity between ecological quadrants.",
+    "Chunk embedding vectors are multiplied in linear algebra textbooks to demonstrate dot products.",
+    "Evidence priorities in medical emergency rooms determine triage order for urgent patient care."
+  ],
+  "D4_semantic": [
+    "Synapse computes ranking importance by combining multiple relevance dimensions into a composite metric.",
+    "The memory buffer caches frequently queried representations up to a fixed maximum capacity limit.",
+    "Iterative context enlargement includes extra chunks step-by-step until criteria are satisfied.",
+    "A lightweight lexical filter gates expensive neural network computations using token overlap.",
+    "Chunk deduplication and cross-query state retention rely on cryptographic hashes of document texts.",
+    "Adaptive execution paths switch between shallow and comprehensive pipelines based on complexity.",
+    "Context assembly selects top-ranked passages to construct an optimal prompt within token budgets.",
+    "Relevance scoring balances semantic similarity lexical matching and historical reuse signals.",
+    "Confidence evaluation safeguards against pruning essential evidence when scores are ambiguous.",
+    "Fast-path filtering bypasses heavy transformer embeddings when keyword overlap is unambiguous."
+  ],
+  "D5_partial": [
+    "Synapse calculates priority score P using alpha for semantic and beta for lexical relevance.",
+    "The embedding cache is bounded with an LRU policy and holds query vectors.",
+    "Progressive expansion stops when sufficiency threshold is met, but chunk addition is variable.",
+    "The lexical semantic gate uses Jaccard index overlap for gating decisions.",
+    "Evidence reuse fingerprints chunks using SHA-256 for persistent identification.",
+    "The priority engine assigns high medium and low tiers to incoming chunks.",
+    "Adaptive routing selects between Light and Standard pipelines depending on query traits.",
+    "Confidence assessment calculates the score margin between the highest ranked items.",
+    "The context compressor strips structural markers and redundant sentences from chunks.",
+    "The sufficiency engine evaluates keyword coverage against expected terms."
+  ],
+  "D6_contradictory": [
+    "Synapse strictly forbids priority scoring, relying entirely on random chunk selection.",
+    "The embedding cache has infinite capacity and never evicts any stored vector entries.",
+    "Progressive expansion has been completely deprecated in favor of static single-chunk retrieval.",
+    "The lexical semantic gate always forces full embedding computation for all inputs unconditionally.",
+    "Evidence reuse does not use SHA-256 fingerprinting and discards all historical evidence immediately.",
+    "Adaptive routing always forces Deep pipeline execution regardless of query simplicity or confidence.",
+    "ConfidenceGuard blindly accepts all priority rankings and never triggers fallback under any condition.",
+    "Priority weights alpha, beta, and gamma must always sum to zero in calibrated Synapse configurations.",
+    "Context compression expands prompt size by duplicating all sentences three times.",
+    "Sufficiency evaluation determines that zero evidence chunks are always 100% sufficient for all queries."
+  ]
+}
