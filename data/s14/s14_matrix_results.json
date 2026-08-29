@@ -1,0 +1,98 @@
+[
+  {
+    "Config": "Config A (S13 Baseline)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 44.0,
+    "Set Sufficiency (%)": 38.5,
+    "Conflict Recall (%)": 0.0,
+    "Guard Active (%)": 69.2,
+    "Mean Lat (ms)": 44.645,
+    "P95 Lat (ms)": 94.635,
+    "Avg Chunks": 1,
+    "Trade-off Score": 2.04
+  },
+  {
+    "Config": "Config B (Contradiction Only)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 44.0,
+    "Set Sufficiency (%)": 38.5,
+    "Conflict Recall (%)": 33.3,
+    "Guard Active (%)": 69.2,
+    "Mean Lat (ms)": 0.573,
+    "P95 Lat (ms)": 1.031,
+    "Avg Chunks": 1,
+    "Trade-off Score": 21.7
+  },
+  {
+    "Config": "Config C (Coverage Only)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 44.0,
+    "Set Sufficiency (%)": 53.8,
+    "Conflict Recall (%)": 0.0,
+    "Guard Active (%)": 84.6,
+    "Mean Lat (ms)": 0.81,
+    "P95 Lat (ms)": 1.982,
+    "Avg Chunks": 1,
+    "Trade-off Score": 23.52
+  },
+  {
+    "Config": "Config D (Assembly Only)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 80.0,
+    "Set Sufficiency (%)": 92.3,
+    "Conflict Recall (%)": 0.0,
+    "Guard Active (%)": 53.8,
+    "Mean Lat (ms)": 4.241,
+    "P95 Lat (ms)": 7.595,
+    "Avg Chunks": 2,
+    "Trade-off Score": 14.13
+  },
+  {
+    "Config": "Config E (Contra + Coverage)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 44.0,
+    "Set Sufficiency (%)": 53.8,
+    "Conflict Recall (%)": 33.3,
+    "Guard Active (%)": 84.6,
+    "Mean Lat (ms)": 0.657,
+    "P95 Lat (ms)": 0.881,
+    "Avg Chunks": 1,
+    "Trade-off Score": 24.29
+  },
+  {
+    "Config": "Config F (Contra + Assembly)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 80.0,
+    "Set Sufficiency (%)": 92.3,
+    "Conflict Recall (%)": 16.7,
+    "Guard Active (%)": 53.8,
+    "Mean Lat (ms)": 4.397,
+    "P95 Lat (ms)": 7.985,
+    "Avg Chunks": 2,
+    "Trade-off Score": 13.95
+  },
+  {
+    "Config": "Config G (Coverage + Assembly)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 80.0,
+    "Set Sufficiency (%)": 92.3,
+    "Conflict Recall (%)": 0.0,
+    "Guard Active (%)": 53.8,
+    "Mean Lat (ms)": 4.296,
+    "P95 Lat (ms)": 7.463,
+    "Avg Chunks": 2,
+    "Trade-off Score": 14.06
+  },
+  {
+    "Config": "Config H (Full S14 Resolution)",
+    "Top-1 (%)": 84.6,
+    "Recall (%)": 80.0,
+    "Set Sufficiency (%)": 92.3,
+    "Conflict Recall (%)": 16.7,
+    "Guard Active (%)": 53.8,
+    "Mean Lat (ms)": 2.992,
+    "P95 Lat (ms)": 5.381,
+    "Avg Chunks": 2,
+    "Trade-off Score": 15.73
+  }
+]

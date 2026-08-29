@@ -1,9 +1,9 @@
-﻿"""
-Aryntra Synapse — Sprint 12: Confidence Guard & Fallback Routing
+"""
+Aryntra Synapse — Sprint 12 & Sprint 14: Confidence Guard & Fallback Routing
 
 Determines whether priority-based processing is trustworthy
 for a given query/evidence combination. Falls back to broader
-context when confidence is low.
+context when confidence is low or evidence is contradictory/fragmented.
 
 Signals evaluated (all cheap, no embeddings or LLM):
 - Priority score margin (top-1 vs top-2)
@@ -11,6 +11,8 @@ Signals evaluated (all cheap, no embeddings or LLM):
 - Lexical agreement with top chunk
 - Corpus size
 - Average priority score
+- [S14] Contradiction presence & severity
+- [S14] Multi-concept query coverage ratio
 """
 
 import logging
@@ -25,6 +27,8 @@ class FallbackDecision(str, Enum):
     TRUST_PRIORITY = "trust_priority"
     FALLBACK_BROAD = "fallback_broad"
     FALLBACK_SKIP = "fallback_skip"
+    RESOLVE_CONFLICT = "resolve_conflict"
+    EXPAND_COVERAGE = "expand_coverage"
 
 
 @dataclass
@@ -45,7 +49,7 @@ class ConfidenceAssessment:
 
 class ConfidenceGuard:
     """
-    S12 Confidence Guard.
+    S12 / S14 Conflict-Aware Confidence Guard.
 
     Evaluates priority output trustworthiness using cheap signals.
     Does NOT require additional embedding calls or LLM invocations.
@@ -57,19 +61,25 @@ class ConfidenceGuard:
         min_high_count: int = 1,
         min_lexical_agreement: float = 0.10,
         small_corpus_threshold: int = 5,
+        conflict_penalty_weight: float = 0.35,
+        coverage_penalty_weight: float = 0.25,
     ):
         self.min_score_margin = min_score_margin
         self.min_high_count = min_high_count
         self.min_lexical_agreement = min_lexical_agreement
         self.small_corpus_threshold = small_corpus_threshold
+        self.conflict_penalty_weight = conflict_penalty_weight
+        self.coverage_penalty_weight = coverage_penalty_weight
 
     def assess(
         self,
         query: str,
         ranked_chunks: List[Dict[str, Any]],
         priority_metrics: Optional[Dict[str, Any]] = None,
+        conflict_report: Optional[Any] = None,
+        coverage_report: Optional[Any] = None,
     ) -> ConfidenceAssessment:
-        """Evaluate whether to trust priority results or fall back."""
+        """Evaluate whether to trust priority results, fall back, or expand/resolve."""
         signals: Dict[str, Any] = {}
         reasons: List[str] = []
         confidence = 0.50  # neutral baseline
@@ -83,7 +93,7 @@ class ConfidenceGuard:
             )
 
         # Signal 1: Score margin between top-1 and top-2
-        scores = [c.get("priority_score", 0.0) for c in ranked_chunks]
+        scores = [c.get("priority_score", c.get("score", 0.0)) for c in ranked_chunks]
         if len(scores) >= 2:
             margin = scores[0] - scores[1]
             signals["score_margin"] = round(margin, 4)
@@ -140,9 +150,42 @@ class ConfidenceGuard:
             confidence -= 0.10
             reasons.append("low_avg_score")
 
+        # Signal 6 [S14]: Contradiction Penalty
+        if conflict_report is not None:
+            c_score = getattr(conflict_report, "conflict_score", 0.0)
+            c_detected = getattr(conflict_report, "detected", False)
+            signals["contradiction_detected"] = c_detected
+            signals["contradiction_score"] = round(c_score, 4)
+            if c_detected and c_score > 0.30:
+                confidence -= (self.conflict_penalty_weight * c_score)
+                reasons.append("contradiction_detected")
+        else:
+            signals["contradiction_detected"] = False
+            signals["contradiction_score"] = 0.0
+
+        # Signal 7 [S14]: Coverage Adjustment
+        if coverage_report is not None:
+            cov_ratio = getattr(coverage_report, "coverage_ratio", 1.0)
+            signals["coverage_ratio"] = round(cov_ratio, 4)
+            if cov_ratio < 0.50:
+                confidence -= (self.coverage_penalty_weight * (1.0 - cov_ratio))
+                reasons.append("low_concept_coverage")
+            elif cov_ratio >= 0.80:
+                confidence += 0.10
+        else:
+            signals["coverage_ratio"] = 1.0
+
         confidence = max(0.0, min(1.0, confidence))
 
-        if confidence >= 0.55:
+        # Routing decision with S14 specializations
+        has_conflict = signals.get("contradiction_detected", False) and signals.get("contradiction_score", 0.0) >= 0.40
+        low_cov = signals.get("coverage_ratio", 1.0) < 0.50
+
+        if has_conflict:
+            decision = FallbackDecision.RESOLVE_CONFLICT
+        elif low_cov and confidence < 0.55:
+            decision = FallbackDecision.EXPAND_COVERAGE
+        elif confidence >= 0.55:
             decision = FallbackDecision.TRUST_PRIORITY
         elif confidence >= 0.35:
             decision = FallbackDecision.FALLBACK_BROAD
