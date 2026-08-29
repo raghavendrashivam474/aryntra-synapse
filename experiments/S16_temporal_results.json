@@ -1,0 +1,237 @@
+{
+  "metadata": {
+    "sprint": "S16",
+    "version": "v1.7.0",
+    "timestamp": "2026-08-30 03:34:37",
+    "total_scenarios": 8
+  },
+  "metrics": {
+    "s15_top1_accuracy": 0.625,
+    "s16_top1_accuracy": 1.0,
+    "s15_current_accuracy": 1.0,
+    "s16_current_accuracy": 1.0,
+    "s15_historical_accuracy": 0.0,
+    "s16_historical_accuracy": 1.0,
+    "s15_supersession_accuracy": 0.5,
+    "s16_supersession_accuracy": 1.0,
+    "s15_false_suppression_count": 0,
+    "s16_false_suppression_count": 0,
+    "s15_avg_latency_ms": 0.7877125000277374,
+    "s16_avg_latency_ms": 1.0017124999990301,
+    "temporal_decision_overhead_ms": 0.2139999999712927
+  },
+  "scenarios": [
+    {
+      "case_id": "T1_current_info",
+      "category": "T1_current",
+      "query": "What is the company's current pricing for the Pro plan?",
+      "target": "T1_c1",
+      "s15_output": {
+        "selected_ids": [
+          "T1_c1"
+        ],
+        "top_1_id": "T1_c1",
+        "latency_ms": 1.6072999999323656,
+        "iterations": 2,
+        "sufficiency_score": 0.5025
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T1_c1"
+        ],
+        "top_1_id": "T1_c1",
+        "latency_ms": 1.5106000000741915,
+        "iterations": 2,
+        "sufficiency_score": 0.5025,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "current"
+      }
+    },
+    {
+      "case_id": "T2_historical_info",
+      "category": "T2_historical",
+      "query": "What was the pricing back in 2022?",
+      "target": "T2_c2",
+      "s15_output": {
+        "selected_ids": [
+          "T2_c1",
+          "T2_c2"
+        ],
+        "top_1_id": "T2_c1",
+        "latency_ms": 0.6905000000188011,
+        "iterations": 2,
+        "sufficiency_score": 0.3979
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T2_c2"
+        ],
+        "top_1_id": "T2_c2",
+        "latency_ms": 0.5619999999453285,
+        "iterations": 2,
+        "sufficiency_score": 0.5367,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "point_in_time"
+      }
+    },
+    {
+      "case_id": "T3_version_chain",
+      "category": "T3_versions",
+      "query": "What is the latest product refund policy?",
+      "target": "T3_c3",
+      "s15_output": {
+        "selected_ids": [
+          "T3_c1"
+        ],
+        "top_1_id": "T3_c1",
+        "latency_ms": 0.5719999999200809,
+        "iterations": 1,
+        "sufficiency_score": 0.7375
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T3_c3"
+        ],
+        "top_1_id": "T3_c3",
+        "latency_ms": 1.0557999999036838,
+        "iterations": 1,
+        "sufficiency_score": 0.7525,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "current"
+      }
+    },
+    {
+      "case_id": "T4_superseded",
+      "category": "T4_supersession",
+      "query": "What is the active policy on remote work?",
+      "target": "T4_c1",
+      "s15_output": {
+        "selected_ids": [
+          "T4_c1"
+        ],
+        "top_1_id": "T4_c1",
+        "latency_ms": 0.4079000000274391,
+        "iterations": 1,
+        "sufficiency_score": 0.748
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T4_c1"
+        ],
+        "top_1_id": "T4_c1",
+        "latency_ms": 0.5679000000782253,
+        "iterations": 1,
+        "sufficiency_score": 0.748,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "current"
+      }
+    },
+    {
+      "case_id": "T5_effective_date",
+      "category": "T5_effective_date",
+      "query": "What policy was in effect during February 2026?",
+      "target": "T5_c2",
+      "s15_output": {
+        "selected_ids": [
+          "T5_c1"
+        ],
+        "top_1_id": "T5_c1",
+        "latency_ms": 0.5344999999579159,
+        "iterations": 1,
+        "sufficiency_score": 0.7153
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T5_c2",
+          "T5_c1"
+        ],
+        "top_1_id": "T5_c2",
+        "latency_ms": 1.2979999999060965,
+        "iterations": 2,
+        "sufficiency_score": 0.7108,
+        "temporal_score": 0.6,
+        "query_temporal_intent": "point_in_time"
+      }
+    },
+    {
+      "case_id": "T6_unknown_timestamp",
+      "category": "T6_unknown",
+      "query": "Explain how the server authentication protocol works.",
+      "target": "T6_c1",
+      "s15_output": {
+        "selected_ids": [
+          "T6_c1",
+          "T6_c2"
+        ],
+        "top_1_id": "T6_c1",
+        "latency_ms": 0.7857000000512926,
+        "iterations": 2,
+        "sufficiency_score": 0.5404
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T6_c1",
+          "T6_c2"
+        ],
+        "top_1_id": "T6_c1",
+        "latency_ms": 0.9786000000531203,
+        "iterations": 2,
+        "sufficiency_score": 0.5404,
+        "temporal_score": 0.5,
+        "query_temporal_intent": "unknown"
+      }
+    },
+    {
+      "case_id": "T7_mixed_corpus",
+      "category": "T7_mixed",
+      "query": "What is the active pricing tier today?",
+      "target": "T7_c1",
+      "s15_output": {
+        "selected_ids": [
+          "T7_c1"
+        ],
+        "top_1_id": "T7_c1",
+        "latency_ms": 1.130000000102882,
+        "iterations": 2,
+        "sufficiency_score": 0.6275
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T7_c1"
+        ],
+        "top_1_id": "T7_c1",
+        "latency_ms": 1.3495999999122432,
+        "iterations": 2,
+        "sufficiency_score": 0.6275,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "current"
+      }
+    },
+    {
+      "case_id": "T8_temporal_distractor",
+      "category": "T8_distractor",
+      "query": "What is the current system API endpoint?",
+      "target": "T8_c1",
+      "s15_output": {
+        "selected_ids": [
+          "T8_c1"
+        ],
+        "top_1_id": "T8_c1",
+        "latency_ms": 0.5738000002111221,
+        "iterations": 2,
+        "sufficiency_score": 0.5367
+      },
+      "s16_output": {
+        "selected_ids": [
+          "T8_c1"
+        ],
+        "top_1_id": "T8_c1",
+        "latency_ms": 0.6912000001193519,
+        "iterations": 2,
+        "sufficiency_score": 0.5367,
+        "temporal_score": 1.0,
+        "query_temporal_intent": "current"
+      }
+    }
+  ]
+}
