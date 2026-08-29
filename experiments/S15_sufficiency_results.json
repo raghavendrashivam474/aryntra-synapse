@@ -1,0 +1,442 @@
+[
+  {
+    "strategy": "A_top1",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "s1",
+        "text": "The server outage was caused by a memory leak in the authentication service.",
+        "priority_score": 0.92
+      }
+    ],
+    "latency": 1.4000002011016477e-06,
+    "iterations": 1,
+    "query_id": "simple_1",
+    "query_type": "simple",
+    "expected_min": 1,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "B_top3",
+    "selected_count": 3,
+    "chunks": [
+      {
+        "chunk_id": "s1",
+        "text": "The server outage was caused by a memory leak in the authentication service.",
+        "priority_score": 0.92
+      },
+      {
+        "chunk_id": "s2",
+        "text": "The datacenter temperature was within normal range.",
+        "priority_score": 0.3
+      },
+      {
+        "chunk_id": "s3",
+        "text": "Network latency remained stable throughout the incident.",
+        "priority_score": 0.25
+      }
+    ],
+    "latency": 6.000000212225132e-07,
+    "iterations": 1,
+    "query_id": "simple_1",
+    "query_type": "simple",
+    "expected_min": 1,
+    "over_expansion": 2
+  },
+  {
+    "strategy": "C_s14_assembly",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "s1",
+        "text": "The server outage was caused by a memory leak in the authentication service.",
+        "priority_score": 0.92
+      }
+    ],
+    "latency": 0.0016101999999591499,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "assembled_sufficient",
+    "query_id": "simple_1",
+    "query_type": "simple",
+    "expected_min": 1,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "D_s15_mse",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "s1",
+        "text": "The server outage was caused by a memory leak in the authentication service.",
+        "priority_score": 0.92
+      }
+    ],
+    "latency": 0.0009648000000197499,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "mse_sufficient",
+    "sufficiency_score": 0.888,
+    "sufficiency_decision": "sufficient",
+    "query_id": "simple_1",
+    "query_type": "simple",
+    "expected_min": 1,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "A_top1",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "m1",
+        "text": "The cause of the outage was a database failover event.",
+        "priority_score": 0.88
+      }
+    ],
+    "latency": 6.999998731771484e-07,
+    "iterations": 1,
+    "query_id": "multi_1",
+    "query_type": "multi_concept",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "B_top3",
+    "selected_count": 3,
+    "chunks": [
+      {
+        "chunk_id": "m1",
+        "text": "The cause of the outage was a database failover event.",
+        "priority_score": 0.88
+      },
+      {
+        "chunk_id": "m2",
+        "text": "The resolution occurred at 2024-03-15 03:00 UTC.",
+        "priority_score": 0.75
+      },
+      {
+        "chunk_id": "m3",
+        "text": "Customer support received 200 tickets during the incident.",
+        "priority_score": 0.4
+      }
+    ],
+    "latency": 4.99999714520527e-07,
+    "iterations": 1,
+    "query_id": "multi_1",
+    "query_type": "multi_concept",
+    "expected_min": 2,
+    "over_expansion": 1
+  },
+  {
+    "strategy": "C_s14_assembly",
+    "selected_count": 2,
+    "chunks": [
+      {
+        "chunk_id": "m1",
+        "text": "The cause of the outage was a database failover event.",
+        "priority_score": 0.88
+      },
+      {
+        "chunk_id": "m2",
+        "text": "The resolution occurred at 2024-03-15 03:00 UTC.",
+        "priority_score": 0.75
+      }
+    ],
+    "latency": 0.003765200000088953,
+    "iterations": 3,
+    "coverage": 0.6,
+    "decision": "partial_coverage",
+    "query_id": "multi_1",
+    "query_type": "multi_concept",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "D_s15_mse",
+    "selected_count": 2,
+    "chunks": [
+      {
+        "chunk_id": "m1",
+        "text": "The cause of the outage was a database failover event.",
+        "priority_score": 0.88
+      },
+      {
+        "chunk_id": "m2",
+        "text": "The resolution occurred at 2024-03-15 03:00 UTC.",
+        "priority_score": 0.75
+      }
+    ],
+    "latency": 0.002669500000138214,
+    "iterations": 2,
+    "coverage": 0.6,
+    "decision": "mse_sufficient",
+    "sufficiency_score": 0.7,
+    "sufficiency_decision": "sufficient",
+    "query_id": "multi_1",
+    "query_type": "multi_concept",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "A_top1",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "f1",
+        "text": "The cause of the datacenter failure was a cooling system malfunction.",
+        "priority_score": 0.85
+      }
+    ],
+    "latency": 7.000003279244993e-07,
+    "iterations": 1,
+    "query_id": "frag_1",
+    "query_type": "fragmented",
+    "expected_min": 3,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "B_top3",
+    "selected_count": 3,
+    "chunks": [
+      {
+        "chunk_id": "f1",
+        "text": "The cause of the datacenter failure was a cooling system malfunction.",
+        "priority_score": 0.85
+      },
+      {
+        "chunk_id": "f2",
+        "text": "The impact included 4 hours of downtime for 10,000 users.",
+        "priority_score": 0.7
+      },
+      {
+        "chunk_id": "f3",
+        "text": "The resolution involved replacing the primary cooling unit.",
+        "priority_score": 0.65
+      }
+    ],
+    "latency": 3.999998625658918e-07,
+    "iterations": 1,
+    "query_id": "frag_1",
+    "query_type": "fragmented",
+    "expected_min": 3,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "C_s14_assembly",
+    "selected_count": 2,
+    "chunks": [
+      {
+        "chunk_id": "f1",
+        "text": "The cause of the datacenter failure was a cooling system malfunction.",
+        "priority_score": 0.85
+      },
+      {
+        "chunk_id": "f2",
+        "text": "The impact included 4 hours of downtime for 10,000 users.",
+        "priority_score": 0.7
+      }
+    ],
+    "latency": 0.0014417000002140412,
+    "iterations": 2,
+    "coverage": 0.875,
+    "decision": "assembled_sufficient",
+    "query_id": "frag_1",
+    "query_type": "fragmented",
+    "expected_min": 3,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "D_s15_mse",
+    "selected_count": 2,
+    "chunks": [
+      {
+        "chunk_id": "f1",
+        "text": "The cause of the datacenter failure was a cooling system malfunction.",
+        "priority_score": 0.85
+      },
+      {
+        "chunk_id": "f2",
+        "text": "The impact included 4 hours of downtime for 10,000 users.",
+        "priority_score": 0.7
+      }
+    ],
+    "latency": 0.0033872999997583975,
+    "iterations": 2,
+    "coverage": 0.875,
+    "decision": "mse_sufficient",
+    "sufficiency_score": 0.8037,
+    "sufficiency_decision": "sufficient",
+    "query_id": "frag_1",
+    "query_type": "fragmented",
+    "expected_min": 3,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "A_top1",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "x1",
+        "text": "The system was restored on 2024-06-15 after the patch.",
+        "priority_score": 0.8
+      }
+    ],
+    "latency": 7.000003279244993e-07,
+    "iterations": 1,
+    "query_id": "contra_1",
+    "query_type": "contradictory",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "B_top3",
+    "selected_count": 3,
+    "chunks": [
+      {
+        "chunk_id": "x1",
+        "text": "The system was restored on 2024-06-15 after the patch.",
+        "priority_score": 0.8
+      },
+      {
+        "chunk_id": "x2",
+        "text": "The system was not restored until 2024-07-01 due to complications.",
+        "priority_score": 0.78
+      },
+      {
+        "chunk_id": "x3",
+        "text": "Monitoring confirmed full recovery by end of June.",
+        "priority_score": 0.5
+      }
+    ],
+    "latency": 6.000000212225132e-07,
+    "iterations": 1,
+    "query_id": "contra_1",
+    "query_type": "contradictory",
+    "expected_min": 2,
+    "over_expansion": 1
+  },
+  {
+    "strategy": "C_s14_assembly",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "x1",
+        "text": "The system was restored on 2024-06-15 after the patch.",
+        "priority_score": 0.8
+      }
+    ],
+    "latency": 0.00022889999991093646,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "conflict_detected_unresolved",
+    "query_id": "contra_1",
+    "query_type": "contradictory",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "D_s15_mse",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "x1",
+        "text": "The system was restored on 2024-06-15 after the patch.",
+        "priority_score": 0.8
+      }
+    ],
+    "latency": 0.0004758999998557556,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "conflict_detected_unresolved",
+    "sufficiency_score": 0.87,
+    "sufficiency_decision": "sufficient",
+    "query_id": "contra_1",
+    "query_type": "contradictory",
+    "expected_min": 2,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "A_top1",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "d1",
+        "text": "The API failure was caused by a rate-limiting misconfiguration.",
+        "priority_score": 0.9
+      }
+    ],
+    "latency": 1.2999998943996616e-06,
+    "iterations": 1,
+    "query_id": "distract_1",
+    "query_type": "distractor",
+    "expected_min": 1,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "B_top3",
+    "selected_count": 3,
+    "chunks": [
+      {
+        "chunk_id": "d1",
+        "text": "The API failure was caused by a rate-limiting misconfiguration.",
+        "priority_score": 0.9
+      },
+      {
+        "chunk_id": "d2",
+        "text": "The marketing team launched a new campaign on Monday.",
+        "priority_score": 0.12
+      },
+      {
+        "chunk_id": "d3",
+        "text": "Employee satisfaction scores improved by 15% this quarter.",
+        "priority_score": 0.08
+      }
+    ],
+    "latency": 3.999998625658918e-07,
+    "iterations": 1,
+    "query_id": "distract_1",
+    "query_type": "distractor",
+    "expected_min": 1,
+    "over_expansion": 2
+  },
+  {
+    "strategy": "C_s14_assembly",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "d1",
+        "text": "The API failure was caused by a rate-limiting misconfiguration.",
+        "priority_score": 0.9
+      }
+    ],
+    "latency": 0.00017969999998967978,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "assembled_sufficient",
+    "query_id": "distract_1",
+    "query_type": "distractor",
+    "expected_min": 1,
+    "over_expansion": 0
+  },
+  {
+    "strategy": "D_s15_mse",
+    "selected_count": 1,
+    "chunks": [
+      {
+        "chunk_id": "d1",
+        "text": "The API failure was caused by a rate-limiting misconfiguration.",
+        "priority_score": 0.9
+      }
+    ],
+    "latency": 0.0007086999999046384,
+    "iterations": 1,
+    "coverage": 1.0,
+    "decision": "mse_sufficient",
+    "sufficiency_score": 0.885,
+    "sufficiency_decision": "sufficient",
+    "query_id": "distract_1",
+    "query_type": "distractor",
+    "expected_min": 1,
+    "over_expansion": 0
+  }
+]
