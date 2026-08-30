@@ -1,0 +1,5 @@
+{
+  "Case 1: Current Query Temporal + Version Lineage": "PASS",
+  "Case 2: Historical Policy Targeting (2025-02)": "PASS",
+  "Case 3: Deterministic Veto on Superseded Accept": "PASS"
+}

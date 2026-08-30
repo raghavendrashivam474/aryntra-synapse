@@ -1,0 +1,641 @@
+{
+  "decision_id": "d9ededb5-36b5-41ad-b0e8-8055ae7d0ee2",
+  "query": "What current authentication policy should be followed now?",
+  "created_at": 1788101516.2487903,
+  "candidate_ids": [
+    "c1",
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "c7"
+  ],
+  "selected_ids": [
+    "c6",
+    "c3"
+  ],
+  "rejected_ids": [
+    "c1",
+    "c2",
+    "c4",
+    "c5",
+    "c7"
+  ],
+  "events": [
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c1",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488334
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c2",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488441
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c3",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488494
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c4",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488523
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c5",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488558
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c6",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.248859
+    },
+    {
+      "stage": "candidate",
+      "action": "consider",
+      "reason": "candidate in initial pool",
+      "evidence_id": "c7",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2488616
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_match",
+      "reason": "temporal_score=1.000",
+      "evidence_id": "c6",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2506917
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_mismatch",
+      "reason": "temporal_score=0.100",
+      "evidence_id": "c1",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2506993
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_mismatch",
+      "reason": "temporal_score=0.100",
+      "evidence_id": "c2",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2507043
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_mismatch",
+      "reason": "temporal_score=0.100",
+      "evidence_id": "c3",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2507079
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_mismatch",
+      "reason": "temporal_score=0.100",
+      "evidence_id": "c4",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.250712
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_match",
+      "reason": "temporal_score=0.500",
+      "evidence_id": "c7",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2507155
+    },
+    {
+      "stage": "temporal",
+      "action": "temporal_mismatch",
+      "reason": "temporal_score=0.100",
+      "evidence_id": "c5",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2507188
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c6",
+      "related_evidence_id": "c1",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538722
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c6",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538805
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c6",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538855
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c6",
+      "related_evidence_id": "c4",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538893
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c6",
+      "related_evidence_id": "c5",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538931
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c2",
+      "related_evidence_id": "c1",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2538967
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c3",
+      "related_evidence_id": "c1",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539003
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c3",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539039
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c2",
+      "related_evidence_id": "c4",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539072
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c2",
+      "related_evidence_id": "c5",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539108
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c3",
+      "related_evidence_id": "c4",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539144
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDES",
+      "evidence_id": "c3",
+      "related_evidence_id": "c5",
+      "metadata": {
+        "relationship": "SUPERSEDES"
+      },
+      "timestamp": 1788101516.2539182
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c1",
+      "related_evidence_id": "c6",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2539268
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c2",
+      "related_evidence_id": "c6",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2539303
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c3",
+      "related_evidence_id": "c6",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.253934
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c4",
+      "related_evidence_id": "c6",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2539375
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c5",
+      "related_evidence_id": "c6",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2539408
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c1",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2542853
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c1",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2542927
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c2",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.254298
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c4",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2543015
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c5",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2543054
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c4",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2543087
+    },
+    {
+      "stage": "relationship",
+      "action": "supersede",
+      "reason": "detected SUPERSEDED_BY",
+      "evidence_id": "c5",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SUPERSEDED_BY"
+      },
+      "timestamp": 1788101516.2543123
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected CONTRADICTS",
+      "evidence_id": "c1",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "CONTRADICTS"
+      },
+      "timestamp": 1788101516.2543201
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected CONTRADICTS",
+      "evidence_id": "c1",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "CONTRADICTS"
+      },
+      "timestamp": 1788101516.254324
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected CONTRADICTS",
+      "evidence_id": "c2",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "CONTRADICTS"
+      },
+      "timestamp": 1788101516.2543278
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected SAME_DOCUMENT",
+      "evidence_id": "c1",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "SAME_DOCUMENT"
+      },
+      "timestamp": 1788101516.2543347
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected SAME_DOCUMENT",
+      "evidence_id": "c1",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SAME_DOCUMENT"
+      },
+      "timestamp": 1788101516.254338
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected SAME_DOCUMENT",
+      "evidence_id": "c2",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "SAME_DOCUMENT"
+      },
+      "timestamp": 1788101516.2543414
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected TEMPORALLY_ADJACENT",
+      "evidence_id": "c1",
+      "related_evidence_id": "c2",
+      "metadata": {
+        "relationship": "TEMPORALLY_ADJACENT"
+      },
+      "timestamp": 1788101516.2543502
+    },
+    {
+      "stage": "relationship",
+      "action": "relate",
+      "reason": "detected TEMPORALLY_ADJACENT",
+      "evidence_id": "c2",
+      "related_evidence_id": "c3",
+      "metadata": {
+        "relationship": "TEMPORALLY_ADJACENT"
+      },
+      "timestamp": 1788101516.2543535
+    },
+    {
+      "stage": "sufficiency",
+      "action": "insufficient",
+      "reason": "state=contradictory",
+      "evidence_id": null,
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2625055
+    },
+    {
+      "stage": "adjudication",
+      "action": "invoke",
+      "reason": "unified_pipeline_gate",
+      "evidence_id": null,
+      "related_evidence_id": null,
+      "metadata": {
+        "candidate_ids": [
+          "c6",
+          "c1",
+          "c2",
+          "c3",
+          "c4",
+          "c7",
+          "c5"
+        ]
+      },
+      "timestamp": 1788101516.2626147
+    },
+    {
+      "stage": "adjudication",
+      "action": "abstain",
+      "reason": "conflict_above_threshold",
+      "evidence_id": null,
+      "related_evidence_id": null,
+      "metadata": {
+        "confidence": 0.0
+      },
+      "timestamp": 1788101516.262675
+    },
+    {
+      "stage": "ranking",
+      "action": "select",
+      "reason": "selected by unified pipeline",
+      "evidence_id": "c6",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2626948
+    },
+    {
+      "stage": "ranking",
+      "action": "select",
+      "reason": "selected by unified pipeline",
+      "evidence_id": "c3",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2627003
+    },
+    {
+      "stage": "ranking",
+      "action": "reject",
+      "reason": "rejected by unified pipeline",
+      "evidence_id": "c1",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2627046
+    },
+    {
+      "stage": "ranking",
+      "action": "reject",
+      "reason": "rejected by unified pipeline",
+      "evidence_id": "c2",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2627084
+    },
+    {
+      "stage": "ranking",
+      "action": "reject",
+      "reason": "rejected by unified pipeline",
+      "evidence_id": "c4",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.262712
+    },
+    {
+      "stage": "ranking",
+      "action": "reject",
+      "reason": "rejected by unified pipeline",
+      "evidence_id": "c5",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2627149
+    },
+    {
+      "stage": "ranking",
+      "action": "reject",
+      "reason": "rejected by unified pipeline",
+      "evidence_id": "c7",
+      "related_evidence_id": null,
+      "metadata": {},
+      "timestamp": 1788101516.2627177
+    },
+    {
+      "stage": "finalization",
+      "action": "finalize",
+      "reason": "unified_pipeline_uncertain",
+      "evidence_id": null,
+      "related_evidence_id": null,
+      "metadata": {
+        "status": "uncertain",
+        "confidence": null
+      },
+      "timestamp": 1788101516.2627323
+    }
+  ],
+  "adjudication": {
+    "invoked": true,
+    "candidate_ids": [
+      "c6",
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c7",
+      "c5"
+    ],
+    "decision": "UNCERTAIN",
+    "confidence": 0.0,
+    "reason": "conflict_above_threshold",
+    "veto_applied": false,
+    "veto_reason": null
+  },
+  "final_status": "FinalStatus.UNCERTAIN",
+  "final_confidence": null,
+  "final_reason": "unified_pipeline_uncertain",
+  "trace_complete": true,
+  "trace_truncated": false
+}
