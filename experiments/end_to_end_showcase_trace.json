@@ -1,7 +1,7 @@
 {
-  "decision_id": "d9ededb5-36b5-41ad-b0e8-8055ae7d0ee2",
+  "decision_id": "95ab77ca-67ff-4791-84d9-4525b3f12fb6",
   "query": "What current authentication policy should be followed now?",
-  "created_at": 1788101516.2487903,
+  "created_at": 1788102139.9334779,
   "candidate_ids": [
     "c1",
     "c2",
@@ -30,7 +30,7 @@
       "evidence_id": "c1",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488334
+      "timestamp": 1788102139.9335115
     },
     {
       "stage": "candidate",
@@ -39,7 +39,7 @@
       "evidence_id": "c2",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488441
+      "timestamp": 1788102139.9335244
     },
     {
       "stage": "candidate",
@@ -48,7 +48,7 @@
       "evidence_id": "c3",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488494
+      "timestamp": 1788102139.9335296
     },
     {
       "stage": "candidate",
@@ -57,7 +57,7 @@
       "evidence_id": "c4",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488523
+      "timestamp": 1788102139.9335327
     },
     {
       "stage": "candidate",
@@ -66,7 +66,7 @@
       "evidence_id": "c5",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488558
+      "timestamp": 1788102139.9335372
     },
     {
       "stage": "candidate",
@@ -75,7 +75,7 @@
       "evidence_id": "c6",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.248859
+      "timestamp": 1788102139.9335425
     },
     {
       "stage": "candidate",
@@ -84,7 +84,7 @@
       "evidence_id": "c7",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2488616
+      "timestamp": 1788102139.9335456
     },
     {
       "stage": "temporal",
@@ -93,7 +93,7 @@
       "evidence_id": "c6",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2506917
+      "timestamp": 1788102139.935263
     },
     {
       "stage": "temporal",
@@ -102,7 +102,7 @@
       "evidence_id": "c1",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2506993
+      "timestamp": 1788102139.9352713
     },
     {
       "stage": "temporal",
@@ -111,7 +111,7 @@
       "evidence_id": "c2",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2507043
+      "timestamp": 1788102139.935276
     },
     {
       "stage": "temporal",
@@ -120,7 +120,7 @@
       "evidence_id": "c3",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2507079
+      "timestamp": 1788102139.9352796
     },
     {
       "stage": "temporal",
@@ -129,7 +129,7 @@
       "evidence_id": "c4",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.250712
+      "timestamp": 1788102139.9352832
     },
     {
       "stage": "temporal",
@@ -138,7 +138,7 @@
       "evidence_id": "c7",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2507155
+      "timestamp": 1788102139.9352868
     },
     {
       "stage": "temporal",
@@ -147,7 +147,7 @@
       "evidence_id": "c5",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2507188
+      "timestamp": 1788102139.93529
     },
     {
       "stage": "relationship",
@@ -158,7 +158,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538722
+      "timestamp": 1788102139.9385645
     },
     {
       "stage": "relationship",
@@ -169,7 +169,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538805
+      "timestamp": 1788102139.938573
     },
     {
       "stage": "relationship",
@@ -180,7 +180,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538855
+      "timestamp": 1788102139.938578
     },
     {
       "stage": "relationship",
@@ -191,7 +191,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538893
+      "timestamp": 1788102139.938582
     },
     {
       "stage": "relationship",
@@ -202,7 +202,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538931
+      "timestamp": 1788102139.9385858
     },
     {
       "stage": "relationship",
@@ -213,7 +213,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2538967
+      "timestamp": 1788102139.938589
     },
     {
       "stage": "relationship",
@@ -224,7 +224,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539003
+      "timestamp": 1788102139.9385927
     },
     {
       "stage": "relationship",
@@ -235,7 +235,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539039
+      "timestamp": 1788102139.938596
     },
     {
       "stage": "relationship",
@@ -246,7 +246,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539072
+      "timestamp": 1788102139.9385996
     },
     {
       "stage": "relationship",
@@ -257,7 +257,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539108
+      "timestamp": 1788102139.938603
     },
     {
       "stage": "relationship",
@@ -268,7 +268,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539144
+      "timestamp": 1788102139.9386063
     },
     {
       "stage": "relationship",
@@ -279,7 +279,7 @@
       "metadata": {
         "relationship": "SUPERSEDES"
       },
-      "timestamp": 1788101516.2539182
+      "timestamp": 1788102139.93861
     },
     {
       "stage": "relationship",
@@ -290,7 +290,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2539268
+      "timestamp": 1788102139.938619
     },
     {
       "stage": "relationship",
@@ -301,7 +301,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2539303
+      "timestamp": 1788102139.9386227
     },
     {
       "stage": "relationship",
@@ -312,7 +312,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.253934
+      "timestamp": 1788102139.9386263
     },
     {
       "stage": "relationship",
@@ -323,7 +323,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2539375
+      "timestamp": 1788102139.9386432
     },
     {
       "stage": "relationship",
@@ -334,7 +334,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2539408
+      "timestamp": 1788102139.9386468
     },
     {
       "stage": "relationship",
@@ -345,7 +345,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2542853
+      "timestamp": 1788102139.938977
     },
     {
       "stage": "relationship",
@@ -356,7 +356,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2542927
+      "timestamp": 1788102139.9389815
     },
     {
       "stage": "relationship",
@@ -367,7 +367,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.254298
+      "timestamp": 1788102139.938985
     },
     {
       "stage": "relationship",
@@ -378,7 +378,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2543015
+      "timestamp": 1788102139.9389892
     },
     {
       "stage": "relationship",
@@ -389,7 +389,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2543054
+      "timestamp": 1788102139.9389927
     },
     {
       "stage": "relationship",
@@ -400,7 +400,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2543087
+      "timestamp": 1788102139.9389963
     },
     {
       "stage": "relationship",
@@ -411,7 +411,7 @@
       "metadata": {
         "relationship": "SUPERSEDED_BY"
       },
-      "timestamp": 1788101516.2543123
+      "timestamp": 1788102139.9389997
     },
     {
       "stage": "relationship",
@@ -422,7 +422,7 @@
       "metadata": {
         "relationship": "CONTRADICTS"
       },
-      "timestamp": 1788101516.2543201
+      "timestamp": 1788102139.9390092
     },
     {
       "stage": "relationship",
@@ -433,7 +433,7 @@
       "metadata": {
         "relationship": "CONTRADICTS"
       },
-      "timestamp": 1788101516.254324
+      "timestamp": 1788102139.939015
     },
     {
       "stage": "relationship",
@@ -444,7 +444,7 @@
       "metadata": {
         "relationship": "CONTRADICTS"
       },
-      "timestamp": 1788101516.2543278
+      "timestamp": 1788102139.939019
     },
     {
       "stage": "relationship",
@@ -455,7 +455,7 @@
       "metadata": {
         "relationship": "SAME_DOCUMENT"
       },
-      "timestamp": 1788101516.2543347
+      "timestamp": 1788102139.9390275
     },
     {
       "stage": "relationship",
@@ -466,7 +466,7 @@
       "metadata": {
         "relationship": "SAME_DOCUMENT"
       },
-      "timestamp": 1788101516.254338
+      "timestamp": 1788102139.9390326
     },
     {
       "stage": "relationship",
@@ -477,7 +477,7 @@
       "metadata": {
         "relationship": "SAME_DOCUMENT"
       },
-      "timestamp": 1788101516.2543414
+      "timestamp": 1788102139.9390366
     },
     {
       "stage": "relationship",
@@ -488,7 +488,7 @@
       "metadata": {
         "relationship": "TEMPORALLY_ADJACENT"
       },
-      "timestamp": 1788101516.2543502
+      "timestamp": 1788102139.939046
     },
     {
       "stage": "relationship",
@@ -499,7 +499,7 @@
       "metadata": {
         "relationship": "TEMPORALLY_ADJACENT"
       },
-      "timestamp": 1788101516.2543535
+      "timestamp": 1788102139.9390492
     },
     {
       "stage": "sufficiency",
@@ -508,7 +508,7 @@
       "evidence_id": null,
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2625055
+      "timestamp": 1788102139.9472766
     },
     {
       "stage": "adjudication",
@@ -527,7 +527,7 @@
           "c5"
         ]
       },
-      "timestamp": 1788101516.2626147
+      "timestamp": 1788102139.9474332
     },
     {
       "stage": "adjudication",
@@ -538,7 +538,7 @@
       "metadata": {
         "confidence": 0.0
       },
-      "timestamp": 1788101516.262675
+      "timestamp": 1788102139.9475138
     },
     {
       "stage": "ranking",
@@ -547,7 +547,7 @@
       "evidence_id": "c6",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2626948
+      "timestamp": 1788102139.9475353
     },
     {
       "stage": "ranking",
@@ -556,7 +556,7 @@
       "evidence_id": "c3",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2627003
+      "timestamp": 1788102139.9475408
     },
     {
       "stage": "ranking",
@@ -565,7 +565,7 @@
       "evidence_id": "c1",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2627046
+      "timestamp": 1788102139.9475455
     },
     {
       "stage": "ranking",
@@ -574,7 +574,7 @@
       "evidence_id": "c2",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2627084
+      "timestamp": 1788102139.947549
     },
     {
       "stage": "ranking",
@@ -583,7 +583,7 @@
       "evidence_id": "c4",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.262712
+      "timestamp": 1788102139.9475527
     },
     {
       "stage": "ranking",
@@ -592,7 +592,7 @@
       "evidence_id": "c5",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2627149
+      "timestamp": 1788102139.9475555
     },
     {
       "stage": "ranking",
@@ -601,7 +601,7 @@
       "evidence_id": "c7",
       "related_evidence_id": null,
       "metadata": {},
-      "timestamp": 1788101516.2627177
+      "timestamp": 1788102139.9475584
     },
     {
       "stage": "finalization",
@@ -613,7 +613,7 @@
         "status": "uncertain",
         "confidence": null
       },
-      "timestamp": 1788101516.2627323
+      "timestamp": 1788102139.947578
     }
   ],
   "adjudication": {

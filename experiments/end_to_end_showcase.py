@@ -1,5 +1,5 @@
 ﻿"""
-ARYNTRA SYNAPSE — END-TO-END EVIDENCE INTELLIGENCE SHOWCASE
+ARYNTRA SYNAPSE -- END-TO-END EVIDENCE INTELLIGENCE SHOWCASE
 
 This showcase runs a complete end-to-end demonstration of the full Synapse stack.
 It uses a deliberately messy, realistic evidence corpus containing:
@@ -165,14 +165,14 @@ def print_story(title, result):
 # ---------------------------------------------------------------------------
 
 def run_showcase():
-    print_banner("ARYNTRA SYNAPSE — END-TO-END EVIDENCE INTELLIGENCE SHOWCASE")
+    print_banner("ARYNTRA SYNAPSE -- END-TO-END EVIDENCE INTELLIGENCE SHOWCASE")
     print(f"Corpus Loaded: {len(SHOWCASE_CORPUS)} chunks from {len(set(c['document_id'] for c in SHOWCASE_CORPUS if 'document_id' in c))} different manuals.")
     print("Testing pipeline convergence on multi-signal constraints...")
 
     showcase_results = {}
 
     # -----------------------------------------------------------------------
-    # TEST 1: Query A — Current policy verification
+    # TEST 1: Query A -- Current policy verification
     # -----------------------------------------------------------------------
     print_banner("CASE 1: CURRENT SYSTEM QUERY")
     engine_current = UnifiedEvidenceEngine()
@@ -180,7 +180,7 @@ def run_showcase():
         query="What current authentication policy should be followed now?",
         candidates=SHOWCASE_CORPUS
     )
-    print_story("PHASE MAP — CASE 1 (CURRENT)", res_a)
+    print_story("PHASE MAP -- CASE 1 (CURRENT)", res_a)
     
     # Assert correct current selection (c3 is present, c1 and c2 are pruned as obsolete)
     sel_ids_a = {c["chunk_id"] for c in res_a.selected_evidence}
@@ -192,7 +192,7 @@ def run_showcase():
 
 
     # -----------------------------------------------------------------------
-    # TEST 2: Query B — Historical query verification
+    # TEST 2: Query B -- Historical query verification
     # -----------------------------------------------------------------------
     print_banner("CASE 2: HISTORICAL SYSTEM QUERY")
     engine_historical = UnifiedEvidenceEngine()
@@ -200,7 +200,7 @@ def run_showcase():
         query="What authentication policy applied in February 2025?",
         candidates=SHOWCASE_CORPUS
     )
-    print_story("PHASE MAP — CASE 2 (HISTORICAL)", res_b)
+    print_story("PHASE MAP -- CASE 2 (HISTORICAL)", res_b)
     
     # Assert correct historical selection (c2 is selected for 2025, c3 is pruned as future)
     sel_ids_b = {c["chunk_id"] for c in res_b.selected_evidence}
@@ -211,7 +211,7 @@ def run_showcase():
 
 
     # -----------------------------------------------------------------------
-    # TEST 3: Query C — Safety Trap (LLM prefers obsolete document)
+    # TEST 3: Query C -- Safety Trap (LLM prefers obsolete document)
     # -----------------------------------------------------------------------
     print_banner("CASE 3: SEMANTIC SAFETY TRAP & DETERMINISTIC VETO")
     mock_adjudicator = MockAdjudicator()
@@ -228,7 +228,7 @@ def run_showcase():
         query="Is authentication optional or mandatory?",
         candidates=SHOWCASE_CORPUS
     )
-    print_story("PHASE MAP — CASE 3 (SAFETY OVERRIDE)", res_c)
+    print_story("PHASE MAP -- CASE 3 (SAFETY OVERRIDE)", res_c)
     
     # Assert deterministic veto was applied
     veto_applied = res_c.safety.get("deterministic_veto") is True
@@ -252,10 +252,10 @@ def run_showcase():
     trace_path = REPO_ROOT / "experiments" / "end_to_end_showcase_trace.json"
     
     try:
-        with open(results_path, "w") as f:
+        with open(results_path, "w", encoding="utf-8") as f:
             json.dump({k: v for k, v in showcase_results.items()}, f, indent=2)
         if res_a.provenance:
-            with open(trace_path, "w") as f:
+            with open(trace_path, "w", encoding="utf-8") as f:
                 json.dump(res_a.provenance.to_dict(), f, indent=2)
         print(f"\nShowcase artifacts saved successfully to '{results_path.name}' and '{trace_path.name}'.")
     except Exception as exc:
