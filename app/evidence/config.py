@@ -243,3 +243,59 @@ class S16TemporalConfig:
     @classmethod
     def balanced(cls) -> "S16TemporalConfig":
         return cls()
+
+# ── Sprint 17: Relationship Configuration ──────────────────────────────
+
+@dataclass
+class S17RelationshipConfig:
+    """
+    Sprint 17 — Evidence Relationship Graph configuration.
+
+    Controls graph edge detection, bounds, and relationship-aware
+    assembly re-ranking weights.
+    """
+    relationship_enabled: bool = True
+    relationship_weight: float = 0.15
+    max_relationship_edges: int = 50
+    max_graph_nodes: int = 20
+
+    # Feature flags for individual relationship detectors
+    enable_supersession_edges: bool = True
+    enable_contradiction_edges: bool = True
+    enable_same_doc_edges: bool = True
+    enable_version_chain_edges: bool = True
+    enable_temporal_adjacency_edges: bool = True
+    enable_elaboration_edges: bool = True
+    enable_transitive_supersession: bool = True
+
+    # Selection bias adjustments
+    superseded_candidate_demotion: float = 0.20
+    current_version_head_boost: float = 0.05
+
+    @classmethod
+    def balanced(cls) -> "S17RelationshipConfig":
+        """Default balanced configuration."""
+        return cls()
+
+    @classmethod
+    def strict(cls) -> "S17RelationshipConfig":
+        """Strict relationship checking with heavier demotion of superseded nodes."""
+        return cls(
+            relationship_weight=0.25,
+            superseded_candidate_demotion=0.35,
+            current_version_head_boost=0.10,
+        )
+
+    @classmethod
+    def conservative(cls) -> "S17RelationshipConfig":
+        """Lightweight relationship checking, low weight."""
+        return cls(
+            relationship_weight=0.05,
+            superseded_candidate_demotion=0.10,
+            current_version_head_boost=0.02,
+        )
+
+    @classmethod
+    def disabled(cls) -> "S17RelationshipConfig":
+        """Backward-compatible disabled configuration."""
+        return cls(relationship_enabled=False, relationship_weight=0.0)
