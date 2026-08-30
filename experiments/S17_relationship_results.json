@@ -1,0 +1,51 @@
+{
+  "sprint": "S17",
+  "target_release": "v1.9.0",
+  "benchmark_runs": {
+    "R1_version_chain": {
+      "correct": true,
+      "supersedes_count": 3,
+      "latency_ms": 0.8876
+    },
+    "R2_contradiction": {
+      "correct": true,
+      "contradicts_count": 1,
+      "nodes_preserved": 2,
+      "latency_ms": 0.2128
+    },
+    "R3_same_document": {
+      "correct": true,
+      "same_doc_count": 1,
+      "latency_ms": 0.2677
+    },
+    "R4_temporal_adjacency": {
+      "correct": true,
+      "temporal_adj_count": 1,
+      "latency_ms": 0.3178
+    },
+    "R5_mixed_assembly": {
+      "correct": true,
+      "selected_chunks": [
+        "v3"
+      ],
+      "graph_edges": 5,
+      "latency_ms": 3.2804
+    },
+    "R6_precision_guard": {
+      "correct": true,
+      "false_edges_detected": 0,
+      "latency_ms": 0.3308
+    }
+  },
+  "aggregate_metrics": {
+    "benchmark_pass_rate": 1.0,
+    "relationship_precision": 1.0,
+    "false_relationship_rate": 0.0,
+    "supersession_correctness": 1.0,
+    "conflict_preservation": 1.0,
+    "avg_relationship_overhead_ms": 0.8829,
+    "max_relationship_overhead_ms": 3.2804,
+    "total_benchmark_tests": 6,
+    "passed_tests": 6
+  }
+}
