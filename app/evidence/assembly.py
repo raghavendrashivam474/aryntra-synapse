@@ -1,14 +1,20 @@
 ﻿"""
-Aryntra Synapse — Sprint 14 + Sprint 15
-Progressive Evidence Assembly Engine with Minimum Sufficient Evidence Control.
+Aryntra Synapse — Sprint 14 + Sprint 15 + Sprint 16 + Sprint 17
+Progressive Evidence Assembly Engine with Minimum Sufficient Evidence Control
+and Evidence Relationship Graph.
 
 S14: Bounded greedy assembly with conflict-aware selection.
 S15: Multi-signal sufficiency evaluation replaces single coverage-ratio stopping.
+S16: Temporal & version-aware evidence enrichment.
+S17: Deterministic evidence relationship graph for structurally aware assembly.
 
 The assembly loop now asks:
   "Would another evidence expansion materially improve my ability to answer?"
 instead of:
   "Is coverage_ratio >= threshold?"
+
+S17 adds:
+  "How do these evidence chunks relate to one another?"
 """
 import time
 import logging
@@ -39,6 +45,9 @@ class AssemblyMetrics:
     # S16 additions
     temporal_score: float = -1.0
     query_temporal_intent: str = "not_evaluated"
+    # S17 additions
+    relationship_edges: int = 0
+    relationship_nodes: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -54,6 +63,8 @@ class AssemblyMetrics:
             "sufficiency_decision": self.sufficiency_decision,
             "temporal_score": round(self.temporal_score, 4),
             "query_temporal_intent": self.query_temporal_intent,
+            "relationship_edges": self.relationship_edges,
+            "relationship_nodes": self.relationship_nodes,
         }
 
 
@@ -64,20 +75,26 @@ class AssemblyResult:
     coverage_report: CoverageReport
     conflict_report: ConflictReport
     metrics: AssemblyMetrics
+    # S17 addition
+    evidence_graph: Optional[Any] = None  # EvidenceGraph or None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             "selected_chunks": self.selected_chunks,
             "relational_state": self.relational_state.to_dict(),
             "coverage_report": self.coverage_report.to_dict(),
             "conflict_report": self.conflict_report.to_dict(),
             "metrics": self.metrics.to_dict(),
         }
+        if self.evidence_graph is not None:
+            d["evidence_graph"] = self.evidence_graph.to_dict()
+        return d
 
 
 class EvidenceAssembler:
     """
-    Bounded progressive evidence assembler with optional S15 MSE control.
+    Bounded progressive evidence assembler with optional S15 MSE control,
+    S16 temporal awareness, and S17 relationship graph.
 
     When sufficiency_evaluator is None, behaves identically to S14.
     When provided, the evaluator's multi-signal decision replaces the
@@ -98,6 +115,7 @@ class EvidenceAssembler:
         )
         self.sufficiency_evaluator = sufficiency_evaluator
         self.temporal_analyzer = None  # S16: set via with_temporal()
+        self.relationship_analyzer = None  # S17: set via with_relationships()
 
     @classmethod
     def with_sufficiency(
@@ -140,6 +158,30 @@ class EvidenceAssembler:
         )
         return assembler
 
+    @classmethod
+    def with_relationships(
+        cls,
+        s14_config=None,
+        s15_config=None,
+        s16_config=None,
+        s17_config=None,
+    ) -> "EvidenceAssembler":
+        """S17: Assembler with sufficiency, temporal, AND relationship awareness."""
+        from app.evidence.relationships import RelationshipAnalyzer
+        from app.evidence.config import S17RelationshipConfig
+
+        assembler = cls.with_temporal(
+            s14_config=s14_config,
+            s15_config=s15_config,
+            s16_config=s16_config,
+        )
+        assembler.relationship_analyzer = RelationshipAnalyzer(
+            config=s17_config or S17RelationshipConfig.balanced(),
+            contradiction_detector=assembler.contradiction_detector,
+            temporal_analyzer=assembler.temporal_analyzer,
+        )
+        return assembler
+
     def assemble(
         self,
         query: str,
@@ -154,6 +196,7 @@ class EvidenceAssembler:
             empty_cov = self.coverage_analyzer.evaluate(query, [])
             empty_conf = ConflictReport(detected=False, conflict_score=0.0)
             latency = time.perf_counter() - t0
+            from app.evidence.relationships import EvidenceGraph
             return AssemblyResult(
                 selected_chunks=[],
                 relational_state=RelationalEvidenceState(
@@ -174,6 +217,7 @@ class EvidenceAssembler:
                     assembly_latency=latency,
                     assembly_decision="no_candidates",
                 ),
+                evidence_graph=EvidenceGraph(),
             )
 
         # S16: Enrich chunks with temporal scores before assembly
@@ -181,6 +225,18 @@ class EvidenceAssembler:
             ranked_chunks = self.temporal_analyzer.enrich_chunks(
                 query, ranked_chunks
             )
+
+        # S17: Build evidence relationship graph over candidate pool
+        evidence_graph = None
+        if self.relationship_analyzer:
+            from app.evidence.config import S17RelationshipConfig
+            r_cfg = self.relationship_analyzer.config
+            if getattr(r_cfg, "relationship_enabled", True):
+                evidence_graph = self.relationship_analyzer.build_graph(ranked_chunks)
+                # S17: Relationship-aware candidate reordering
+                ranked_chunks = self._relationship_aware_reorder(
+                    ranked_chunks, evidence_graph
+                )
 
         # Step 1: Start with strongest individual candidate
         selected: List[Dict[str, Any]] = [ranked_chunks[0]]
@@ -275,6 +331,10 @@ class EvidenceAssembler:
         avg_temporal = sum(t_scores) / len(t_scores) if t_scores else -1.0
         q_intent = selected[0].get("query_temporal_intent", "not_evaluated") if selected else "not_evaluated"
 
+        # S17: Graph metrics
+        r_edges = evidence_graph.edge_count if evidence_graph else 0
+        r_nodes = evidence_graph.node_count if evidence_graph else 0
+
         metrics = AssemblyMetrics(
             total_candidates=len(ranked_chunks),
             selected_count=len(selected),
@@ -288,6 +348,8 @@ class EvidenceAssembler:
             sufficiency_decision=suff_decision,
             temporal_score=avg_temporal,
             query_temporal_intent=q_intent,
+            relationship_edges=r_edges,
+            relationship_nodes=r_nodes,
         )
 
         return AssemblyResult(
@@ -296,6 +358,55 @@ class EvidenceAssembler:
             coverage_report=cov_report,
             conflict_report=conflict_report,
             metrics=metrics,
+            evidence_graph=evidence_graph,
+        )
+
+    # ── S17 helper methods ──
+
+    def _relationship_aware_reorder(
+        self,
+        chunks: List[Dict[str, Any]],
+        graph: Any,
+    ) -> List[Dict[str, Any]]:
+        """
+        S17: Reorder candidates using relationship graph signals.
+
+        - Demote chunks that are superseded by other candidates in the pool.
+        - Boost chunks that are the current head of a version chain.
+        - NEVER remove chunks (safety invariant).
+        """
+        from app.evidence.relationships import RelationshipType
+
+        r_cfg = self.relationship_analyzer.config
+        demotion = getattr(r_cfg, "superseded_candidate_demotion", 0.20)
+        boost = getattr(r_cfg, "current_version_head_boost", 0.05)
+
+        for chunk in chunks:
+            cid = str(chunk.get("chunk_id", chunk.get("id", "")))
+            if not cid:
+                continue
+
+            # Check if this chunk is superseded by another candidate
+            superseded_by = graph.get_superseded_by(cid)
+            if superseded_by:
+                current_score = chunk.get("combined_score", chunk.get("priority_score", chunk.get("score", 0.5)))
+                chunk["combined_score"] = round(current_score * (1.0 - demotion), 4)
+                chunk["_s17_superseded"] = True
+
+            # Check if this chunk supersedes others (version chain head)
+            supersedes = graph.get_supersedes(cid)
+            if supersedes and not chunk.get("_s17_superseded"):
+                current_score = chunk.get("combined_score", chunk.get("priority_score", chunk.get("score", 0.5)))
+                chunk["combined_score"] = round(
+                    min(1.0, current_score + boost), 4
+                )
+                chunk["_s17_version_head"] = True
+
+        # Stable re-sort by combined_score
+        return sorted(
+            chunks,
+            key=lambda x: (x.get("combined_score", 0.0), x.get("priority_score", 0.0)),
+            reverse=True,
         )
 
     # ── S15 helper methods ──
