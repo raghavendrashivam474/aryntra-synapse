@@ -1,4 +1,4 @@
-﻿# Aryntra Synapse
+# Aryntra Synapse
 
 Adaptive Context Engineering Framework for Knowledge-Augmented Language Models.
 
