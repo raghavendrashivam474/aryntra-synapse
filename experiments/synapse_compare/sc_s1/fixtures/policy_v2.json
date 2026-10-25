@@ -1,0 +1,8 @@
+{
+    "document_id": "AUTH-POLICY-V2",
+    "version": "2.0",
+    "publication_date": "2025-01-01",
+    "status": "current",
+    "content": "Authentication is mandatory for internal systems.",
+    "supersedes": "AUTH-POLICY-V1"
+}
