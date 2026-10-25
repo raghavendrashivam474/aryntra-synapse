@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "SC-S1-TEMPORAL-001",
+  "system": "synapse",
+  "query": "What authentication policy is currently in effect for internal systems?",
+  "corpus": {
+    "documents": [
+      "AUTH-POLICY-V1",
+      "AUTH-POLICY-V2"
+    ]
+  },
+  "execution": {
+    "status": "success",
+    "pipeline_time_ms": 3.16
+  },
+  "retrieval": {
+    "method": "synapse_unified_evidence_engine",
+    "selected_evidence": [
+      "AUTH-POLICY-V1"
+    ],
+    "rejected_evidence": [
+      "AUTH-POLICY-V2"
+    ]
+  },
+  "decision": {
+    "outcome": "UNCERTAIN",
+    "selected_evidence": [
+      "AUTH-POLICY-V1"
+    ],
+    "confidence": 0.48,
+    "output": "Synapse decision: UNCERTAIN (confidence: 0.48)"
+  },
+  "signals": {
+    "temporal_context": {
+      "query_intent": "current",
+      "target_date": null
+    },
+    "conflict_detected": false,
+    "conflict_score": 0.0,
+    "adjudication_triggered": false,
+    "adjudication_decision": "UNCERTAIN",
+    "safety_veto": false,
+    "sufficiency_score": 0.0,
+    "relationships": {
+      "node_count": 2,
+      "edge_count": 1
+    }
+  },
+  "evaluation": {
+    "expected_current_document": "AUTH-POLICY-V2",
+    "selected_current_document": false,
+    "status": "FAIL"
+  }
+}
