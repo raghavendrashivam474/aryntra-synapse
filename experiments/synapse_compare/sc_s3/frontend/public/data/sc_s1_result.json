@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "SC-S1-TEMPORAL-001",
+  "system": "baseline",
+  "query": "What authentication policy is currently in effect for internal systems?",
+  "corpus": {
+    "documents": [
+      "AUTH-POLICY-V1",
+      "AUTH-POLICY-V2"
+    ]
+  },
+  "retrieval": {
+    "method": "lexical_token_overlap",
+    "top_k": 2,
+    "results": [
+      {
+        "document_id": "AUTH-POLICY-V1",
+        "rank": 1,
+        "score": 0.5
+      },
+      {
+        "document_id": "AUTH-POLICY-V2",
+        "rank": 2,
+        "score": 0.5
+      }
+    ]
+  },
+  "decision": {
+    "selected_evidence": [
+      "AUTH-POLICY-V1"
+    ],
+    "output": "Based on top-ranked evidence (AUTH-POLICY-V1): Authentication is optional for internal systems."
+  },
+  "evaluation": {
+    "expected_current_document": "AUTH-POLICY-V2",
+    "selected_current_document": false,
+    "status": "FAIL"
+  }
+}
