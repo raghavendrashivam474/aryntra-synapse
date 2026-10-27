@@ -1,0 +1,39 @@
+{
+  "experiment_id": "SC-S1-TEMPORAL-001",
+  "query": "What authentication policy is currently in effect for internal systems?",
+  "input_integrity": "MATCH",
+  "baseline": {
+    "system": "baseline",
+    "execution_status": "success",
+    "selected_evidence": [
+      "AUTH-POLICY-V1"
+    ],
+    "decision_output": "Based on top-ranked evidence (AUTH-POLICY-V1): Authentication is optional for internal systems.",
+    "confidence": null,
+    "evaluation_status": "FAIL"
+  },
+  "synapse": {
+    "system": "synapse",
+    "execution_status": "success",
+    "selected_evidence": [
+      "AUTH-POLICY-V1"
+    ],
+    "decision_output": "Synapse decision: UNCERTAIN (confidence: 0.48)",
+    "confidence": 0.48,
+    "evaluation_status": "FAIL",
+    "temporal_intent": "current",
+    "conflict_score": 0.0,
+    "sufficiency_score": 0.0
+  },
+  "evidence_selection_match": true,
+  "both_selected_current": false,
+  "baseline_selected_current": false,
+  "synapse_selected_current": false,
+  "decision_comparison": "Neither system selected the current policy.",
+  "notes": [
+    "Synapse returned UNCERTAIN rather than confidently selecting outdated evidence.",
+    "Synapse detected temporal intent 'current' from the query.",
+    "Synapse built a relationship graph (2 nodes, 1 edges).",
+    "Synapse sufficiency score was 0.0, indicating it recognized the evidence as insufficient for a definitive answer."
+  ]
+}

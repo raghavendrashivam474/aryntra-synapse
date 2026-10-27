@@ -1,0 +1,8 @@
+{
+    "document_id": "SSO-GUIDELINE-V1",
+    "version": "1.0",
+    "publication_date": "2023-06-01",
+    "status": "deprecated",
+    "content": "Single sign-on via SAML 2.0 is the recommended authentication method for all web applications. Users should authenticate through the central identity provider. Local authentication should be disabled where possible. This guideline is under review for replacement with an OpenID Connect standard.",
+    "supersedes": null
+}

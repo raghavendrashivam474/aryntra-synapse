@@ -1,0 +1,8 @@
+{
+  "document_id": "AUTH-POLICY-V1",
+  "version": "1.0",
+  "publication_date": "2024-01-01",
+  "status": "superseded",
+  "content": "Authentication is optional for internal systems.",
+  "supersedes": null
+}
