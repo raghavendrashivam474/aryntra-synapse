@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { PolicyFixture, BaselineResult, SynapseResult } from "../types/experiment";
@@ -13,40 +13,62 @@ type Perspective = "baseline" | "synapse" | "compare";
 
 interface Props {
   onBack: () => void;
+  customBaseline?: BaselineResult | null;
+  customSynapse?: SynapseResult | null;
+  customFixtures?: PolicyFixture[];
+  customQuery?: string;
 }
 
-const POSITIONS: Record<string, [number, number, number]> = {
-  "AUTH-POLICY-V1": [-2.5, 0, 0],
-  "AUTH-POLICY-V2": [2.5, 0, 0],
-};
-
-export default function EvidenceWorld({ onBack }: Props) {
-  const [fixtures, setFixtures] = useState<PolicyFixture[]>([]);
-  const [baseline, setBaseline] = useState<BaselineResult | null>(null);
-  const [synapse, setSynapse] = useState<SynapseResult | null>(null);
+export default function EvidenceWorld({
+  onBack,
+  customBaseline,
+  customSynapse,
+  customFixtures,
+  customQuery,
+}: Props) {
+  const [fixtures, setFixtures] = useState<PolicyFixture[]>(customFixtures ?? []);
+  const [baseline, setBaseline] = useState<BaselineResult | null>(customBaseline ?? null);
+  const [synapse, setSynapse] = useState<SynapseResult | null>(customSynapse ?? null);
   const [perspective, setPerspective] = useState<Perspective>("synapse");
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
   const [selectedRel, setSelectedRel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal state — separate from selection so world state is preserved
   const [entityModalId, setEntityModalId] = useState<string | null>(null);
   const [relModalOpen, setRelModalOpen] = useState(false);
 
   useEffect(() => {
+    if (customFixtures && customFixtures.length > 0) return;
     (async () => {
       try {
         const [f, b, s] = await Promise.all([
           loadFixtures(), loadBaseline(), loadSynapse(),
         ]);
         setFixtures(f);
-        setBaseline(b);
-        setSynapse(s);
+        setBaseline(customBaseline ?? b);
+        setSynapse(customSynapse ?? s);
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
     })();
-  }, []);
+  }, [customFixtures, customBaseline, customSynapse]);
+
+  // Dynamic positions in a circle for N nodes
+  const positions = useMemo(() => {
+    const map: Record<string, [number, number, number]> = {};
+    const count = fixtures.length;
+    if (count === 0) return map;
+    const radius = count > 2 ? 4.5 : 2.5;
+    fixtures.forEach((f, i) => {
+      const angle = (2 * Math.PI * i) / count - Math.PI / 2;
+      map[f.document_id] = [
+        Math.cos(angle) * radius,
+        0,
+        Math.sin(angle) * radius,
+      ];
+    });
+    return map;
+  }, [fixtures]);
 
   const entityStates = useMemo(() => {
     const states: Record<string, EntityVisualState> = {};
@@ -69,7 +91,7 @@ export default function EvidenceWorld({ onBack }: Props) {
       }
 
       states[f.document_id] = {
-        status: f.status as "current" | "superseded",
+        status: (f.status === "active" || f.status === "current") ? "current" : "superseded",
         selected,
         rejected,
         perspective,
@@ -78,10 +100,17 @@ export default function EvidenceWorld({ onBack }: Props) {
     return states;
   }, [fixtures, baseline, synapse, perspective]);
 
-  const supersedingDoc = fixtures.find((f) => f.supersedes);
-  const relId = supersedingDoc
-    ? `${supersedingDoc.document_id}-SUPERSEDES-${supersedingDoc.supersedes}`
-    : null;
+  const edges = useMemo(() => {
+    return fixtures
+      .filter((f) => f.supersedes)
+      .map((f) => ({
+        id: `${f.document_id}-SUPERSEDES-${f.supersedes}`,
+        source: f.document_id,
+        target: f.supersedes!,
+      }));
+  }, [fixtures]);
+
+  const activeEdge = edges.find((e) => e.id === selectedRel);
 
   const handleMiss = () => {
     setSelectedEntity(null);
@@ -98,13 +127,11 @@ export default function EvidenceWorld({ onBack }: Props) {
     setEntityModalId(null);
   }, []);
 
-  const openRelModal = useCallback(() => {
-    if (relId) {
-      setSelectedRel(relId);
-      setSelectedEntity(null);
-      setRelModalOpen(true);
-    }
-  }, [relId]);
+  const openRelModal = useCallback((id: string) => {
+    setSelectedRel(id);
+    setSelectedEntity(null);
+    setRelModalOpen(true);
+  }, []);
 
   const closeRelModal = useCallback(() => {
     setRelModalOpen(false);
@@ -127,7 +154,7 @@ export default function EvidenceWorld({ onBack }: Props) {
     );
   }
 
-  if (!baseline || !synapse || fixtures.length === 0) {
+  if (fixtures.length === 0) {
     return <div className="loading">Loading Evidence World...</div>;
   }
 
@@ -138,22 +165,22 @@ export default function EvidenceWorld({ onBack }: Props) {
   return (
     <div className="evidence-world">
       <Canvas
-        camera={{ position: [0, 3, 7], fov: 50 }}
+        camera={{ position: [0, 5, 10], fov: 50 }}
         onPointerMissed={handleMiss}
       >
         <color attach="background" args={["#0d0d1a"]} />
-        <fog attach="fog" args={["#0d0d1a", 12, 25]} />
-        <ambientLight intensity={0.35} />
-        <pointLight position={[5, 5, 5]} intensity={0.7} />
-        <pointLight position={[-5, 3, -5]} intensity={0.25} />
+        <fog attach="fog" args={["#0d0d1a", 15, 30]} />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[5, 8, 5]} intensity={0.8} />
+        <pointLight position={[-5, 3, -5]} intensity={0.3} />
 
-        <gridHelper args={[20, 20, "#1a1a3e", "#111128"]} position={[0, -1.5, 0]} />
+        <gridHelper args={[24, 24, "#1a1a3e", "#111128"]} position={[0, -1.5, 0]} />
 
         {fixtures.map((f) => (
           <EntityNode
             key={f.document_id}
             id={f.document_id}
-            position={POSITIONS[f.document_id] ?? [0, 0, 0]}
+            position={positions[f.document_id] ?? [0, 0, 0]}
             visualState={
               entityStates[f.document_id] ?? {
                 status: "superseded",
@@ -166,29 +193,30 @@ export default function EvidenceWorld({ onBack }: Props) {
           />
         ))}
 
-        {supersedingDoc && supersedingDoc.supersedes && (
+        {edges.map((e) => (
           <RelationshipEdge
-            id={relId!}
-            from={POSITIONS[supersedingDoc.document_id] ?? [2.5, 0, 0]}
-            to={POSITIONS[supersedingDoc.supersedes] ?? [-2.5, 0, 0]}
+            key={e.id}
+            id={e.id}
+            from={positions[e.source] ?? [0, 0, 0]}
+            to={positions[e.target] ?? [0, 0, 0]}
             label="SUPERSEDES"
-            provenance="Source: Fixture metadata (policy_v2.supersedes)"
-            isSelected={selectedRel === relId}
-            onClick={openRelModal}
+            provenance={`Source: Fixture metadata (${e.source}.supersedes)`}
+            isSelected={selectedRel === e.id}
+            onClick={() => openRelModal(e.id)}
           />
-        )}
+        ))}
 
         <OrbitControls
           enableDamping
           dampingFactor={0.08}
           minDistance={3}
-          maxDistance={15}
+          maxDistance={20}
           maxPolarAngle={Math.PI / 1.8}
         />
       </Canvas>
 
       <WorldHUD
-        query={baseline.query}
+        query={customQuery ?? baseline?.query ?? "Corpus Visualization"}
         perspective={perspective}
         onPerspectiveChange={setPerspective}
         onBack={onBack}
@@ -196,7 +224,6 @@ export default function EvidenceWorld({ onBack }: Props) {
         selectedRelationship={selectedRel}
       />
 
-      {/* Entity Inspection Modal */}
       <EntityInspectionModal
         isOpen={entityModalId !== null}
         onClose={closeEntityModal}
@@ -207,15 +234,14 @@ export default function EvidenceWorld({ onBack }: Props) {
         onNavigateToEntity={navigateToEntity}
       />
 
-      {/* Relationship Inspection Modal */}
-      {supersedingDoc && supersedingDoc.supersedes && (
+      {activeEdge && (
         <RelationshipInspectionModal
           isOpen={relModalOpen}
           onClose={closeRelModal}
-          sourceEntity={supersedingDoc.document_id}
-          targetEntity={supersedingDoc.supersedes}
+          sourceEntity={activeEdge.source}
+          targetEntity={activeEdge.target}
           relType="SUPERSEDES"
-          provenance="Fixture metadata (policy_v2.json supersedes field)"
+          provenance={`Fixture metadata (${activeEdge.source}.supersedes field)`}
           onNavigateToEntity={navigateToEntity}
         />
       )}
