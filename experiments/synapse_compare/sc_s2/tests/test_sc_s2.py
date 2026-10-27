@@ -48,14 +48,14 @@ SYNAPSE_RESULT_PATH = SC_S2_DIR / "results" / "sc_s2_result.json"
 # ===================================================================
 
 class TestLoadFixtures:
-    def test_loads_both_documents(self):
+    def test_loads_all_documents(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)
-        assert len(docs) == 2
+        assert len(docs) == 6
 
     def test_document_ids_preserved(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)
         ids = {d["document_id"] for d in docs}
-        assert ids == {"AUTH-POLICY-V1", "AUTH-POLICY-V2"}
+        assert ids == {"ACCESS-CONTROL-V1", "AUTH-POLICY-V1", "AUTH-POLICY-V2", "AUTH-POLICY-V2-AMENDMENT", "PASSWORD-POLICY-V1", "SSO-GUIDELINE-V1"}
 
     def test_required_fields_present(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)

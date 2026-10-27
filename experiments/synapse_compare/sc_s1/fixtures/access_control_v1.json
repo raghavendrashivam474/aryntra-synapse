@@ -1,0 +1,8 @@
+{
+    "document_id": "ACCESS-CONTROL-V1",
+    "version": "1.0",
+    "publication_date": "2024-03-15",
+    "status": "active",
+    "content": "Role-based access control (RBAC) is enforced for all production systems. Users must be assigned to at least one access group by their department manager. Access reviews are conducted quarterly. Unauthorized access attempts are logged and trigger automatic account lockout after five consecutive failures.",
+    "supersedes": null
+}
