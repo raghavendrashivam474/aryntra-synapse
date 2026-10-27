@@ -1,0 +1,50 @@
+[
+  {
+    "document_id": "ACCESS-CONTROL-V1",
+    "version": "1.0",
+    "publication_date": "2024-03-15",
+    "status": "active",
+    "content": "Role-based access control (RBAC) is enforced for all production systems. Users must be assigned to at least one access group by their department manager. Access reviews are conducted quarterly. Unauthorized access attempts are logged and trigger automatic account lockout after five consecutive failures.",
+    "supersedes": null
+  },
+  {
+    "document_id": "AUTH-POLICY-V2-AMENDMENT",
+    "version": "2.1",
+    "publication_date": "2024-09-01",
+    "status": "active",
+    "content": "This amendment to AUTH-POLICY-V2 clarifies that certificate-based authentication is now the primary method for service-to-service communication. API keys are deprecated for inter-service calls and will be fully removed by Q2 2025. All internal systems must migrate to mTLS by December 2024.",
+    "supersedes": null
+  },
+  {
+    "document_id": "PASSWORD-POLICY-V1",
+    "version": "1.0",
+    "publication_date": "2024-02-01",
+    "status": "active",
+    "content": "All user passwords must be at least 12 characters long and include uppercase, lowercase, numeric, and special characters. Passwords expire every 90 days. Multi-factor authentication is required for all external access. Password reuse is prohibited for the previous 12 iterations.",
+    "supersedes": null
+  },
+  {
+    "document_id": "AUTH-POLICY-V1",
+    "version": "1.0",
+    "publication_date": "2024-01-01",
+    "status": "superseded",
+    "content": "Authentication is optional for internal systems.",
+    "supersedes": null
+  },
+  {
+    "document_id": "AUTH-POLICY-V2",
+    "version": "2.0",
+    "publication_date": "2025-01-01",
+    "status": "current",
+    "content": "Authentication is mandatory for internal systems.",
+    "supersedes": "AUTH-POLICY-V1"
+  },
+  {
+    "document_id": "SSO-GUIDELINE-V1",
+    "version": "1.0",
+    "publication_date": "2023-06-01",
+    "status": "deprecated",
+    "content": "Single sign-on via SAML 2.0 is the recommended authentication method for all web applications. Users should authenticate through the central identity provider. Local authentication should be disabled where possible. This guideline is under review for replacement with an OpenID Connect standard.",
+    "supersedes": null
+  }
+]
