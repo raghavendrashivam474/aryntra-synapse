@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 SC-S2 Comparison Runner.
 
@@ -9,6 +9,7 @@ machine-readable comparison artifact.
 Usage (from repository root):
     python experiments/synapse_compare/sc_s2/run_comparison.py
 """
+
 from __future__ import annotations
 
 import json
@@ -24,9 +25,7 @@ from comparison import load_result, compare
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-BASELINE_RESULT = (
-    SCRIPT_DIR.parent / "sc_s1" / "results" / "sc_s1_result.json"
-)
+BASELINE_RESULT = SCRIPT_DIR.parent / "sc_s1" / "results" / "sc_s1_result.json"
 SYNAPSE_RESULT = SCRIPT_DIR / "results" / "sc_s2_result.json"
 COMPARISON_RESULT = SCRIPT_DIR / "results" / "sc_s2_comparison.json"
 

@@ -25,7 +25,9 @@ def main():
     print("\n" + "=" * 100)
     print("  S3 PROGRESSIVE vs S4 EVIDENCE WORKSPACE COMPARISON")
     print("=" * 100)
-    print(f"{'ID':<5} | {'S3 Cum':<8} | {'S4 Cum':<8} | {'S4 New':<8} | {'S4 Rep':<8} | {'S3 Lat':<8} | {'S4 Lat':<8} | {'Steps':<5} | {'Calls':<5}")
+    print(
+        f"{'ID':<5} | {'S3 Cum':<8} | {'S4 Cum':<8} | {'S4 New':<8} | {'S4 Rep':<8} | {'S3 Lat':<8} | {'S4 Lat':<8} | {'Steps':<5} | {'Calls':<5}"
+    )
     print("-" * 100)
 
     n = len(ids)
@@ -51,18 +53,22 @@ def main():
         sums["steps"] += steps
         sums["calls"] += calls
 
-        print(f"{qid:<5} | {s3c:<8} | {s4c:<8} | {s4n:<8} | {s4r_:<8} | {s3l:<8.2f} | {s4l:<8.2f} | {steps:<5} | {calls:<5}")
+        print(
+            f"{qid:<5} | {s3c:<8} | {s4c:<8} | {s4n:<8} | {s4r_:<8} | {s3l:<8.2f} | {s4l:<8.2f} | {steps:<5} | {calls:<5}"
+        )
 
     print("-" * 100)
-    print(f"{'AVG':<5} | {sums['s3_cum']/n:<8.1f} | {sums['s4_cum']/n:<8.1f} | {sums['s4_new']/n:<8.1f} | {sums['s4_rep']/n:<8.1f} | {sums['s3_lat']/n:<8.2f} | {sums['s4_lat']/n:<8.2f} | {sums['steps']/n:<5.1f} | {sums['calls']/n:<5.1f}")
+    print(
+        f"{'AVG':<5} | {sums['s3_cum'] / n:<8.1f} | {sums['s4_cum'] / n:<8.1f} | {sums['s4_new'] / n:<8.1f} | {sums['s4_rep'] / n:<8.1f} | {sums['s3_lat'] / n:<8.2f} | {sums['s4_lat'] / n:<8.2f} | {sums['steps'] / n:<5.1f} | {sums['calls'] / n:<5.1f}"
+    )
     print("=" * 100)
 
-    cum_change = ((sums["s4_cum"]/n - sums["s3_cum"]/n) / (sums["s3_cum"]/n)) * 100 if sums["s3_cum"] > 0 else 0
-    lat_change = ((sums["s4_lat"]/n - sums["s3_lat"]/n) / (sums["s3_lat"]/n)) * 100 if sums["s3_lat"] > 0 else 0
+    cum_change = ((sums["s4_cum"] / n - sums["s3_cum"] / n) / (sums["s3_cum"] / n)) * 100 if sums["s3_cum"] > 0 else 0
+    lat_change = ((sums["s4_lat"] / n - sums["s3_lat"] / n) / (sums["s3_lat"] / n)) * 100 if sums["s3_lat"] > 0 else 0
 
     print(f"\n  Cumulative Context Change: {cum_change:+.2f}%")
     print(f"  Latency Change:            {lat_change:+.2f}%")
-    print(f"  New vs Repeated Ratio:     {sums['s4_new']/n:.0f} new / {sums['s4_rep']/n:.0f} repeated per query")
+    print(f"  New vs Repeated Ratio:     {sums['s4_new'] / n:.0f} new / {sums['s4_rep'] / n:.0f} repeated per query")
     print("=" * 100 + "\n")
 
 

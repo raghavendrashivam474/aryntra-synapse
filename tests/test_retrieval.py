@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/test_retrieval.py
 
 Aryntra Synapse — Sprint 0.2
@@ -13,20 +13,20 @@ Covers:
 - Edge cases
 """
 
-import pytest
 import numpy as np
-from app.retrieval.chunking import load_text, chunk_text, load_and_chunk
+import pytest
+
+from app.core.config import settings
+from app.retrieval.chunking import chunk_text, load_and_chunk
 from app.retrieval.embeddings import EmbeddingModel
 from app.retrieval.retriever import Retriever
-from app.core.config import settings
-
 
 # ---------------------------------------------------------------------------
 # Chunking tests
 # ---------------------------------------------------------------------------
 
-class TestChunking:
 
+class TestChunking:
     def test_chunk_text_returns_list(self):
         result = chunk_text("Hello world. This is a test document.")
         assert isinstance(result, list)
@@ -84,8 +84,8 @@ class TestChunking:
 # Embedding tests
 # ---------------------------------------------------------------------------
 
-class TestEmbeddings:
 
+class TestEmbeddings:
     @pytest.fixture(scope="class")
     @classmethod
     def model(cls):
@@ -115,8 +115,8 @@ class TestEmbeddings:
 # Retriever tests
 # ---------------------------------------------------------------------------
 
-class TestRetriever:
 
+class TestRetriever:
     @pytest.fixture(scope="class")
     @classmethod
     def loaded_retriever(cls):

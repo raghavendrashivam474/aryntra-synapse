@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — S2 Analysis
 
 Purpose:
@@ -95,7 +95,9 @@ def main() -> None:
     print("=" * 85)
     print("  PER-QUERY BREAKDOWN")
     print("=" * 85)
-    print(f"{'ID':<5} | {'Base Ctx':<9} | {'S2 Ctx':<9} | {'Reduction':<10} | {'Base Gen (s)':<13} | {'S2 Gen (s)':<13} | {'Gen Delta':<10}")
+    print(
+        f"{'ID':<5} | {'Base Ctx':<9} | {'S2 Ctx':<9} | {'Reduction':<10} | {'Base Gen (s)':<13} | {'S2 Gen (s)':<13} | {'Gen Delta':<10}"
+    )
     print("-" * 85)
 
     faster_count = 0
@@ -115,7 +117,9 @@ def main() -> None:
         else:
             slower_count += 1
 
-        print(f"{qid:<5} | {b_ctx:<9} | {s_ctx:<9} | {reduction:>8.1f}% | {b_gen:>13.3f} | {s_gen:>13.3f} | {g_delta:>+9.2f}%")
+        print(
+            f"{qid:<5} | {b_ctx:<9} | {s_ctx:<9} | {reduction:>8.1f}% | {b_gen:>13.3f} | {s_gen:>13.3f} | {g_delta:>+9.2f}%"
+        )
 
     print()
     print("=" * 85)

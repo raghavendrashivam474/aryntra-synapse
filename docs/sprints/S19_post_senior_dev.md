@@ -207,10 +207,10 @@ Prior to S19, unifying the reasoning engine would have required a complex facade
 # S20 Unified Access Pattern (Preview)
 record = assembly_result.provenance
 
-print(record.selected_ids)       # Direct access to selected evidence
-print(record.rejected_ids)       # Direct access to rejected candidates
-print(record.adjudication)       # Semantic adjudication details + veto status
-print(record.explain())          # End-to-end human-readable decision narrative
+print(record.selected_ids)  # Direct access to selected evidence
+print(record.rejected_ids)  # Direct access to rejected candidates
+print(record.adjudication)  # Semantic adjudication details + veto status
+print(record.explain())  # End-to-end human-readable decision narrative
 json_payload = record.to_json()  # Zero-loss transmission to API consumers
 ```
 

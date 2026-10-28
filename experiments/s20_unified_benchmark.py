@@ -1,4 +1,4 @@
-﻿"""
+"""
 S20 Unified Evidence Intelligence Benchmark
 
 10 scenarios (U1-U10) exercising the full pipeline end-to-end.
@@ -34,9 +34,9 @@ def _c(cid, text="Evidence content text.", score=0.8, **kw):
 
 
 def _header(label):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {label}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 def run_benchmark():
@@ -140,13 +140,15 @@ def run_benchmark():
     _header("U7 — Semantic ambiguity")
     try:
         mock = MockAdjudicator()
-        mock.set_response(AdjudicationResult(
-            decision=AdjudicationDecision.UNCERTAIN,
-            confidence=0.4,
-            selected_evidence_ids=(),
-            rationale="genuinely ambiguous",
-            adjudication_time_ms=5.0,
-        ))
+        mock.set_response(
+            AdjudicationResult(
+                decision=AdjudicationDecision.UNCERTAIN,
+                confidence=0.4,
+                selected_evidence_ids=(),
+                rationale="genuinely ambiguous",
+                adjudication_time_ms=5.0,
+            )
+        )
         engine = UnifiedEvidenceEngine(adjudicator=mock)
         r = engine.process(
             "ambiguous query",
@@ -161,13 +163,15 @@ def run_benchmark():
     _header("U8 — Deterministic veto")
     try:
         mock = MockAdjudicator()
-        mock.set_response(AdjudicationResult(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.95,
-            selected_evidence_ids=("c1",),
-            rationale="accept superseded",
-            adjudication_time_ms=2.0,
-        ))
+        mock.set_response(
+            AdjudicationResult(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.95,
+                selected_evidence_ids=("c1",),
+                rationale="accept superseded",
+                adjudication_time_ms=2.0,
+            )
+        )
         engine = UnifiedEvidenceEngine(adjudicator=mock)
         r = engine.process(
             "test query",
@@ -218,9 +222,9 @@ def run_benchmark():
         results["U10"] = f"ERROR: {e}"
 
     # ── Summary ──
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  S20 BENCHMARK SUMMARY")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     for k, v in results.items():
         status = "OK" if v == "PASS" else "!!"
         print(f"  [{status}] {k}: {v}")

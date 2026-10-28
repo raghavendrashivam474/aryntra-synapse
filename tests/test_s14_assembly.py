@@ -1,11 +1,11 @@
 import pytest
+
 from app.evidence.assembly import EvidenceAssembler
 from app.evidence.config import S14ResolutionConfig
 from app.evidence.state import EvidenceState
 
 
 class TestEvidenceAssembler:
-
     @pytest.fixture
     def assembler(self):
         return EvidenceAssembler(config=S14ResolutionConfig.full_resolution())
@@ -40,7 +40,10 @@ class TestEvidenceAssembler:
         result = assembler.assemble(query, chunks)
         # Even if both discuss release date, conflict detection flags relational state
         conflict = result.conflict_report
-        assert conflict.detected or result.relational_state.state in (EvidenceState.CONTRADICTORY, EvidenceState.SUFFICIENT)
+        assert conflict.detected or result.relational_state.state in (
+            EvidenceState.CONTRADICTORY,
+            EvidenceState.SUFFICIENT,
+        )
 
     def test_budget_exhaustion_safety(self):
         cfg = S14ResolutionConfig(max_assembly_chunks=2, max_assembly_iterations=2)

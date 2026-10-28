@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/test_api.py
 
 Aryntra Synapse — Sprint 0.2
@@ -13,6 +13,7 @@ Covers:
 import pytest
 from fastapi.testclient import TestClient
 from main import app
+
 from app.api.routes import initialise_retriever
 
 
@@ -30,14 +31,14 @@ def client():
 # Health tests
 # ---------------------------------------------------------------------------
 
-class TestHealth:
 
+class TestHealth:
     def test_health_returns_200(self, client):
         response = client.get("/health")
         assert response.status_code == 200
 
     def test_health_status_is_ok(self, client):
-        data = response = client.get("/health").json()
+        data = client.get("/health").json()
         assert data["status"] == "ok"
 
     def test_health_retriever_ready(self, client):
@@ -58,8 +59,8 @@ class TestHealth:
 # Ask tests
 # ---------------------------------------------------------------------------
 
-class TestAsk:
 
+class TestAsk:
     def test_ask_returns_200(self, client):
         response = client.post("/ask", json={"text": "What is RAG?"})
         assert response.status_code == 200
@@ -120,8 +121,8 @@ class TestAsk:
 # Edge case tests
 # ---------------------------------------------------------------------------
 
-class TestEdgeCases:
 
+class TestEdgeCases:
     def test_empty_question_returns_400(self, client):
         response = client.post("/ask", json={"text": ""})
         assert response.status_code == 400
@@ -131,10 +132,7 @@ class TestEdgeCases:
         assert response.status_code == 400
 
     def test_no_obvious_match_still_returns_chunks(self, client):
-        data = client.post(
-            "/ask",
-            json={"text": "xkqzwpvmbn gibberish query zzzzz"}
-        ).json()
+        data = client.post("/ask", json={"text": "xkqzwpvmbn gibberish query zzzzz"}).json()
         assert isinstance(data["retrieved_chunks"], list)
 
     def test_top_k_exceeds_chunk_count_does_not_crash(self, client):

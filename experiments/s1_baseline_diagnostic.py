@@ -41,9 +41,7 @@ def load_queries():
 
     text = QUERY_FILE.read_text(encoding="utf-8")
 
-    pattern = re.compile(
-        r"\|\s*(Q\d+)\s*\|[^|]+\|\s*(.*?)\s*\|"
-    )
+    pattern = re.compile(r"\|\s*(Q\d+)\s*\|[^|]+\|\s*(.*?)\s*\|")
 
     queries = []
 
@@ -52,15 +50,15 @@ def load_queries():
         question = match.group(2).strip()
 
         if query_id.startswith("Q"):
-            queries.append({
-                "id": query_id,
-                "question": question,
-            })
+            queries.append(
+                {
+                    "id": query_id,
+                    "question": question,
+                }
+            )
 
     if len(queries) != 10:
-        raise ValueError(
-            f"Expected 10 queries, found {len(queries)}."
-        )
+        raise ValueError(f"Expected 10 queries, found {len(queries)}.")
 
     return queries
 
@@ -122,10 +120,7 @@ def run_queries(client, queries):
             response.raise_for_status()
             data = response.json()
 
-            retrieved_chunks = data.get(
-                "retrieved_chunks",
-                []
-            )
+            retrieved_chunks = data.get("retrieved_chunks", [])
 
             result = {
                 "id": query_id,
@@ -136,64 +131,41 @@ def run_queries(client, queries):
                     "num_chunks_retrieved",
                     len(retrieved_chunks),
                 ),
-                "retrieval_latency": data.get(
-                    "retrieval_latency"
-                ),
-                "generation_latency": data.get(
-                    "generation_latency"
-                ),
+                "retrieval_latency": data.get("retrieval_latency"),
+                "generation_latency": data.get("generation_latency"),
                 "total_latency": data.get(
                     "total_latency",
                     round(elapsed, 4),
                 ),
-                "context_length": data.get(
-                    "context_length"
-                ),
+                "context_length": data.get("context_length"),
                 "retrieved_chunks": retrieved_chunks,
             }
 
-            print(
-                f"  Chunks:     "
-                f"{result['num_chunks_retrieved']}"
-            )
-            print(
-                f"  Retrieval:  "
-                f"{result['retrieval_latency']}s"
-            )
-            print(
-                f"  Generation: "
-                f"{result['generation_latency']}s"
-            )
-            print(
-                f"  Total:      "
-                f"{result['total_latency']}s"
-            )
-            print(
-                f"  Context:    "
-                f"{result['context_length']} chars"
-            )
+            print(f"  Chunks:     {result['num_chunks_retrieved']}")
+            print(f"  Retrieval:  {result['retrieval_latency']}s")
+            print(f"  Generation: {result['generation_latency']}s")
+            print(f"  Total:      {result['total_latency']}s")
+            print(f"  Context:    {result['context_length']} chars")
 
             for i, chunk in enumerate(
                 retrieved_chunks,
                 start=1,
             ):
-                print(
-                    f"    Chunk {i}: "
-                    f"[{chunk.get('chunk_id')}] "
-                    f"score={chunk.get('score')}"
-                )
+                print(f"    Chunk {i}: [{chunk.get('chunk_id')}] score={chunk.get('score')}")
 
             results.append(result)
 
         except Exception as exc:
             print(f"  FAILED: {exc}")
 
-            results.append({
-                "id": query_id,
-                "question": question,
-                "status": "FAIL",
-                "error": str(exc),
-            })
+            results.append(
+                {
+                    "id": query_id,
+                    "question": question,
+                    "status": "FAIL",
+                    "error": str(exc),
+                }
+            )
 
     return results
 
@@ -225,32 +197,24 @@ def save_results(health, results):
         encoding="utf-8",
     )
 
-    print(
-        f"\nResults saved to: {RESULT_FILE}"
-    )
+    print(f"\nResults saved to: {RESULT_FILE}")
 
 
 def print_summary(results):
-    passed = sum(
-        1
-        for result in results
-        if result["status"] == "PASS"
-    )
+    passed = sum(1 for result in results if result["status"] == "PASS")
 
     failed = len(results) - passed
 
     retrieval_times = [
         result["retrieval_latency"]
         for result in results
-        if result["status"] == "PASS"
-        and result.get("retrieval_latency") is not None
+        if result["status"] == "PASS" and result.get("retrieval_latency") is not None
     ]
 
     generation_times = [
         result["generation_latency"]
         for result in results
-        if result["status"] == "PASS"
-        and result.get("generation_latency") is not None
+        if result["status"] == "PASS" and result.get("generation_latency") is not None
     ]
 
     print("\n[3/3] Summary")
@@ -261,16 +225,10 @@ def print_summary(results):
     print(f"  Failed:           {failed}")
 
     if retrieval_times:
-        print(
-            f"  Avg retrieval:    "
-            f"{sum(retrieval_times) / len(retrieval_times):.4f}s"
-        )
+        print(f"  Avg retrieval:    {sum(retrieval_times) / len(retrieval_times):.4f}s")
 
     if generation_times:
-        print(
-            f"  Avg generation:   "
-            f"{sum(generation_times) / len(generation_times):.4f}s"
-        )
+        print(f"  Avg generation:   {sum(generation_times) / len(generation_times):.4f}s")
 
     print("\n" + "=" * 70)
     print("  S1 BASELINE DIAGNOSTIC COMPLETE")
@@ -284,10 +242,7 @@ def main():
         print(f"ERROR loading query set: {exc}")
         sys.exit(1)
 
-    print(
-        f"Loaded {len(queries)} queries "
-        f"from {QUERY_FILE}"
-    )
+    print(f"Loaded {len(queries)} queries from {QUERY_FILE}")
 
     try:
         with httpx.Client() as client:
@@ -304,12 +259,8 @@ def main():
 
     except Exception as exc:
         print(f"\nERROR communicating with Synapse: {exc}")
-        print(
-            "\nMake sure the server is running with:"
-        )
-        print(
-            "  uvicorn main:app --reload"
-        )
+        print("\nMake sure the server is running with:")
+        print("  uvicorn main:app --reload")
         sys.exit(1)
 
     save_results(

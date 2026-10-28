@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/run_s6_full.py
 
 Aryntra Synapse — Sprint 6
@@ -44,22 +44,22 @@ def wait_for_server(server_proc, max_wait=STARTUP_WAIT):
         try:
             r = httpx.get(f"{BASE_URL}/health", timeout=2)
             if r.status_code == 200:
-                print(f" ready ({i+1}s)")
+                print(f" ready ({i + 1}s)")
                 return r.json()
         except Exception:
             pass
         time.sleep(1)
         if (i + 1) % 5 == 0:
-            print(f" {i+1}s...", end="", flush=True)
+            print(f" {i + 1}s...", end="", flush=True)
     print(" TIMEOUT")
     return None
 
 
 def run_experiment_for_mode(mode):
     """Run the S6 experiment for a single mode."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  MODE: {mode}")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     env = os.environ.copy()
     env["CONTEXT_REPRESENTATION"] = mode
@@ -68,11 +68,16 @@ def run_experiment_for_mode(mode):
     print(f"  Starting uvicorn (main:app) with CONTEXT_REPRESENTATION={mode}...")
     server_proc = subprocess.Popen(
         [
-            sys.executable, "-m", "uvicorn",
+            sys.executable,
+            "-m",
+            "uvicorn",
             "main:app",
-            "--host", "127.0.0.1",
-            "--port", "8000",
-            "--log-level", "warning",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8000",
+            "--log-level",
+            "warning",
         ],
         env=env,
         stdout=subprocess.PIPE,
@@ -122,9 +127,9 @@ def run_experiment_for_mode(mode):
 
 def run_analysis():
     """Run the S6 comparative analysis."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  RUNNING COMPARATIVE ANALYSIS")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     result = subprocess.run(
         [sys.executable, "experiments/s6_analysis.py"],
@@ -149,9 +154,9 @@ def main():
             print(f"\n  WARNING: {mode} failed. Continuing with remaining modes.")
 
     # Summary
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("  EXPERIMENT SUMMARY")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     for mode, ok in results.items():
         status = "OK" if ok else "FAILED"
         f = Path(f"experiments/S6_results_{mode}.json")

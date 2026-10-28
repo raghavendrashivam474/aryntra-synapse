@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s9_efficiency_ablation.py
 
 Aryntra Synapse — Sprint 9
@@ -48,7 +48,11 @@ TEST_QUERIES = [
     {"id": "Q5", "query": "What are the benefits of cross-query evidence reuse and fingerprinting?", "topic": "Reuse"},
     # Repeat sequence to evaluate real-world warm cache hit rates
     {"id": "Q1_rep", "query": "What is the core architecture of Aryntra Synapse?", "topic": "Architecture (Repeat)"},
-    {"id": "Q3_rep", "query": "What is the role of the evidence workspace in managing context?", "topic": "Workspace (Repeat)"},
+    {
+        "id": "Q3_rep",
+        "query": "What is the role of the evidence workspace in managing context?",
+        "topic": "Workspace (Repeat)",
+    },
 ]
 
 CONFIGURATIONS = {
@@ -210,7 +214,7 @@ def run_benchmark():
                 f"PriLat={q_rec['priority_latency_ms']:>6.2f}ms | "
                 f"SemCalls={q_rec['semantic_calls']} | "
                 f"FastPath={q_rec['fast_path_hits']} | "
-                f"CacheHits={q_rec['semantic_cache_hits']+q_rec['query_cache_hits']} | "
+                f"CacheHits={q_rec['semantic_cache_hits'] + q_rec['query_cache_hits']} | "
                 f"Active={q_rec['active_chunks']} | "
                 f"Stop={stop_reason}"
             )
@@ -245,7 +249,9 @@ def run_benchmark():
 
     # Print Comparative Matrix Table
     print("\n" + "=" * 90)
-    print(f"{'Configuration':<32} | {'Pri Latency':<12} | {'Total Sem Evals':<16} | {'Sufficiency Rate':<18} | {'Active Chunks'}")
+    print(
+        f"{'Configuration':<32} | {'Pri Latency':<12} | {'Total Sem Evals':<16} | {'Sufficiency Rate':<18} | {'Active Chunks'}"
+    )
     print("-" * 90)
     for c_name, data in all_results.items():
         agg = data["aggregate"]

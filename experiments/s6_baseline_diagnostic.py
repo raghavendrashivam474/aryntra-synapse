@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s6_baseline_diagnostic.py
 
 Quick health check to verify the server is running with the
@@ -6,6 +6,7 @@ expected S6 context representation mode.
 """
 
 import sys
+
 try:
     import httpx
 except ImportError:
@@ -13,6 +14,7 @@ except ImportError:
     sys.exit(1)
 
 BASE_URL = "http://127.0.0.1:8000"
+
 
 def main():
     try:
@@ -35,6 +37,7 @@ def main():
     except Exception as e:
         print(f"Cannot reach server: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

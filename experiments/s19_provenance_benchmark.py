@@ -1,4 +1,4 @@
-﻿"""
+"""
 S19 Provenance & Decision Archaeology Benchmark Runner
 Runs scenarios P1-P10, measures latency overhead and outputs full metrics summary.
 """
@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from tests.test_s19_provenance import TestS19BenchmarkScenarios
 from app.evidence.provenance import DecisionRecorder, FinalStatus
 
+
 def measure_overhead() -> float:
     iterations = 5000
     start = time.perf_counter()
@@ -26,13 +27,14 @@ def measure_overhead() -> float:
     total_time = time.perf_counter() - start
     return (total_time / iterations) * 1000.0
 
+
 def main():
     print("=" * 80)
     print("ARYNTRA SYNAPSE — S19 PROVENANCE & DECISION ARCHAEOLOGY BENCHMARK")
     print("=" * 80)
 
     bench = TestS19BenchmarkScenarios()
-    
+
     scenarios = [
         ("P1", "Simple Decision", bench.test_p1_simple_decision),
         ("P2", "Multi-Candidate Selection", bench.test_p2_multi_candidate),
@@ -78,24 +80,31 @@ def main():
     print(f"{'Provenance Regressions':<35} | {'0':<12} | {'0':<12} | {'MET'}")
     print(f"{'Existing Test Regressions':<35} | {'0':<12} | {'0':<12} | {'MET'}")
     print(f"{'Trace Size Bounded':<35} | {'Bounded':<12} | {'Bounded':<12} | {'MET'}")
-    print(f"{'Latency Overhead':<35} | {'< 1.0 ms':<12} | {f'{overhead_ms:.4f} ms':<12} | {'MET' if overhead_ms < 1.0 else 'FAILED'}")
+    print(
+        f"{'Latency Overhead':<35} | {'< 1.0 ms':<12} | {f'{overhead_ms:.4f} ms':<12} | {'MET' if overhead_ms < 1.0 else 'FAILED'}"
+    )
     print("=" * 80)
 
     # Save results json
     os.makedirs(os.path.dirname(__file__), exist_ok=True)
     out_file = os.path.join(os.path.dirname(__file__), "s19_benchmark_results.json")
     with open(out_file, "w", encoding="utf-8") as f:
-        json.dump({
-            "sprint": "S19",
-            "all_passed": all_passed,
-            "latency_overhead_ms": overhead_ms,
-            "metrics": {
-                "trace_completeness": completeness_score,
-                "safety_veto_traceability": safety_veto_score,
-                "serialization_roundtrip": roundtrip_score
-            }
-        }, f, indent=2)
+        json.dump(
+            {
+                "sprint": "S19",
+                "all_passed": all_passed,
+                "latency_overhead_ms": overhead_ms,
+                "metrics": {
+                    "trace_completeness": completeness_score,
+                    "safety_veto_traceability": safety_veto_score,
+                    "serialization_roundtrip": roundtrip_score,
+                },
+            },
+            f,
+            indent=2,
+        )
     print(f"Results saved to {out_file}")
+
 
 if __name__ == "__main__":
     main()

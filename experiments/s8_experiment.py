@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s8_experiment.py
 
 Aryntra Synapse — Sprint 8
@@ -45,9 +45,17 @@ def health_check(client):
     r = client.get(f"{BASE_URL}/health", timeout=TIMEOUT)
     r.raise_for_status()
     d = r.json()
-    for k in ["status", "app_name", "version", "retriever_ready",
-              "chunk_count", "llm_model", "evidence_reuse_enabled",
-              "enable_priority_routing", "evidence_store_size"]:
+    for k in [
+        "status",
+        "app_name",
+        "version",
+        "retriever_ready",
+        "chunk_count",
+        "llm_model",
+        "evidence_reuse_enabled",
+        "enable_priority_routing",
+        "evidence_store_size",
+    ]:
         print(f"  {k}: {d.get(k)}")
     return d
 
@@ -88,7 +96,7 @@ def run_workload(client, queries):
             print(
                 f"    Priority: High={result['high_priority_count']}, Med={result['medium_priority_count']}, Low={result['low_priority_count']} | "
                 f"AvgScore={result['average_priority_score']:.4f} | "
-                f"PriLatency={result['priority_latency']*1000:.2f}ms | "
+                f"PriLatency={result['priority_latency'] * 1000:.2f}ms | "
                 f"TotalLatency={result['total_latency']}s"
             )
             results.append(result)
@@ -107,9 +115,7 @@ def save_results(health, results):
         "results": results,
     }
     result_file.parent.mkdir(parents=True, exist_ok=True)
-    result_file.write_text(
-        json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    result_file.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nResults saved to: {result_file}")
 
 

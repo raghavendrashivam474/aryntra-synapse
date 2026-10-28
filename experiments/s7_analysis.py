@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s7_analysis.py
 
 Aryntra Synapse — Sprint 7
@@ -58,8 +58,10 @@ def main():
     workloads = data.get("workloads", {})
     analyses = {}
 
-    print(f"\n{'Workload':<16} {'Candidates':>10} {'Reused':>8} {'New':>6} "
-          f"{'Reuse%':>8} {'AvgLat':>8} {'FPLat':>10} {'LookupLat':>10}")
+    print(
+        f"\n{'Workload':<16} {'Candidates':>10} {'Reused':>8} {'New':>6} "
+        f"{'Reuse%':>8} {'AvgLat':>8} {'FPLat':>10} {'LookupLat':>10}"
+    )
     print("-" * 80)
 
     for name, results in workloads.items():

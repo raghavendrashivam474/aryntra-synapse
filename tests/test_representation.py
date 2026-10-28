@@ -7,6 +7,7 @@ validates StructuredRepresenterV1 functionality.
 """
 
 import pytest
+
 from app.context.representation import (
     FlatRepresenter,
     StructuredRepresenterV1,

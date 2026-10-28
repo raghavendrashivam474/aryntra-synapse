@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 13: Failure Analysis and Reliability Map Generator
 
 Synthesizes experimental results to construct:
@@ -36,17 +36,29 @@ def analyze_failure_patterns(data_filepath: str = DATA_FILE) -> Dict[str, Any]:
         "reliability_map": {},
         "root_cause_analysis": {
             "semantic_confusion": {"count": 0, "description": "D4 semantic distractors ranking above true evidence"},
-            "lexical_saturation": {"count": 0, "description": "D3 lexical distractors with high keyword overlap taking Top-1"},
-            "contradiction_vulnerability": {"count": 0, "description": "D6 contradictory chunks promoted without conflict detection"},
-            "partial_evidence_dilution": {"count": 0, "description": "D5 partial evidence chunks splitting attention/score margin"},
-            "scale_induced_dispersion": {"count": 0, "description": "Score margin compression at C150-C250 corpus scale"},
+            "lexical_saturation": {
+                "count": 0,
+                "description": "D3 lexical distractors with high keyword overlap taking Top-1",
+            },
+            "contradiction_vulnerability": {
+                "count": 0,
+                "description": "D6 contradictory chunks promoted without conflict detection",
+            },
+            "partial_evidence_dilution": {
+                "count": 0,
+                "description": "D5 partial evidence chunks splitting attention/score margin",
+            },
+            "scale_induced_dispersion": {
+                "count": 0,
+                "description": "Score margin compression at C150-C250 corpus scale",
+            },
         },
         "decision_gate": {
             "green_stable": [],
             "yellow_optimization": [],
             "red_critical_weakness": [],
-            "black_benchmark_artifact": []
-        }
+            "black_benchmark_artifact": [],
+        },
     }
 
     # 1. Build Grid: Corpus Size x Distractor Type
@@ -56,7 +68,11 @@ def analyze_failure_patterns(data_filepath: str = DATA_FILE) -> Dict[str, Any]:
     for c in corpus_levels:
         analysis["reliability_map"][f"C{c}"] = {}
         for d in distractor_types:
-            subset = [e for e in evals if e["corpus_size"] == c and e["distractor_type"] == d and e["config_name"] == "calibrated_blend"]
+            subset = [
+                e
+                for e in evals
+                if e["corpus_size"] == c and e["distractor_type"] == d and e["config_name"] == "calibrated_blend"
+            ]
             if not subset:
                 subset = [e for e in evals if e["corpus_size"] == c and e["distractor_type"] == d]
             n = len(subset)
@@ -81,7 +97,7 @@ def analyze_failure_patterns(data_filepath: str = DATA_FILE) -> Dict[str, Any]:
                 "zone": zone,
                 "top1_acc": round(top1_acc, 3),
                 "recall": round(recall, 3),
-                "guard_trigger_rate": round(guard_trig, 3)
+                "guard_trigger_rate": round(guard_trig, 3),
             }
 
     # 2. Root Cause Mapping
@@ -102,36 +118,48 @@ def analyze_failure_patterns(data_filepath: str = DATA_FILE) -> Dict[str, Any]:
 
     # 3. Decision Gate Categorization
     # Green
-    analysis["decision_gate"]["green_stable"].append({
-        "area": "Random & Topic Distractor Handling (D1, D2) across C5-C100",
-        "rationale": "Calibrated multi-signal priority maintains high accuracy with robust separation."
-    })
-    analysis["decision_gate"]["green_stable"].append({
-        "area": "ConfidenceGuard Trigger Reliability",
-        "rationale": "Safety guard reliably catches ambiguous margins and initiates fallback."
-    })
+    analysis["decision_gate"]["green_stable"].append(
+        {
+            "area": "Random & Topic Distractor Handling (D1, D2) across C5-C100",
+            "rationale": "Calibrated multi-signal priority maintains high accuracy with robust separation.",
+        }
+    )
+    analysis["decision_gate"]["green_stable"].append(
+        {
+            "area": "ConfidenceGuard Trigger Reliability",
+            "rationale": "Safety guard reliably catches ambiguous margins and initiates fallback.",
+        }
+    )
 
     # Yellow
-    analysis["decision_gate"]["yellow_optimization"].append({
-        "area": "Corpus Scale Margin Compression (C150-C250)",
-        "rationale": "At >=150 chunks, score margin between top-1 and distractors compresses, solvable via adaptive dynamic thresholding."
-    })
-    analysis["decision_gate"]["yellow_optimization"].append({
-        "area": "Partial Evidence Aggregation (D5)",
-        "rationale": "Fragmented multi-chunk queries benefit from progressive context expansion rather than pure Top-1 focus."
-    })
+    analysis["decision_gate"]["yellow_optimization"].append(
+        {
+            "area": "Corpus Scale Margin Compression (C150-C250)",
+            "rationale": "At >=150 chunks, score margin between top-1 and distractors compresses, solvable via adaptive dynamic thresholding.",
+        }
+    )
+    analysis["decision_gate"]["yellow_optimization"].append(
+        {
+            "area": "Partial Evidence Aggregation (D5)",
+            "rationale": "Fragmented multi-chunk queries benefit from progressive context expansion rather than pure Top-1 focus.",
+        }
+    )
 
     # Red
-    analysis["decision_gate"]["red_critical_weakness"].append({
-        "area": "Contradictory / Conflicting Evidence Resolution (D6)",
-        "rationale": "Priority scoring alone cannot discern semantic contradiction without polarity/veracity checking."
-    })
+    analysis["decision_gate"]["red_critical_weakness"].append(
+        {
+            "area": "Contradictory / Conflicting Evidence Resolution (D6)",
+            "rationale": "Priority scoring alone cannot discern semantic contradiction without polarity/veracity checking.",
+        }
+    )
 
     # Black
-    analysis["decision_gate"]["black_benchmark_artifact"].append({
-        "area": "Synthetically Identical Keyword Overlap in Lexical Distractors",
-        "rationale": "Exact keyword duplicates without semantic answers stress lexical weights artificially when semantic weight is 0."
-    })
+    analysis["decision_gate"]["black_benchmark_artifact"].append(
+        {
+            "area": "Synthetically Identical Keyword Overlap in Lexical Distractors",
+            "rationale": "Exact keyword duplicates without semantic answers stress lexical weights artificially when semantic weight is 0.",
+        }
+    )
 
     return analysis
 
@@ -149,11 +177,7 @@ def print_reliability_report(analysis: Dict[str, Any]):
     print(f"| {'Scale':<6} | {headers} |")
     print("|" + "-" * 88 + "|")
 
-    zone_icons = {
-        "GREEN_STABLE": "[GREEN]",
-        "YELLOW_EMERGING_DEGRADATION": "[YELLO]",
-        "RED_CRITICAL": "[ RED ]"
-    }
+    zone_icons = {"GREEN_STABLE": "[GREEN]", "YELLOW_EMERGING_DEGRADATION": "[YELLO]", "RED_CRITICAL": "[ RED ]"}
 
     for c_key, dist_map in analysis["reliability_map"].items():
         row = " | ".join(f"{zone_icons.get(dist_map[d]['zone'], '[ ? ]'):<7}" for d in distractor_types)

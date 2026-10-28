@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s6_diagnostic_sweep.py
 
 Analyzes per-chunk vs concatenated similarity distributions
@@ -11,13 +11,14 @@ from pathlib import Path
 SEM_FILE = Path("experiments/S6_results_semantic_v1.json")
 BL_FILE = Path("experiments/S6_results_blended_v1.json")
 
+
 def main():
     if not SEM_FILE.exists():
         print("S6 results not found.")
         return
 
     data = json.loads(SEM_FILE.read_text(encoding="utf-8"))
-    
+
     print("\n" + "=" * 90)
     print("  S6 SEMANTIC SIMILARITY DISTRIBUTION ACROSS STAGES")
     print("=" * 90)
@@ -45,7 +46,7 @@ def main():
     print("  SIMULATION: EARLY-STOPPING AT STAGE 1 BY THRESHOLD (MAX CHUNK)")
     print("=" * 90)
     thresholds = [0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
-    
+
     for th in thresholds:
         stopped_qids = [qid for qid, _, _, max_c, _ in records if max_c >= th]
         is_q9_stopped = "Q9" in stopped_qids
@@ -54,6 +55,7 @@ def main():
         print(f"  Threshold {th:.2f} -> Early Stops: {len(stopped_qids):<2}/10 {stopped_qids} | Safety: {safety}")
 
     print("=" * 90 + "\n")
+
 
 if __name__ == "__main__":
     main()

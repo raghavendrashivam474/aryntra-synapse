@@ -1,4 +1,4 @@
-﻿"""
+"""
 SC-S2 Comparison Logic.
 
 Reads the SC-S1 baseline result and the SC-S2 Synapse result,
@@ -7,6 +7,7 @@ validates input integrity, and produces a structured comparison.
 This module does NOT reimplement either system. It compares
 their recorded outputs.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,6 +22,7 @@ from typing import Optional
 @dataclass
 class SystemSummary:
     """Summary of one system's result for comparison display."""
+
     system: str
     execution_status: str
     selected_evidence: list[str]
@@ -35,6 +37,7 @@ class SystemSummary:
 @dataclass
 class ComparisonResult:
     """Structured comparison of baseline vs Synapse."""
+
     experiment_id: str
     query: str
     input_integrity: str  # "MATCH" or description of mismatch
@@ -103,10 +106,7 @@ def check_integrity(baseline: dict, synapse: dict) -> str:
     Returns 'MATCH' or a description of the first mismatch found.
     """
     if baseline.get("experiment_id") != synapse.get("experiment_id"):
-        return (
-            f"experiment_id mismatch: "
-            f"{baseline.get('experiment_id')} vs {synapse.get('experiment_id')}"
-        )
+        return f"experiment_id mismatch: {baseline.get('experiment_id')} vs {synapse.get('experiment_id')}"
     if baseline.get("query") != synapse.get("query"):
         return "query mismatch between baseline and synapse results"
 
@@ -185,19 +185,13 @@ def compare(baseline: dict, synapse: dict) -> ComparisonResult:
 
     # Add analytical notes
     if not s_synapse_sel and s_decision.get("outcome") == "UNCERTAIN":
-        notes.append(
-            "Synapse returned UNCERTAIN rather than confidently "
-            "selecting outdated evidence."
-        )
+        notes.append("Synapse returned UNCERTAIN rather than confidently selecting outdated evidence.")
     if tc.get("query_intent") == "current":
-        notes.append(
-            "Synapse detected temporal intent 'current' from the query."
-        )
+        notes.append("Synapse detected temporal intent 'current' from the query.")
     rel = s_signals.get("relationships", {})
     if rel.get("edge_count", 0) > 0:
         notes.append(
-            f"Synapse built a relationship graph "
-            f"({rel.get('node_count')} nodes, {rel.get('edge_count')} edges)."
+            f"Synapse built a relationship graph ({rel.get('node_count')} nodes, {rel.get('edge_count')} edges)."
         )
     if s_signals.get("sufficiency_score", 0) == 0.0:
         notes.append(

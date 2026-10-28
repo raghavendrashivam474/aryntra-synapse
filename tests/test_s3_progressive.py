@@ -1,4 +1,3 @@
-import pytest
 from app.context.progressive import ProgressiveContextEngine
 
 
@@ -22,7 +21,7 @@ def generate_sample_chunks(n=3):
     texts = [
         "The capital of France is Paris. It is a major European city and a global center for art, fashion, gastronomy and culture.",
         "The theory of general relativity was developed by Albert Einstein between 1907 and 1915, describing gravity as geometry.",
-        "Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy for fuel."
+        "Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy for fuel.",
     ]
     return [
         {

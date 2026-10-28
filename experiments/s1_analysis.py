@@ -45,9 +45,7 @@ def main() -> None:
     s1_results = s1_data["results"]
 
     if len(baseline_results) != len(s1_results):
-        raise ValueError(
-            "Baseline and S1 result sets contain different numbers of queries."
-        )
+        raise ValueError("Baseline and S1 result sets contain different numbers of queries.")
 
     print("=" * 100)
     print("  ARYNTRA SYNAPSE — S1 RESULT ANALYSIS")
@@ -92,26 +90,14 @@ def main() -> None:
     s1_same_count = 0
 
     for baseline, s1 in zip(baseline_results, s1_results):
-        baseline_generation = float(
-            baseline.get("generation_latency", 0.0)
-        )
-        s1_generation = float(
-            s1.get("generation_latency", 0.0)
-        )
+        baseline_generation = float(baseline.get("generation_latency", 0.0))
+        s1_generation = float(s1.get("generation_latency", 0.0))
 
-        baseline_context = float(
-            baseline.get("context_length", 0.0)
-        )
-        s1_context = float(
-            s1.get("context_length", 0.0)
-        )
+        baseline_context = float(baseline.get("context_length", 0.0))
+        s1_context = float(s1.get("context_length", 0.0))
 
-        baseline_total = float(
-            baseline.get("total_latency", 0.0)
-        )
-        s1_total = float(
-            s1.get("total_latency", 0.0)
-        )
+        baseline_total = float(baseline.get("total_latency", 0.0))
+        s1_total = float(s1.get("total_latency", 0.0))
 
         generation_delta = percentage_change(
             baseline_generation,
@@ -158,44 +144,19 @@ def main() -> None:
     def average(values: list[float]) -> float:
         return sum(values) / len(values) if values else 0.0
 
-    baseline_generation_total = sum(
-        float(result.get("generation_latency", 0.0))
-        for result in baseline_results
-    )
+    baseline_generation_total = sum(float(result.get("generation_latency", 0.0)) for result in baseline_results)
 
-    s1_generation_total = sum(
-        float(result.get("generation_latency", 0.0))
-        for result in s1_results
-    )
+    s1_generation_total = sum(float(result.get("generation_latency", 0.0)) for result in s1_results)
 
-    baseline_total_latency = sum(
-        float(result.get("total_latency", 0.0))
-        for result in baseline_results
-    )
+    baseline_total_latency = sum(float(result.get("total_latency", 0.0)) for result in baseline_results)
 
-    s1_total_latency = sum(
-        float(result.get("total_latency", 0.0))
-        for result in s1_results
-    )
+    s1_total_latency = sum(float(result.get("total_latency", 0.0)) for result in s1_results)
 
-    baseline_context_average = average(
-        [
-            float(result.get("context_length", 0.0))
-            for result in baseline_results
-        ]
-    )
+    baseline_context_average = average([float(result.get("context_length", 0.0)) for result in baseline_results])
 
-    s1_context_average = average(
-        [
-            float(result.get("context_length", 0.0))
-            for result in s1_results
-        ]
-    )
+    s1_context_average = average([float(result.get("context_length", 0.0)) for result in s1_results])
 
-    representation_latencies = [
-        float(result.get("representation_build_latency", 0.0))
-        for result in s1_results
-    ]
+    representation_latencies = [float(result.get("representation_build_latency", 0.0)) for result in s1_results]
 
     average_representation_latency = average(representation_latencies)
 
@@ -208,61 +169,33 @@ def main() -> None:
     print("AGGREGATE MEASUREMENTS")
     print("-" * 100)
 
-    print(
-        f"Baseline total generation latency: "
-        f"{baseline_generation_total:.3f}s"
-    )
+    print(f"Baseline total generation latency: {baseline_generation_total:.3f}s")
+
+    print(f"S1 total generation latency:       {s1_generation_total:.3f}s")
 
     print(
-        f"S1 total generation latency:       "
-        f"{s1_generation_total:.3f}s"
-    )
-
-    print(
-        f"Generation latency change:          "
-        f"{percentage_change(baseline_generation_total, s1_generation_total):.2f}%"
+        f"Generation latency change:          {percentage_change(baseline_generation_total, s1_generation_total):.2f}%"
     )
 
     print()
 
-    print(
-        f"Baseline total latency:             "
-        f"{baseline_total_latency:.3f}s"
-    )
+    print(f"Baseline total latency:             {baseline_total_latency:.3f}s")
 
-    print(
-        f"S1 total latency:                   "
-        f"{s1_total_latency:.3f}s"
-    )
+    print(f"S1 total latency:                   {s1_total_latency:.3f}s")
 
-    print(
-        f"Total latency change:               "
-        f"{percentage_change(baseline_total_latency, s1_total_latency):.2f}%"
-    )
+    print(f"Total latency change:               {percentage_change(baseline_total_latency, s1_total_latency):.2f}%")
 
     print()
 
-    print(
-        f"Average baseline context:           "
-        f"{baseline_context_average:.1f} chars"
-    )
+    print(f"Average baseline context:           {baseline_context_average:.1f} chars")
 
-    print(
-        f"Average S1 context:                 "
-        f"{s1_context_average:.1f} chars"
-    )
+    print(f"Average S1 context:                 {s1_context_average:.1f} chars")
 
-    print(
-        f"Average context change:             "
-        f"{percentage_change(baseline_context_average, s1_context_average):.2f}%"
-    )
+    print(f"Average context change:             {percentage_change(baseline_context_average, s1_context_average):.2f}%")
 
     print()
 
-    print(
-        f"Average S1 representation build:    "
-        f"{average_representation_latency:.6f}s"
-    )
+    print(f"Average S1 representation build:    {average_representation_latency:.6f}s")
 
     print()
 
@@ -272,20 +205,11 @@ def main() -> None:
 
     print()
 
-    print(
-        f"Average per-query generation Δ:     "
-        f"{average(generation_changes):.2f}%"
-    )
+    print(f"Average per-query generation Δ:     {average(generation_changes):.2f}%")
 
-    print(
-        f"Average per-query context Δ:        "
-        f"{average(context_changes):.2f}%"
-    )
+    print(f"Average per-query context Δ:        {average(context_changes):.2f}%")
 
-    print(
-        f"Average per-query total Δ:          "
-        f"{average(total_changes):.2f}%"
-    )
+    print(f"Average per-query total Δ:          {average(total_changes):.2f}%")
 
     # ------------------------------------------------------------------
     # Retrieval consistency
@@ -299,29 +223,18 @@ def main() -> None:
     retrieval_differences = 0
 
     for baseline, s1 in zip(baseline_results, s1_results):
-        baseline_chunks = [
-            chunk.get("chunk_id")
-            for chunk in baseline.get("retrieved_chunks", [])
-        ]
+        baseline_chunks = [chunk.get("chunk_id") for chunk in baseline.get("retrieved_chunks", [])]
 
-        s1_chunks = [
-            chunk.get("chunk_id")
-            for chunk in s1.get("retrieved_chunks", [])
-        ]
+        s1_chunks = [chunk.get("chunk_id") for chunk in s1.get("retrieved_chunks", [])]
 
         if baseline_chunks != s1_chunks:
             retrieval_differences += 1
-            print(
-                f"{baseline['id']}: retrieval differs"
-            )
+            print(f"{baseline['id']}: retrieval differs")
 
     if retrieval_differences == 0:
         print("Retrieved chunk ordering/selection is identical across all queries.")
     else:
-        print(
-            f"Retrieval differed on {retrieval_differences} "
-            f"of {len(s1_results)} queries."
-        )
+        print(f"Retrieval differed on {retrieval_differences} of {len(s1_results)} queries.")
 
     # ------------------------------------------------------------------
     # Answer status
@@ -332,15 +245,9 @@ def main() -> None:
     print("RESULT STATUS")
     print("-" * 100)
 
-    baseline_passed = sum(
-        1 for result in baseline_results
-        if result.get("status") == "PASS"
-    )
+    baseline_passed = sum(1 for result in baseline_results if result.get("status") == "PASS")
 
-    s1_passed = sum(
-        1 for result in s1_results
-        if result.get("status") == "PASS"
-    )
+    s1_passed = sum(1 for result in s1_results if result.get("status") == "PASS")
 
     print(f"Baseline passed:                    {baseline_passed}/{len(baseline_results)}")
     print(f"S1 passed:                          {s1_passed}/{len(s1_results)}")

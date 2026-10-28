@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 15 Benchmark
 Minimum Sufficient Evidence Controller — Comparative Evaluation.
 
@@ -10,6 +10,7 @@ Strategies compared:
 
 Query types: simple, multi-concept, fragmented, contradictory, distractor-heavy.
 """
+
 import sys
 import os
 from pathlib import Path
@@ -32,6 +33,7 @@ from app.evidence.state import EvidenceState
 
 
 # ── Test corpus ──
+
 
 def _c(cid, text, score=0.5):
     return {"chunk_id": cid, "text": text, "priority_score": score}
@@ -109,6 +111,7 @@ TEST_CASES = [
 
 # ── Strategy runners ──
 
+
 def run_top1(query: str, chunks: List[Dict]) -> Dict[str, Any]:
     """Strategy A: Single best chunk."""
     t0 = time.perf_counter()
@@ -175,6 +178,7 @@ def run_s15(query: str, chunks: List[Dict]) -> Dict[str, Any]:
 
 # ── Main benchmark ──
 
+
 def run_benchmark():
     results = []
 
@@ -202,7 +206,7 @@ def run_benchmark():
         print(
             f"{r['query_id']:<12} {r['query_type']:<14} {r['strategy']:<18} "
             f"{r['selected_count']:>3} {r['over_expansion']:>3} "
-            f"{r.get('iterations', 1):>4} {r['latency']*1000:>8.3f}"
+            f"{r.get('iterations', 1):>4} {r['latency'] * 1000:>8.3f}"
         )
 
     # Aggregate by strategy

@@ -1,9 +1,10 @@
-﻿"""
+"""
 SC-S4 Backend API Tests.
 
 Tests the live comparison endpoint: validation, execution,
 partial failures, and response contract compliance.
 """
+
 from __future__ import annotations
 
 import sys
@@ -74,10 +75,13 @@ class TestValidation:
 # ===================================================================
 class TestSuccessfulExecution:
     def test_canonical_query_both_succeed(self):
-        r = client.post("/api/v1/compare", json={
-            "query": "What authentication policy is currently in effect for internal systems?",
-            "top_k": 2,
-        })
+        r = client.post(
+            "/api/v1/compare",
+            json={
+                "query": "What authentication policy is currently in effect for internal systems?",
+                "top_k": 2,
+            },
+        )
         assert r.status_code == 200
         data = r.json()
         assert data["mode"] == "live"
@@ -114,10 +118,13 @@ class TestSuccessfulExecution:
         assert "decision" in sy
 
     def test_comparison_has_notes(self):
-        r = client.post("/api/v1/compare", json={
-            "query": "What authentication policy is currently in effect for internal systems?",
-            "top_k": 2,
-        })
+        r = client.post(
+            "/api/v1/compare",
+            json={
+                "query": "What authentication policy is currently in effect for internal systems?",
+                "top_k": 2,
+            },
+        )
         comp = r.json()["comparison"]["result"]
         assert "notes" in comp
         assert len(comp["notes"]) > 0
@@ -147,8 +154,7 @@ class TestResponseContract:
     def test_all_top_level_keys_present(self):
         r = client.post("/api/v1/compare", json={"query": "test", "top_k": 2})
         data = r.json()
-        required = {"run_id", "mode", "query", "corpus", "baseline",
-                     "synapse", "comparison", "evaluation", "metadata"}
+        required = {"run_id", "mode", "query", "corpus", "baseline", "synapse", "comparison", "evaluation", "metadata"}
         assert required.issubset(data.keys())
 
     def test_baseline_error_null_on_success(self):

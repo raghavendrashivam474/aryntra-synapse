@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 17
 Evidence Relationship Benchmark.
 
@@ -19,6 +19,7 @@ Measures:
   - Average Selected Chunks
   - Relationship Analysis Overhead (ms)
 """
+
 import os
 import sys
 import time
@@ -52,9 +53,27 @@ def run_benchmark() -> Dict[str, Any]:
     # ── R1: Version Chain Supersession ────────────────────────────────
     print("\n[R1] Running Version Chain Benchmark...")
     v_chunks = [
-        {"chunk_id": "v3", "text": "Policy v3 is currently active.", "version": "3", "document_id": "pol_v3", "score": 0.95},
-        {"chunk_id": "v2", "text": "Policy v2 was active in 2023.", "version": "2", "document_id": "pol_v2", "score": 0.85},
-        {"chunk_id": "v1", "text": "Policy v1 was active in 2021.", "version": "1", "document_id": "pol_v1", "score": 0.70},
+        {
+            "chunk_id": "v3",
+            "text": "Policy v3 is currently active.",
+            "version": "3",
+            "document_id": "pol_v3",
+            "score": 0.95,
+        },
+        {
+            "chunk_id": "v2",
+            "text": "Policy v2 was active in 2023.",
+            "version": "2",
+            "document_id": "pol_v2",
+            "score": 0.85,
+        },
+        {
+            "chunk_id": "v1",
+            "text": "Policy v1 was active in 2021.",
+            "version": "1",
+            "document_id": "pol_v1",
+            "score": 0.70,
+        },
     ]
     t0 = time.perf_counter()
     g_r1 = analyzer.build_graph(v_chunks)
@@ -76,7 +95,11 @@ def run_benchmark() -> Dict[str, Any]:
     print("[R2] Running Explicit Contradiction Benchmark...")
     c_chunks = [
         {"chunk_id": "c1", "text": "Multi-factor authentication is mandatory and enabled for all users.", "score": 0.9},
-        {"chunk_id": "c2", "text": "Multi-factor authentication is optional and disabled for all users.", "score": 0.85},
+        {
+            "chunk_id": "c2",
+            "text": "Multi-factor authentication is optional and disabled for all users.",
+            "score": 0.85,
+        },
     ]
     t0 = time.perf_counter()
     g_r2 = analyzer.build_graph(c_chunks)
@@ -94,19 +117,34 @@ def run_benchmark() -> Dict[str, Any]:
     # ── R3: Same Document Structuring ─────────────────────────────────
     print("[R3] Running Same Document Benchmark...")
     doc_chunks = [
-        {"chunk_id": "d1_sec1", "text": "Section 1: Data protection requirements.", "document_id": "sec_policy_2024", "score": 0.88},
-        {"chunk_id": "d1_sec2", "text": "Section 2: Incident response protocol.", "document_id": "sec_policy_2024", "score": 0.82},
-        {"chunk_id": "d2_sec1", "text": "Section 1: Vendor management policy.", "document_id": "vendor_policy_2024", "score": 0.75},
+        {
+            "chunk_id": "d1_sec1",
+            "text": "Section 1: Data protection requirements.",
+            "document_id": "sec_policy_2024",
+            "score": 0.88,
+        },
+        {
+            "chunk_id": "d1_sec2",
+            "text": "Section 2: Incident response protocol.",
+            "document_id": "sec_policy_2024",
+            "score": 0.82,
+        },
+        {
+            "chunk_id": "d2_sec1",
+            "text": "Section 1: Vendor management policy.",
+            "document_id": "vendor_policy_2024",
+            "score": 0.75,
+        },
     ]
     t0 = time.perf_counter()
     g_r3 = analyzer.build_graph(doc_chunks)
     lat_r3 = (time.perf_counter() - t0) * 1000
 
     same_doc_r3 = g_r3.get_relationships_by_type(RelationshipType.SAME_DOCUMENT)
-    r3_correct = (
-        len(same_doc_r3) == 1
-        and {"d1_sec1", "d1_sec2"} == {same_doc_r3[0].source_id, same_doc_r3[0].target_id}
-    )
+    r3_correct = len(same_doc_r3) == 1 and {"d1_sec1", "d1_sec2"} == {
+        same_doc_r3[0].source_id,
+        same_doc_r3[0].target_id,
+    }
     results["benchmark_runs"]["R3_same_document"] = {
         "correct": r3_correct,
         "same_doc_count": len(same_doc_r3),
@@ -125,10 +163,7 @@ def run_benchmark() -> Dict[str, Any]:
     lat_r4 = (time.perf_counter() - t0) * 1000
 
     temp_adj_r4 = g_r4.get_relationships_by_type(RelationshipType.TEMPORALLY_ADJACENT)
-    r4_correct = (
-        len(temp_adj_r4) == 1
-        and {"t2023", "t2024"} == {temp_adj_r4[0].source_id, temp_adj_r4[0].target_id}
-    )
+    r4_correct = len(temp_adj_r4) == 1 and {"t2023", "t2024"} == {temp_adj_r4[0].source_id, temp_adj_r4[0].target_id}
     results["benchmark_runs"]["R4_temporal_adjacency"] = {
         "correct": r4_correct,
         "temporal_adj_count": len(temp_adj_r4),
@@ -138,10 +173,32 @@ def run_benchmark() -> Dict[str, Any]:
     # ── R5: Mixed Multi-Signal Evidence Set ───────────────────────────
     print("[R5] Running Mixed Multi-Signal Assembly Benchmark...")
     mixed_candidates = [
-        {"chunk_id": "v3", "text": "The current encryption standard is AES-256 mandatory.", "version": "3", "score": 0.92, "document_id": "enc_v3"},
-        {"chunk_id": "v1", "text": "The old encryption standard was DES-56.", "version": "1", "score": 0.88, "document_id": "enc_v1"},
-        {"chunk_id": "c_bad", "text": "The encryption standard is optional and unencrypted plain text.", "score": 0.70, "document_id": "bad_doc"},
-        {"chunk_id": "supp", "text": "Key rotation guidelines supporting AES-256 encryption.", "score": 0.80, "document_id": "enc_v3"},
+        {
+            "chunk_id": "v3",
+            "text": "The current encryption standard is AES-256 mandatory.",
+            "version": "3",
+            "score": 0.92,
+            "document_id": "enc_v3",
+        },
+        {
+            "chunk_id": "v1",
+            "text": "The old encryption standard was DES-56.",
+            "version": "1",
+            "score": 0.88,
+            "document_id": "enc_v1",
+        },
+        {
+            "chunk_id": "c_bad",
+            "text": "The encryption standard is optional and unencrypted plain text.",
+            "score": 0.70,
+            "document_id": "bad_doc",
+        },
+        {
+            "chunk_id": "supp",
+            "text": "Key rotation guidelines supporting AES-256 encryption.",
+            "score": 0.80,
+            "document_id": "enc_v3",
+        },
     ]
     t0 = time.perf_counter()
     asm_res = assembler.assemble("current encryption standard", mixed_candidates)
@@ -159,16 +216,31 @@ def run_benchmark() -> Dict[str, Any]:
     # ── R6: Precision Guard (Unrelated Chunks) ────────────────────────
     print("[R6] Running Precision Guard (Zero False Relationships)...")
     unrelated_chunks = [
-        {"chunk_id": "u1", "text": "The solar panel efficiency improved by 5 percent in testing.", "document_id": "solar_a", "score": 0.7},
-        {"chunk_id": "u2", "text": "Database indexing algorithms improve query lookup throughput.", "document_id": "db_b", "score": 0.7},
-        {"chunk_id": "u3", "text": "Culinary arts emphasize the balance of seasoning and heat.", "document_id": "cook_c", "score": 0.7},
+        {
+            "chunk_id": "u1",
+            "text": "The solar panel efficiency improved by 5 percent in testing.",
+            "document_id": "solar_a",
+            "score": 0.7,
+        },
+        {
+            "chunk_id": "u2",
+            "text": "Database indexing algorithms improve query lookup throughput.",
+            "document_id": "db_b",
+            "score": 0.7,
+        },
+        {
+            "chunk_id": "u3",
+            "text": "Culinary arts emphasize the balance of seasoning and heat.",
+            "document_id": "cook_c",
+            "score": 0.7,
+        },
     ]
     t0 = time.perf_counter()
     g_r6 = analyzer.build_graph(unrelated_chunks)
     lat_r6 = (time.perf_counter() - t0) * 1000
 
     r6_false_edges = g_r6.edge_count
-    r6_correct = (r6_false_edges == 0)
+    r6_correct = r6_false_edges == 0
     results["benchmark_runs"]["R6_precision_guard"] = {
         "correct": r6_correct,
         "false_edges_detected": r6_false_edges,
@@ -177,9 +249,7 @@ def run_benchmark() -> Dict[str, Any]:
 
     # ── Aggregate Performance Metrics ─────────────────────────────────
     latencies = [lat_r1, lat_r2, lat_r3, lat_r4, lat_r5, lat_r6]
-    all_tests_passed = all(
-        r["correct"] for r in results["benchmark_runs"].values()
-    )
+    all_tests_passed = all(r["correct"] for r in results["benchmark_runs"].values())
 
     results["aggregate_metrics"] = {
         "benchmark_pass_rate": 1.0 if all_tests_passed else 0.0,

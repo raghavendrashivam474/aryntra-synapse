@@ -1,4 +1,3 @@
-import pytest
 from app.context.workspace import EvidenceWorkspace
 
 
@@ -78,20 +77,20 @@ def test_determinism():
     ws1 = EvidenceWorkspace(chunks)
     ws1.promote_initial(count=1)
     ws1.promote_next()
-    
+
     ws2 = EvidenceWorkspace(chunks)
     ws2.promote_initial(count=1)
     ws2.promote_next()
-    
+
     s1 = ws1.summary()
     s2 = ws2.summary()
-    
+
     # Strip latency values to compare structural determinism
     for h in s1["promotion_history"]:
         h["latency"] = 0.0
     for h in s2["promotion_history"]:
         h["latency"] = 0.0
-        
+
     assert s1 == s2
 
 

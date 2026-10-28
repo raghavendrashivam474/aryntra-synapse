@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 SC-S2 Synapse Experiment Runner.
 
@@ -9,6 +9,7 @@ machine-readable result JSON.
 Usage (from repository root):
     python experiments/synapse_compare/sc_s2/run_synapse.py
 """
+
 from __future__ import annotations
 
 import json

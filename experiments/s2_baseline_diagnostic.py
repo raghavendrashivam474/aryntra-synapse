@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — S2 Baseline Diagnostic
 
 Purpose:
@@ -105,7 +105,9 @@ def run_queries(client, queries):
                 "representation_metadata": data.get("representation_metadata", {}),
             }
 
-            print(f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)")
+            print(
+                f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)"
+            )
             print(f"  Retrieval:      {result['retrieval_latency']}s")
             print(f"  Generation:     {result['generation_latency']}s")
             print(f"  Total:          {result['total_latency']}s")
@@ -136,8 +138,12 @@ def save_results(health, results):
 
 def print_summary(results):
     passed = sum(1 for r in results if r["status"] == "PASS")
-    retrieval_times = [r["retrieval_latency"] for r in results if r["status"] == "PASS" and r.get("retrieval_latency") is not None]
-    generation_times = [r["generation_latency"] for r in results if r["status"] == "PASS" and r.get("generation_latency") is not None]
+    retrieval_times = [
+        r["retrieval_latency"] for r in results if r["status"] == "PASS" and r.get("retrieval_latency") is not None
+    ]
+    generation_times = [
+        r["generation_latency"] for r in results if r["status"] == "PASS" and r.get("generation_latency") is not None
+    ]
 
     print("\n[3/3] Summary")
     print("-" * 40)

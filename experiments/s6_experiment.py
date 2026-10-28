@@ -1,4 +1,4 @@
-﻿import json
+import json
 import re
 import sys
 import time
@@ -42,8 +42,7 @@ def health_check(client):
     r = client.get(f"{BASE_URL}/health", timeout=TIMEOUT)
     r.raise_for_status()
     d = r.json()
-    for k in ["status", "app_name", "version", "retriever_ready",
-              "chunk_count", "llm_model", "context_representation"]:
+    for k in ["status", "app_name", "version", "retriever_ready", "chunk_count", "llm_model", "context_representation"]:
         print(f"  {k}: {d.get(k)}")
     return d
 
@@ -106,10 +105,14 @@ def run_queries(client, queries, mode):
             results.append(result)
         except Exception as exc:
             print(f"  FAILED: {exc}")
-            results.append({
-                "id": qid, "question": q,
-                "status": "FAIL", "error": str(exc),
-            })
+            results.append(
+                {
+                    "id": qid,
+                    "question": q,
+                    "status": "FAIL",
+                    "error": str(exc),
+                }
+            )
     return results
 
 
@@ -125,18 +128,13 @@ def save_results(health, results, mode):
         "results": results,
     }
     result_file.parent.mkdir(parents=True, exist_ok=True)
-    result_file.write_text(
-        json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    result_file.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nResults saved to: {result_file}")
 
 
 def print_summary(results, mode):
     passed = sum(1 for r in results if r["status"] == "PASS")
-    early_stops = sum(
-        1 for r in results
-        if r.get("stop_reason") == "evidence_sufficient"
-    )
+    early_stops = sum(1 for r in results if r.get("stop_reason") == "evidence_sufficient")
     print(f"\n[3/3] Summary ({mode}): {passed}/{len(results)} passed")
     print(f"  Early stops: {early_stops}/{len(results)}")
     print("=" * 70)

@@ -1,4 +1,4 @@
-﻿"""
+"""
 manual_test.py
 
 Aryntra Synapse — Sprint 0.2
@@ -168,27 +168,31 @@ def test_questions(client):
             # Chunk details
             for j, chunk in enumerate(data.get("retrieved_chunks", []), start=1):
                 chunk_preview = chunk["text"][:80].replace("\n", " ")
-                print(f"    Chunk {j}: [{chunk['chunk_id']}] score={chunk['score']}  \"{chunk_preview}...\"")
+                print(f'    Chunk {j}: [{chunk["chunk_id"]}] score={chunk["score"]}  "{chunk_preview}..."')
 
             total_retrieval += r_lat
             total_generation += g_lat
 
-            results.append({
-                "question": question,
-                "status": "PASS",
-                "chunks": chunks,
-                "retrieval": r_lat,
-                "generation": g_lat,
-                "total": t_lat,
-                "context_length": ctx_len,
-            })
+            results.append(
+                {
+                    "question": question,
+                    "status": "PASS",
+                    "chunks": chunks,
+                    "retrieval": r_lat,
+                    "generation": g_lat,
+                    "total": t_lat,
+                    "context_length": ctx_len,
+                }
+            )
 
         except Exception as e:
             print(f"  FAILED: {e}")
-            results.append({
-                "question": question,
-                "status": "FAIL",
-            })
+            results.append(
+                {
+                    "question": question,
+                    "status": "FAIL",
+                }
+            )
 
         print()
 
@@ -216,11 +220,13 @@ def print_summary(results, total_retrieval, total_generation):
 
     print("  Per-question breakdown:")
     print(f"  {'No':<4} {'Status':<8} {'Chunks':<8} {'Retr(s)':<10} {'Gen(s)':<10} {'Total(s)':<10} {'Ctx':<8}")
-    print(f"  {'-'*4} {'-'*6} {'-'*6} {'-'*8} {'-'*8} {'-'*8} {'-'*6}")
+    print(f"  {'-' * 4} {'-' * 6} {'-' * 6} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 6}")
 
     for i, r in enumerate(results, start=1):
         if r["status"] == "PASS":
-            print(f"  {i:<4} {r['status']:<8} {r['chunks']:<8} {r['retrieval']:<10} {r['generation']:<10} {r['total']:<10} {r['context_length']:<8}")
+            print(
+                f"  {i:<4} {r['status']:<8} {r['chunks']:<8} {r['retrieval']:<10} {r['generation']:<10} {r['total']:<10} {r['context_length']:<8}"
+            )
         else:
             print(f"  {i:<4} {'FAIL':<8} {'-':<8} {'-':<10} {'-':<10} {'-':<10} {'-':<8}")
 

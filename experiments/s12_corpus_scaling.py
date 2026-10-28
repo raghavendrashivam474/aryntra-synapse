@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 12: Corpus Scaling Experiment (RQ1)
 
 Tests whether priority-based evidence selection becomes more
@@ -11,6 +11,7 @@ distractors, near-matches, and irrelevant text.
 
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import json
@@ -81,35 +82,35 @@ def generate_corpus(
 
     for i in range(min(n_answer_bearing, len(ANSWER_BEARING_TEMPLATES))):
         cid = f"ab_{i}"
-        chunks.append({
-            "chunk_id": cid,
-            "text": ANSWER_BEARING_TEMPLATES[i],
-            "source": "synthetic",
-            "category": "answer_bearing",
-        })
+        chunks.append(
+            {
+                "chunk_id": cid,
+                "text": ANSWER_BEARING_TEMPLATES[i],
+                "source": "synthetic",
+                "category": "answer_bearing",
+            }
+        )
         answer_ids.add(cid)
 
     remaining = target_size - len(chunks)
     if remaining <= 0:
         return chunks[:target_size], answer_ids
 
-    filler_pool = (
-        PARTIALLY_RELEVANT_TEMPLATES * 3
-        + DISTRACTOR_TEMPLATES * 5
-        + CONTRADICTORY_TEMPLATES * 2
-    )
+    filler_pool = PARTIALLY_RELEVANT_TEMPLATES * 3 + DISTRACTOR_TEMPLATES * 5 + CONTRADICTORY_TEMPLATES * 2
     rng.shuffle(filler_pool)
 
     for i in range(remaining):
         text = filler_pool[i % len(filler_pool)]
         suffix = f" [variant {i}]"
         cid = f"filler_{i}"
-        chunks.append({
-            "chunk_id": cid,
-            "text": text + suffix,
-            "source": "synthetic",
-            "category": "filler",
-        })
+        chunks.append(
+            {
+                "chunk_id": cid,
+                "text": text + suffix,
+                "source": "synthetic",
+                "category": "filler",
+            }
+        )
 
     rng.shuffle(chunks)
     return chunks, answer_ids
@@ -168,10 +169,7 @@ def run_corpus_scaling_experiment() -> dict:
                 top_id = ranked[0].get("chunk_id", "")
                 top_is_ab = top_id in answer_ids
 
-            top3_ab = sum(
-                1 for c in ranked[:3]
-                if c.get("chunk_id", "") in answer_ids
-            )
+            top3_ab = sum(1 for c in ranked[:3] if c.get("chunk_id", "") in answer_ids)
 
             record = {
                 "query": query,
@@ -190,7 +188,7 @@ def run_corpus_scaling_experiment() -> dict:
             size_results.append(record)
 
             print(
-                f"  [{qi+1}/{len(TEST_QUERIES)}] "
+                f"  [{qi + 1}/{len(TEST_QUERIES)}] "
                 f"lat={latency:.4f}s "
                 f"H={metrics.high_priority_count} "
                 f"top1_ab={top_is_ab} "

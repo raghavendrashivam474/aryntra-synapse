@@ -1,9 +1,9 @@
 import pytest
-from app.evidence.coverage import CoverageAnalyzer, CoverageReport
+
+from app.evidence.coverage import CoverageAnalyzer
 
 
 class TestCoverageAnalyzer:
-
     @pytest.fixture
     def analyzer(self):
         return CoverageAnalyzer(min_facet_coverage_threshold=0.70)
@@ -31,7 +31,10 @@ class TestCoverageAnalyzer:
 
         all_chunks = [
             {"chunk_id": "1", "text": "The crash was caused by an out of memory exception in worker 4."},
-            {"chunk_id": "2", "text": "The incident occurred when timestamp was 2024-03-15 during scheduled batch jobs."},
+            {
+                "chunk_id": "2",
+                "text": "The incident occurred when timestamp was 2024-03-15 during scheduled batch jobs.",
+            },
             {"chunk_id": "3", "text": "The outcome result was an automatic rollback of the deployment pipeline."},
         ]
         report_all = analyzer.evaluate(query, all_chunks)

@@ -1,4 +1,4 @@
-﻿"""
+"""
 SC-S4 Live Comparison API Server.
 
 Minimal FastAPI service that executes both the lexical baseline
@@ -9,6 +9,7 @@ results through the ADR-001 contract.
 Start (from repository root):
     uvicorn experiments.synapse_compare.server.main:app --reload --port 8000
 """
+
 from __future__ import annotations
 
 import sys
@@ -26,7 +27,7 @@ from pydantic import BaseModel, Field
 # use bare imports that depend on their own directories being on sys.path.
 # ---------------------------------------------------------------------------
 SERVER_DIR = Path(__file__).resolve().parent
-SC_DIR = SERVER_DIR.parent                # experiments/synapse_compare
+SC_DIR = SERVER_DIR.parent  # experiments/synapse_compare
 SC_S1_DIR = SC_DIR / "sc_s1"
 SC_S2_DIR = SC_DIR / "sc_s2"
 REPO_ROOT = SC_DIR.parents[1]
@@ -36,8 +37,8 @@ for _p in [str(SC_S1_DIR), str(SC_S2_DIR), str(REPO_ROOT)]:
         sys.path.insert(0, _p)
 
 # --- Engine imports (after sys.path setup) ---
-from baseline import load_corpus, retrieve                     # sc_s1
-from schemas import (                                          # sc_s1
+from baseline import load_corpus, retrieve  # sc_s1
+from schemas import (  # sc_s1
     ExperimentResult,
     DecisionInfo,
     EvaluationInfo,
@@ -46,14 +47,14 @@ from schemas import (                                          # sc_s1
     EXPECTED_CURRENT_DOCUMENT,
     SYSTEM_LABEL as BASELINE_LABEL,
 )
-from synapse_adapter import (                                  # sc_s2
+from synapse_adapter import (  # sc_s2
     map_to_synapse_format,
     run_synapse_engine,
     normalize_engine_result,
     build_error_result,
     SYSTEM_LABEL as SYNAPSE_LABEL,
 )
-from comparison import compare as run_comparison               # sc_s2
+from comparison import compare as run_comparison  # sc_s2
 
 # ---------------------------------------------------------------------------
 # Application
@@ -135,15 +136,10 @@ def compare_engines(request: CompareRequest) -> CompareResponse:
     try:
         retrieval = retrieve(query, _documents, top_k=request.top_k)
         top_doc_id = retrieval.results[0].document_id
-        top_doc = next(
-            d for d in _documents if d["document_id"] == top_doc_id
-        )
+        top_doc = next(d for d in _documents if d["document_id"] == top_doc_id)
         decision = DecisionInfo(
             selected_evidence=[top_doc_id],
-            output=(
-                f"Based on top-ranked evidence ({top_doc_id}): "
-                f"{top_doc['content']}"
-            ),
+            output=(f"Based on top-ranked evidence ({top_doc_id}): {top_doc['content']}"),
         )
         selected_is_current = top_doc_id == EXPECTED_CURRENT_DOCUMENT
         evaluation = EvaluationInfo(
@@ -184,11 +180,7 @@ def compare_engines(request: CompareRequest) -> CompareResponse:
     comparison_status = "not_available"
     comparison_result: dict[str, Any] = {}
 
-    if (
-        baseline_result is not None
-        and synapse_status == "success"
-        and synapse_result is not None
-    ):
+    if baseline_result is not None and synapse_status == "success" and synapse_result is not None:
         try:
             comp = run_comparison(baseline_result, synapse_result)
             comparison_result = comp.to_dict()

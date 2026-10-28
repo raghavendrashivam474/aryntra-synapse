@@ -1,18 +1,16 @@
-﻿import pytest
 from unittest.mock import MagicMock
-from app.strategy.signals import extract_query_signals
+
 from app.strategy.candidates import (
-    StrategyPath,
     StrategyDecision,
+    StrategyPath,
     candidate_a_lexical_complexity,
     candidate_b_cache_warmth,
     candidate_c_reuse_confidence,
     candidate_d_priority_prescreen,
     candidate_e_composite,
-    CANDIDATE_REGISTRY,
 )
 from app.strategy.selector import AdaptiveSelector, StrategyTelemetry
-from app.core.config import settings
+from app.strategy.signals import extract_query_signals
 
 
 def test_signals_empty_query_and_chunks():
@@ -108,16 +106,20 @@ def test_candidate_d_ambiguous():
 
 def test_candidate_e_composite_low_and_high():
     signals_light = {
-        "query_length": 2, "query_keyword_count": 1,
-        "cache_hit_rate": 1.0, "reuse_rate": 1.0,
+        "query_length": 2,
+        "query_keyword_count": 1,
+        "cache_hit_rate": 1.0,
+        "reuse_rate": 1.0,
         "first_chunk_lexical_overlap": 0.9,
     }
     decision_light = candidate_e_composite(signals_light)
     assert decision_light.path == StrategyPath.LIGHT
 
     signals_deep = {
-        "query_length": 15, "query_keyword_count": 10,
-        "cache_hit_rate": 0.0, "reuse_rate": 0.0,
+        "query_length": 15,
+        "query_keyword_count": 10,
+        "cache_hit_rate": 0.0,
+        "reuse_rate": 0.0,
         "first_chunk_lexical_overlap": 0.0,
     }
     decision_deep = candidate_e_composite(signals_deep)
@@ -151,8 +153,7 @@ def test_selector_fallback_mode_safety():
         fallback_candidate="candidate_d",
     )
     decision = selector.select(
-        "short",
-        [{"text": "ambiguous context one"}, {"text": "two"}, {"text": "three"}, {"text": "four"}]
+        "short", [{"text": "ambiguous context one"}, {"text": "two"}, {"text": "three"}, {"text": "four"}]
     )
     assert decision.path in (StrategyPath.STANDARD, StrategyPath.LIGHT)
 
@@ -179,7 +180,7 @@ def test_selector_execute_path_standard():
     mock_metrics.to_dict.return_value = {"priority_latency": 0.001, "semantic_calls": 1}
     mock_engine.rank.return_value = (chunks, mock_metrics)
 
-    result, metrics = selector.execute_path(decision, "query", chunks, mock_engine)
+    _result, metrics = selector.execute_path(decision, "query", chunks, mock_engine)
     mock_engine.rank.assert_called_once_with("query", chunks)
     assert metrics["semantic_calls"] == 1
 

@@ -9,6 +9,7 @@ machine-readable result JSON.
 Usage (from repository root):
     python experiments/synapse_compare/sc_s1/run_baseline.py
 """
+
 from __future__ import annotations
 
 import sys
@@ -108,10 +109,7 @@ def main() -> None:
     top_doc = next(d for d in documents if d["document_id"] == top_doc_id)
     decision = DecisionInfo(
         selected_evidence=[top_doc_id],
-        output=(
-            f"Based on top-ranked evidence ({top_doc_id}): "
-            f"{top_doc['content']}"
-        ),
+        output=(f"Based on top-ranked evidence ({top_doc_id}): {top_doc['content']}"),
     )
 
     # 4. Evaluate against expected outcome

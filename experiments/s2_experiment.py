@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — S2 Context Compression Experiment Runner
 
 Purpose:
@@ -105,7 +105,9 @@ def run_queries(client, queries):
                 "representation_metadata": meta,
             }
 
-            print(f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)")
+            print(
+                f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)"
+            )
             print(f"  Retrieval:      {result['retrieval_latency']}s")
             print(f"  Generation:     {result['generation_latency']}s")
             print(f"  Total:          {result['total_latency']}s")
@@ -148,15 +150,17 @@ def print_summary(results):
             print("\n" + "=" * 80)
             print("  BASELINE (FLAT) vs S2 (COMPRESSED_V1) COMPARISON")
             print("=" * 80)
-            print(f"{'ID':<5} | {'Base Gen (s)':<13} | {'S2 Gen (s)':<13} | {'Base Ctx':<10} | {'S2 Ctx':<10} | {'Reduction':<10}")
+            print(
+                f"{'ID':<5} | {'Base Gen (s)':<13} | {'S2 Gen (s)':<13} | {'Base Ctx':<10} | {'S2 Ctx':<10} | {'Reduction':<10}"
+            )
             print("-" * 80)
             for r in results:
                 qid = r["id"]
                 b = b_results.get(qid, {})
                 b_gen = f"{b.get('generation_latency', 0.0):.2f}"
                 s_gen = f"{r.get('generation_latency', 0.0):.2f}"
-                b_ctx = str(b.get('context_length', 0))
-                s_ctx = str(r.get('context_length', 0))
+                b_ctx = str(b.get("context_length", 0))
+                s_ctx = str(r.get("context_length", 0))
                 red = f"{r.get('context_reduction_pct', 0.0):.1f}%"
                 print(f"{qid:<5} | {b_gen:<13} | {s_gen:<13} | {b_ctx:<10} | {s_ctx:<10} | {red:<10}")
         except Exception as e:

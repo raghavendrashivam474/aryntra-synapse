@@ -1,11 +1,10 @@
-import pytest
 from experiments.s11_quality_evaluation import (
+    analyze_results,
     detect_refusal,
-    measure_keyword_coverage,
-    measure_evidence_grounding,
     detect_unsupported_numbers,
     evaluate_quality,
-    analyze_results,
+    measure_evidence_grounding,
+    measure_keyword_coverage,
 )
 
 
@@ -53,19 +52,21 @@ def test_evaluate_quality_tier():
 
 def test_analyze_results_aggregation():
     mock_results = {
-        "A_frozen": [{
-            "config": "A_frozen",
-            "total_latency": 10.0,
-            "preprocessing_latency": 0.0,
-            "generation_latency": 10.0,
-            "quality": {
-                "quality_tier": "GOOD",
-                "failure_category": "NONE",
-                "evidence_grounding": 0.8,
-                "keyword_coverage": 0.9,
-                "refusal": False
+        "A_frozen": [
+            {
+                "config": "A_frozen",
+                "total_latency": 10.0,
+                "preprocessing_latency": 0.0,
+                "generation_latency": 10.0,
+                "quality": {
+                    "quality_tier": "GOOD",
+                    "failure_category": "NONE",
+                    "evidence_grounding": 0.8,
+                    "keyword_coverage": 0.9,
+                    "refusal": False,
+                },
             }
-        }]
+        ]
     }
     analysis = analyze_results(mock_results)
     assert "A_frozen" in analysis

@@ -1,11 +1,11 @@
 import pytest
-from app.strategy.fallback import ConfidenceGuard, FallbackDecision
-from app.evidence.contradiction import ConflictReport, ConflictPair, ConflictType
+
+from app.evidence.contradiction import ConflictPair, ConflictReport, ConflictType
 from app.evidence.coverage import CoverageReport
+from app.strategy.fallback import ConfidenceGuard, FallbackDecision
 
 
 class TestS14ConfidenceGuardRouting:
-
     @pytest.fixture
     def guard(self):
         return ConfidenceGuard()
@@ -19,7 +19,7 @@ class TestS14ConfidenceGuardRouting:
             detected=True,
             conflict_score=0.75,
             conflicts=[ConflictPair("1", "2", ConflictType.DATE, "mismatch", 0.8)],
-            conflicted_chunk_ids={"1", "2"}
+            conflicted_chunk_ids={"1", "2"},
         )
         assessment = guard.assess("When did it launch?", ranked, conflict_report=conflict)
         assert assessment.decision == FallbackDecision.RESOLVE_CONFLICT

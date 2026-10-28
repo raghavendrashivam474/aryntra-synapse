@@ -14,6 +14,7 @@ This baseline deliberately ignores document metadata (version, date,
 status, supersedes) during retrieval and ranking.  Metadata is used
 only during evaluation.
 """
+
 from __future__ import annotations
 
 import json
@@ -27,6 +28,7 @@ from schemas import RetrievalResult, RetrievalInfo
 # Corpus loading
 # ---------------------------------------------------------------------------
 
+
 def load_corpus(fixture_dir: Path) -> list[dict]:
     """Load all JSON policy documents from the fixture directory.
 
@@ -36,8 +38,7 @@ def load_corpus(fixture_dir: Path) -> list[dict]:
     if not fixture_dir.is_dir():
         raise FileNotFoundError(f"Fixture directory not found: {fixture_dir}")
 
-    required_keys = {"document_id", "version", "publication_date",
-                     "status", "content"}
+    required_keys = {"document_id", "version", "publication_date", "status", "content"}
     documents: list[dict] = []
 
     for path in sorted(fixture_dir.glob("*.json")):
@@ -45,9 +46,7 @@ def load_corpus(fixture_dir: Path) -> list[dict]:
             doc = json.load(f)
         missing = required_keys - doc.keys()
         if missing:
-            raise ValueError(
-                f"{path.name} missing required fields: {missing}"
-            )
+            raise ValueError(f"{path.name} missing required fields: {missing}")
         documents.append(doc)
 
     if not documents:

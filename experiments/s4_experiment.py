@@ -45,8 +45,7 @@ def health_check(client):
     r = client.get(f"{BASE_URL}/health", timeout=TIMEOUT)
     r.raise_for_status()
     d = r.json()
-    for k in ["status", "app_name", "version", "retriever_ready",
-              "chunk_count", "llm_model", "context_representation"]:
+    for k in ["status", "app_name", "version", "retriever_ready", "chunk_count", "llm_model", "context_representation"]:
         print(f"  {k}: {d.get(k)}")
     return d
 
@@ -65,7 +64,9 @@ def run_queries(client, queries):
             r.raise_for_status()
             d = r.json()
             result = {
-                "id": qid, "question": q, "status": "PASS",
+                "id": qid,
+                "question": q,
+                "status": "PASS",
                 "answer": d.get("answer"),
                 "retrieval_latency": d.get("retrieval_latency"),
                 "sufficiency_latency": d.get("sufficiency_latency", 0.0),
@@ -84,9 +85,9 @@ def run_queries(client, queries):
                 "promotion_history": d.get("promotion_history", []),
                 "reuse_ollama_context": d.get("reuse_ollama_context", False),
             }
-            print(f"  Steps: {result["expansion_steps"]} | Calls: {result["total_model_calls"]}")
-            print(f"  New: {result["new_context_length"]} | Repeated: {result["repeated_context_length"]}")
-            print(f"  Cumulative: {result["cumulative_context_length"]} | Latency: {result["total_latency"]}s")
+            print(f"  Steps: {result['expansion_steps']} | Calls: {result['total_model_calls']}")
+            print(f"  New: {result['new_context_length']} | Repeated: {result['repeated_context_length']}")
+            print(f"  Cumulative: {result['cumulative_context_length']} | Latency: {result['total_latency']}s")
             results.append(result)
         except Exception as exc:
             print(f"  FAILED: {exc}")
@@ -96,10 +97,13 @@ def run_queries(client, queries):
 
 def save_results(health, results):
     output = {
-        "experiment": "S4", "phase": "evidence-workspace-evaluation",
+        "experiment": "S4",
+        "phase": "evidence-workspace-evaluation",
         "query_set": "S4 Query Set v1",
         "context_representation": "evidence_workspace_v1",
-        "top_k": TOP_K, "health": health, "results": results,
+        "top_k": TOP_K,
+        "health": health,
+        "results": results,
     }
     RESULT_FILE.parent.mkdir(parents=True, exist_ok=True)
     RESULT_FILE.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")

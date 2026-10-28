@@ -1,12 +1,8 @@
-﻿import pytest
-import os
-import json
 from experiments.s13_generalization_matrix import (
+    GeneralizationHarness,
+    generate_controlled_corpus,
     load_distractor_pool,
     load_query_suite,
-    generate_controlled_corpus,
-    GeneralizationHarness,
-    FailureSeverity,
 )
 
 
@@ -36,11 +32,7 @@ def test_generate_controlled_corpus():
 
     for target_size in [5, 25, 50, 100]:
         chunks, answer_ids = generate_controlled_corpus(
-            query_item=q0,
-            distractor_pool=pool,
-            target_size=target_size,
-            distractor_type="D1_random",
-            seed=42
+            query_item=q0, distractor_pool=pool, target_size=target_size, distractor_type="D1_random", seed=42
         )
         assert len(chunks) == target_size
         assert len(answer_ids) >= 1
@@ -51,9 +43,7 @@ def test_generate_controlled_corpus():
 def test_generalization_harness_mini_sweep():
     harness = GeneralizationHarness()
     results = harness.run_full_matrix(
-        corpus_sizes=[5],
-        distractor_types=["D1_random", "D2_topic"],
-        config_names=["calibrated_blend"]
+        corpus_sizes=[5], distractor_types=["D1_random", "D2_topic"], config_names=["calibrated_blend"]
     )
     assert "metadata" in results
     assert "evaluations" in results

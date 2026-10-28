@@ -1,4 +1,3 @@
-import pytest
 from app.context.sufficiency import SufficiencyEngine, extract_keywords
 
 
@@ -19,7 +18,7 @@ def test_extract_keywords():
     assert "capital" in kw
     assert "france" in kw
     assert "what" not in kw  # stopword
-    assert "the" not in kw   # stopword
+    assert "the" not in kw  # stopword
 
 
 def test_sufficient_high_score_good_coverage():

@@ -5,6 +5,7 @@ Defines the fixed scenario parameters and the data structures
 used to capture baseline retrieval results in a machine-readable
 format consumable by SC-S2.
 """
+
 from __future__ import annotations
 
 import json
@@ -17,10 +18,7 @@ from pathlib import Path
 SCHEMA_VERSION = "1.0"
 EXPERIMENT_ID = "SC-S1-TEMPORAL-001"
 SCENARIO_NAME = "Current Authentication Policy"
-QUERY = (
-    "What authentication policy is currently in effect "
-    "for internal systems?"
-)
+QUERY = "What authentication policy is currently in effect for internal systems?"
 EXPECTED_CURRENT_DOCUMENT = "AUTH-POLICY-V2"
 SYSTEM_LABEL = "baseline"
 
@@ -28,9 +26,11 @@ SYSTEM_LABEL = "baseline"
 # Result data structures
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class RetrievalResult:
     """One ranked document returned by the baseline."""
+
     document_id: str
     rank: int
     score: float
@@ -39,6 +39,7 @@ class RetrievalResult:
 @dataclass
 class RetrievalInfo:
     """Retrieval metadata and ranked results."""
+
     method: str
     top_k: int
     results: list[RetrievalResult]
@@ -47,6 +48,7 @@ class RetrievalInfo:
 @dataclass
 class DecisionInfo:
     """The baseline's selected evidence and derived output."""
+
     selected_evidence: list[str]
     output: str
 
@@ -54,6 +56,7 @@ class DecisionInfo:
 @dataclass
 class EvaluationInfo:
     """Comparison of observed behavior against expected outcome."""
+
     expected_current_document: str
     selected_current_document: bool
     status: str  # "PASS" or "FAIL"
@@ -62,6 +65,7 @@ class EvaluationInfo:
 @dataclass
 class ExperimentResult:
     """Top-level result object for the SC-S1 experiment."""
+
     schema_version: str
     experiment_id: str
     system: str
@@ -98,12 +102,8 @@ class ExperimentResult:
                 "output": self.decision.output,
             },
             "evaluation": {
-                "expected_current_document": (
-                    self.evaluation.expected_current_document
-                ),
-                "selected_current_document": (
-                    self.evaluation.selected_current_document
-                ),
+                "expected_current_document": (self.evaluation.expected_current_document),
+                "selected_current_document": (self.evaluation.selected_current_document),
                 "status": self.evaluation.status,
             },
         }

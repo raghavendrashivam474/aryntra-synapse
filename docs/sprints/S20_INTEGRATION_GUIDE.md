@@ -91,33 +91,31 @@ engine = UnifiedEvidenceEngine(
     )
 )
 
+
 def handle_user_query(query: str, retrieved_docs: List[Dict[str, Any]]) -> Dict[str, Any]:
     # 2. Execute unified intelligence pipeline
     result: UnifiedEvidenceResult = engine.process(
         query=query,
         candidates=retrieved_docs,
     )
-    
+
     # 3. Route based on authoritative decision
     if result.decision == "SUFFICIENT":
-        clean_context = "\n\n".join(
-            f"[{c.get('chunk_id')}]: {c.get('text')}"
-            for c in result.selected_evidence
-        )
+        clean_context = "\n\n".join(f"[{c.get('chunk_id')}]: {c.get('text')}" for c in result.selected_evidence)
         return {
             "status": "ready",
             "context": clean_context,
             "confidence": result.confidence,
             "trace_id": result.provenance.decision_id if result.provenance else None,
         }
-    
+
     elif result.decision == "INSUFFICIENT":
         return {
             "status": "insufficient_evidence",
             "message": "Not enough verified documentation exists to answer this query safely.",
             "trace_id": result.provenance.decision_id if result.provenance else None,
         }
-    
+
     else:  # UNCERTAIN
         return {
             "status": "ambiguous",
@@ -125,7 +123,6 @@ def handle_user_query(query: str, retrieved_docs: List[Dict[str, Any]]) -> Dict[
             "conflicts": result.conflicts,
             "trace_id": result.provenance.decision_id if result.provenance else None,
         }
-
 ```
 
 ## 4. Connecting a Live LLM Adjudicator
@@ -136,6 +133,7 @@ By default, the engine uses `MockAdjudicator`. To connect real LLMs (OpenAI, Ant
 import openai
 from app.evidence.adjudication import LLMAdjudicator, LLMProvider
 from app.evidence import UnifiedEvidenceEngine
+
 
 class OpenAIProvider(LLMProvider):
     def __init__(self, client: openai.OpenAI, model: str = "gpt-4o-mini"):
@@ -152,13 +150,13 @@ class OpenAIProvider(LLMProvider):
         )
         return response.choices[0].message.content or "{}"
 
+
 # Initialize production engine with live LLM adjudicator
 client = openai.OpenAI(api_key="sk-...")
 provider = OpenAIProvider(client=client, model="gpt-4o-mini")
 adjudicator = LLMAdjudicator(provider=provider, timeout=5.0)
 
 engine = UnifiedEvidenceEngine(adjudicator=adjudicator)
-
 ```
 ## 5. Decision Archaeology & Auditing
 
@@ -169,18 +167,17 @@ result = engine.process(query="What is the meal allowance?", candidates=candidat
 
 if result.provenance:
     record = result.provenance
-    
+
     # 1. Plaintext explanation summary
     print(record.explain())
-    
+
     # 2. Stage-by-stage event filtering
     temporal_events = record.temporal_events()
     conflict_events = record.conflict_events()
     veto_events = record.safety_overrides()
-    
+
     # 3. Export to JSON for persistent storage (e.g. S3 / OpenSearch)
     audit_json = record.to_json(indent=2)
-
 ```
 
 ## 6. Configuration Profiles

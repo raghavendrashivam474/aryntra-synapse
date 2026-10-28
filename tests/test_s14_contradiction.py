@@ -1,13 +1,12 @@
 import pytest
+
 from app.evidence.contradiction import (
-    ContradictionDetector,
     ConflictType,
-    ConflictReport,
+    ContradictionDetector,
 )
 
 
 class TestContradictionDetector:
-
     @pytest.fixture
     def detector(self):
         return ContradictionDetector(topic_similarity_threshold=0.25)
@@ -30,8 +29,14 @@ class TestContradictionDetector:
 
     def test_status_contradiction(self, detector):
         chunks = [
-            {"chunk_id": "c1", "text": "Distributed vector cache indexing feature is currently enabled and supported in production."},
-            {"chunk_id": "c2", "text": "Distributed vector cache indexing feature is deprecated and disabled in production."},
+            {
+                "chunk_id": "c1",
+                "text": "Distributed vector cache indexing feature is currently enabled and supported in production.",
+            },
+            {
+                "chunk_id": "c2",
+                "text": "Distributed vector cache indexing feature is deprecated and disabled in production.",
+            },
         ]
         report = detector.analyze(chunks)
         assert report.detected
@@ -40,7 +45,10 @@ class TestContradictionDetector:
     def test_explicit_negation_contradiction(self, detector):
         chunks = [
             {"chunk_id": "c1", "text": "The memory optimizer allocates dedicated GPU buffers for large models."},
-            {"chunk_id": "c2", "text": "The memory optimizer does not allocate dedicated GPU buffers for large models."},
+            {
+                "chunk_id": "c2",
+                "text": "The memory optimizer does not allocate dedicated GPU buffers for large models.",
+            },
         ]
         report = detector.analyze(chunks)
         assert report.detected

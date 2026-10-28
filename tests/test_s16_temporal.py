@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 16 Tests
 Temporal & Version-Aware Evidence Selection.
 
@@ -12,18 +12,19 @@ Validates:
   - Safety invariants (UNKNOWN -> neutral, no silent deletion)
   - All S1-S15 tests remain green
 """
-import pytest
-from app.evidence.temporal import (
-    TemporalAnalyzer,
-    TemporalState,
-    QueryTemporalIntent,
-    TemporalMetadata,
-    TemporalCompatibilityResult,
-)
-from app.evidence.config import S16TemporalConfig
 
+import pytest
+
+from app.evidence.config import S16TemporalConfig
+from app.evidence.temporal import (
+    QueryTemporalIntent,
+    TemporalAnalyzer,
+    TemporalMetadata,
+    TemporalState,
+)
 
 # ── Fixtures ──────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def analyzer():
@@ -103,68 +104,46 @@ def effective_date_chunk():
 
 # ── RQ2: Query Temporal Intent ───────────────────────────────────────
 
-class TestQueryTemporalIntent:
 
+class TestQueryTemporalIntent:
     def test_current_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What is the current price?"
-        ) == QueryTemporalIntent.CURRENT
+        assert analyzer.extract_query_intent("What is the current price?") == QueryTemporalIntent.CURRENT
 
     def test_current_latest(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "Show me the latest version"
-        ) == QueryTemporalIntent.CURRENT
+        assert analyzer.extract_query_intent("Show me the latest version") == QueryTemporalIntent.CURRENT
 
     def test_current_active(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What is the active policy?"
-        ) == QueryTemporalIntent.CURRENT
+        assert analyzer.extract_query_intent("What is the active policy?") == QueryTemporalIntent.CURRENT
 
     def test_historical_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What was the pricing previously?"
-        ) == QueryTemporalIntent.HISTORICAL
+        assert analyzer.extract_query_intent("What was the pricing previously?") == QueryTemporalIntent.HISTORICAL
 
     def test_historical_legacy(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "Show the legacy configuration"
-        ) == QueryTemporalIntent.HISTORICAL
+        assert analyzer.extract_query_intent("Show the legacy configuration") == QueryTemporalIntent.HISTORICAL
 
     def test_future_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What will the price be next year?"
-        ) == QueryTemporalIntent.FUTURE
+        assert analyzer.extract_query_intent("What will the price be next year?") == QueryTemporalIntent.FUTURE
 
     def test_future_planned(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What are the planned changes?"
-        ) == QueryTemporalIntent.FUTURE
+        assert analyzer.extract_query_intent("What are the planned changes?") == QueryTemporalIntent.FUTURE
 
     def test_time_range_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What changed between 2023 and 2025?"
-        ) == QueryTemporalIntent.TIME_RANGE
+        assert analyzer.extract_query_intent("What changed between 2023 and 2025?") == QueryTemporalIntent.TIME_RANGE
 
     def test_point_in_time_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "What was the policy in 2023?"
-        ) == QueryTemporalIntent.POINT_IN_TIME
+        assert analyzer.extract_query_intent("What was the policy in 2023?") == QueryTemporalIntent.POINT_IN_TIME
 
     def test_unknown_query(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "Explain the pricing model"
-        ) == QueryTemporalIntent.UNKNOWN
+        assert analyzer.extract_query_intent("Explain the pricing model") == QueryTemporalIntent.UNKNOWN
 
     def test_unknown_generic(self, analyzer):
-        assert analyzer.extract_query_intent(
-            "How does authentication work?"
-        ) == QueryTemporalIntent.UNKNOWN
+        assert analyzer.extract_query_intent("How does authentication work?") == QueryTemporalIntent.UNKNOWN
 
 
 # ── RQ1: Evidence Temporal Metadata ──────────────────────────────────
 
-class TestEvidenceMetadata:
 
+class TestEvidenceMetadata:
     def test_current_from_timestamp(self, analyzer, current_chunk):
         meta = analyzer.extract_evidence_metadata(current_chunk)
         assert meta.temporal_state == TemporalState.CURRENT
@@ -210,27 +189,21 @@ class TestEvidenceMetadata:
 
 # ── RQ3: Temporal Compatibility ──────────────────────────────────────
 
-class TestTemporalCompatibility:
 
+class TestTemporalCompatibility:
     def test_current_query_current_evidence(self, analyzer):
         meta = TemporalMetadata(temporal_state=TemporalState.CURRENT)
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.CURRENT, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.CURRENT, meta)
         assert result.compatibility_score >= 0.9
 
     def test_current_query_historical_evidence(self, analyzer):
         meta = TemporalMetadata(temporal_state=TemporalState.HISTORICAL)
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.CURRENT, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.CURRENT, meta)
         assert result.compatibility_score <= 0.4
 
     def test_historical_query_historical_evidence(self, analyzer):
         meta = TemporalMetadata(temporal_state=TemporalState.HISTORICAL)
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.HISTORICAL, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.HISTORICAL, meta)
         assert result.compatibility_score >= 0.9
 
     def test_current_query_superseded_evidence(self, analyzer):
@@ -238,9 +211,7 @@ class TestTemporalCompatibility:
             temporal_state=TemporalState.SUPERSEDED,
             supersedes="1",
         )
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.CURRENT, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.CURRENT, meta)
         assert result.compatibility_score <= 0.15
 
     def test_unknown_evidence_neutral(self, analyzer):
@@ -248,31 +219,29 @@ class TestTemporalCompatibility:
         meta = TemporalMetadata(temporal_state=TemporalState.UNKNOWN)
         for intent in QueryTemporalIntent:
             result = analyzer.compute_compatibility(intent, meta)
-            assert result.compatibility_score == pytest.approx(0.5, abs=0.05), \
+            assert result.compatibility_score == pytest.approx(0.5, abs=0.05), (
                 f"UNKNOWN evidence should be neutral for {intent}"
+            )
 
     def test_unknown_intent_neutral(self, analyzer):
         """CRITICAL SAFETY: unknown query intent must NOT filter."""
         for state in TemporalState:
             meta = TemporalMetadata(temporal_state=state)
-            result = analyzer.compute_compatibility(
-                QueryTemporalIntent.UNKNOWN, meta
-            )
-            assert result.compatibility_score == pytest.approx(0.5, abs=0.05), \
+            result = analyzer.compute_compatibility(QueryTemporalIntent.UNKNOWN, meta)
+            assert result.compatibility_score == pytest.approx(0.5, abs=0.05), (
                 f"UNKNOWN intent should be neutral for {state}"
+            )
 
     def test_time_range_time_bounded(self, analyzer):
         meta = TemporalMetadata(temporal_state=TemporalState.TIME_BOUNDED)
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.TIME_RANGE, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.TIME_RANGE, meta)
         assert result.compatibility_score >= 0.8
 
 
 # ── RQ4: Version Awareness ───────────────────────────────────────────
 
-class TestVersionAwareness:
 
+class TestVersionAwareness:
     def test_version_extraction(self, analyzer):
         chunk = {"chunk_id": "v", "text": "See V3.2 for details."}
         meta = analyzer.extract_evidence_metadata(chunk)
@@ -292,19 +261,15 @@ class TestVersionAwareness:
             temporal_state=TemporalState.CURRENT,
             version="3",
         )
-        result = analyzer.compute_compatibility(
-            QueryTemporalIntent.CURRENT, meta
-        )
+        result = analyzer.compute_compatibility(QueryTemporalIntent.CURRENT, meta)
         assert result.compatibility_score >= 1.0
 
 
 # ── Chunk Enrichment ─────────────────────────────────────────────────
 
-class TestChunkEnrichment:
 
-    def test_enrichment_additive(
-        self, analyzer, current_chunk, historical_chunk, unknown_chunk
-    ):
+class TestChunkEnrichment:
+    def test_enrichment_additive(self, analyzer, current_chunk, historical_chunk, unknown_chunk):
         chunks = [current_chunk, historical_chunk, unknown_chunk]
         original_count = len(chunks)
         enriched = analyzer.enrich_chunks("current price?", chunks, rerank=False)
@@ -319,17 +284,13 @@ class TestChunkEnrichment:
             assert "query_temporal_intent" in c
             assert "temporal_reason" in c
 
-    def test_enrichment_preserves_order(
-        self, analyzer, current_chunk, historical_chunk
-    ):
+    def test_enrichment_preserves_order(self, analyzer, current_chunk, historical_chunk):
         chunks = [current_chunk, historical_chunk]
         enriched = analyzer.enrich_chunks("test", chunks, rerank=False)
         assert enriched[0]["chunk_id"] == "c1"
         assert enriched[1]["chunk_id"] == "c2"
 
-    def test_enrichment_preserves_original_fields(
-        self, analyzer, current_chunk
-    ):
+    def test_enrichment_preserves_original_fields(self, analyzer, current_chunk):
         enriched = analyzer.enrich_chunks("test", [current_chunk], rerank=False)
         assert enriched[0]["score"] == 0.9
         assert enriched[0]["chunk_id"] == "c1"
@@ -337,12 +298,12 @@ class TestChunkEnrichment:
 
 # ── S15 Integration ──────────────────────────────────────────────────
 
-class TestS15Integration:
 
+class TestS15Integration:
     def test_sufficiency_with_temporal_scores(self):
-        from app.evidence.sufficiency import SufficiencyEvaluator
-        from app.evidence.coverage import CoverageAnalyzer
         from app.evidence.contradiction import ConflictReport
+        from app.evidence.coverage import CoverageAnalyzer
+        from app.evidence.sufficiency import SufficiencyEvaluator
 
         evaluator = SufficiencyEvaluator()
         ca = CoverageAnalyzer()
@@ -370,9 +331,9 @@ class TestS15Integration:
         assert result.signals["temporal"] >= 0.9
 
     def test_sufficiency_temporal_neutral_when_missing(self):
-        from app.evidence.sufficiency import SufficiencyEvaluator
-        from app.evidence.coverage import CoverageAnalyzer
         from app.evidence.contradiction import ConflictReport
+        from app.evidence.coverage import CoverageAnalyzer
+        from app.evidence.sufficiency import SufficiencyEvaluator
 
         evaluator = SufficiencyEvaluator()
         ca = CoverageAnalyzer()
@@ -401,10 +362,11 @@ class TestS15Integration:
 
 # ── S14 Assembly Integration ─────────────────────────────────────────
 
-class TestAssemblyIntegration:
 
+class TestAssemblyIntegration:
     def test_with_temporal_factory(self):
         from app.evidence.assembly import EvidenceAssembler
+
         assembler = EvidenceAssembler.with_temporal()
         assert assembler.temporal_analyzer is not None
         assert assembler.sufficiency_evaluator is not None
@@ -450,14 +412,11 @@ class TestAssemblyIntegration:
 
 # ── Safety Invariants ────────────────────────────────────────────────
 
-class TestSafetyInvariants:
 
+class TestSafetyInvariants:
     def test_no_silent_deletion(self, analyzer):
         """Temporal analysis must NEVER reduce chunk count."""
-        chunks = [
-            {"chunk_id": f"c{i}", "text": f"Text {i}", "score": 0.5}
-            for i in range(10)
-        ]
+        chunks = [{"chunk_id": f"c{i}", "text": f"Text {i}", "score": 0.5} for i in range(10)]
         enriched = analyzer.enrich_chunks("current price?", chunks, rerank=False)
         assert len(enriched) == 10
 
@@ -474,8 +433,8 @@ class TestSafetyInvariants:
 
 # ── Config ────────────────────────────────────────────────────────────
 
-class TestS16Config:
 
+class TestS16Config:
     def test_default_config(self):
         cfg = S16TemporalConfig()
         assert cfg.temporal_weight == 0.25
@@ -499,8 +458,8 @@ class TestS16Config:
 
 # ── Mixed Corpus ─────────────────────────────────────────────────────
 
-class TestMixedCorpus:
 
+class TestMixedCorpus:
     def test_current_query_prefers_current_evidence(self, analyzer):
         chunks = [
             {
@@ -515,9 +474,7 @@ class TestMixedCorpus:
                 "timestamp": "2025-01-01",
             },
         ]
-        enriched = analyzer.enrich_chunks(
-            "What is the current price?", chunks, rerank=False
-        )
+        enriched = analyzer.enrich_chunks("What is the current price?", chunks, rerank=False)
         new_score = next(c for c in enriched if c["chunk_id"] == "new")["temporal_score"]
         old_score = next(c for c in enriched if c["chunk_id"] == "old")["temporal_score"]
         assert new_score > old_score
@@ -536,9 +493,7 @@ class TestMixedCorpus:
                 "timestamp": "2025-01-01",
             },
         ]
-        enriched = analyzer.enrich_chunks(
-            "What was the price in 2019?", chunks, rerank=False
-        )
+        enriched = analyzer.enrich_chunks("What was the price in 2019?", chunks, rerank=False)
         old_score = next(c for c in enriched if c["chunk_id"] == "old")["temporal_score"]
         new_score = next(c for c in enriched if c["chunk_id"] == "new")["temporal_score"]
         assert old_score > new_score

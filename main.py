@@ -1,4 +1,4 @@
-﻿"""
+"""
 main.py
 
 Aryntra Synapse — Sprint 0.2

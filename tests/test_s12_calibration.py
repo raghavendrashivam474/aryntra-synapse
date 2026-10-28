@@ -1,12 +1,13 @@
-﻿"""S12 - Tests for Priority Calibration Config and Matrix Generator."""
-import sys
+"""S12 - Tests for Priority Calibration Config and Matrix Generator."""
+
 import os
+import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pytest
 from app.context.calibration import (
-    PriorityCalibrationConfig,
     CalibrationMatrixGenerator,
+    PriorityCalibrationConfig,
 )
 
 

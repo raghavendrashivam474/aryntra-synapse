@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/test_s7_evidence_reuse.py
 
 Aryntra Synapse — Sprint 7
@@ -6,8 +6,9 @@ Evidence Reuse & Deduplication tests.
 """
 
 import pytest
+
+from app.context.evidence_store import EvidenceStore
 from app.retrieval.evidence_fingerprint import EvidenceFingerprint
-from app.context.evidence_store import EvidenceStore, ReuseMetrics
 
 
 @pytest.fixture
@@ -27,13 +28,11 @@ def make_chunks(texts=None):
             "Einstein developed general relativity.",
             "Photosynthesis converts light to energy.",
         ]
-    return [
-        {"chunk_id": f"chunk_{i}", "text": t, "score": round(0.9 - i * 0.1, 4)}
-        for i, t in enumerate(texts)
-    ]
+    return [{"chunk_id": f"chunk_{i}", "text": t, "score": round(0.9 - i * 0.1, 4)} for i, t in enumerate(texts)]
 
 
 # ── Fingerprint Tests (1-5) ──────────────────────────────────────
+
 
 class TestFingerprint:
     def test_same_text_same_fingerprint(self, fp):
@@ -56,7 +55,7 @@ class TestFingerprint:
         ]
         base_fp = fp.fingerprint(base)
         for v in variants:
-            assert fp.fingerprint(v) == base_fp, f"Failed for: {repr(v)}"
+            assert fp.fingerprint(v) == base_fp, f"Failed for: {v!r}"
 
     def test_different_meaningful_content(self, fp):
         a = fp.fingerprint("FAISS is a vector search library.")
@@ -70,6 +69,7 @@ class TestFingerprint:
 
 
 # ── Evidence Store Tests (6-10) ──────────────────────────────────
+
 
 class TestEvidenceStore:
     def test_new_evidence_inserted(self, store):
@@ -116,13 +116,14 @@ class TestEvidenceStore:
 
 # ── Integration Tests (11-14) ────────────────────────────────────
 
+
 class TestIntegration:
     def test_reused_evidence_reaches_pipeline(self, store):
         """Test 11: Reused evidence reaches the normal S6 pipeline."""
         chunks = make_chunks(["Pipeline evidence."])
-        tagged, _ = store.process(chunks)
+        _tagged, _ = store.process(chunks)
         store.process(chunks)
-        tagged2, metrics2 = store.process(chunks)
+        tagged2, _metrics2 = store.process(chunks)
         assert len(tagged2) == 1
         assert tagged2[0]["chunk_id"] == "chunk_0"
         assert tagged2[0]["text"] == "Pipeline evidence."
@@ -149,6 +150,7 @@ class TestIntegration:
     def test_existing_tests_remain_green(self, store):
         """Test 14: S7 additions do not break existing workspace patterns."""
         from app.context.workspace import EvidenceWorkspace
+
         chunks = make_chunks(["WS test A.", "WS test B.", "WS test C."])
         tagged, _ = store.process(chunks)
         ws = EvidenceWorkspace(tagged)
@@ -160,6 +162,7 @@ class TestIntegration:
 
 
 # ── Edge Cases ────────────────────────────────────────────────────
+
 
 class TestEdgeCases:
     def test_empty_batch(self, store):

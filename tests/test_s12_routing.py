@@ -1,10 +1,11 @@
-﻿"""S12 - Tests for Confidence Guard and Fallback Routing."""
-import sys
+"""S12 - Tests for Confidence Guard and Fallback Routing."""
+
 import os
+import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pytest
-from app.strategy.fallback import ConfidenceGuard, FallbackDecision, ConfidenceAssessment
+from app.strategy.fallback import ConfidenceGuard, FallbackDecision
 
 
 class TestConfidenceGuard:
@@ -18,12 +19,27 @@ class TestConfidenceGuard:
 
     def test_high_confidence_trust(self):
         ranked = [
-            {"chunk_id": "c1", "text": "priority score alpha beta gamma semantic lexical",
-             "priority_score": 0.9, "priority_class": "HIGH", "state": "active"},
-            {"chunk_id": "c2", "text": "unrelated filler text about databases",
-             "priority_score": 0.1, "priority_class": "LOW", "state": "retained"},
-            {"chunk_id": "c3", "text": "more filler about cloud computing",
-             "priority_score": 0.05, "priority_class": "LOW", "state": "retained"},
+            {
+                "chunk_id": "c1",
+                "text": "priority score alpha beta gamma semantic lexical",
+                "priority_score": 0.9,
+                "priority_class": "HIGH",
+                "state": "active",
+            },
+            {
+                "chunk_id": "c2",
+                "text": "unrelated filler text about databases",
+                "priority_score": 0.1,
+                "priority_class": "LOW",
+                "state": "retained",
+            },
+            {
+                "chunk_id": "c3",
+                "text": "more filler about cloud computing",
+                "priority_score": 0.05,
+                "priority_class": "LOW",
+                "state": "retained",
+            },
         ] * 10
         result = self.guard.assess("priority score alpha", ranked)
         assert result.decision == FallbackDecision.TRUST_PRIORITY
@@ -31,19 +47,26 @@ class TestConfidenceGuard:
 
     def test_low_confidence_fallback(self):
         ranked = [
-            {"chunk_id": "c1", "text": "random text",
-             "priority_score": 0.12, "priority_class": "LOW", "state": "retained"},
-            {"chunk_id": "c2", "text": "more random",
-             "priority_score": 0.11, "priority_class": "LOW", "state": "retained"},
+            {
+                "chunk_id": "c1",
+                "text": "random text",
+                "priority_score": 0.12,
+                "priority_class": "LOW",
+                "state": "retained",
+            },
+            {
+                "chunk_id": "c2",
+                "text": "more random",
+                "priority_score": 0.11,
+                "priority_class": "LOW",
+                "state": "retained",
+            },
         ]
         result = self.guard.assess("complex query about priority", ranked)
         assert result.decision in (FallbackDecision.FALLBACK_BROAD, FallbackDecision.FALLBACK_SKIP)
 
     def test_to_dict(self):
-        ranked = [
-            {"chunk_id": "c1", "text": "test",
-             "priority_score": 0.5, "priority_class": "HIGH"}
-        ] * 10
+        ranked = [{"chunk_id": "c1", "text": "test", "priority_score": 0.5, "priority_class": "HIGH"}] * 10
         result = self.guard.assess("test", ranked)
         d = result.to_dict()
         assert "decision" in d
@@ -52,10 +75,8 @@ class TestConfidenceGuard:
 
     def test_signals_populated(self):
         ranked = [
-            {"chunk_id": "c1", "text": "test query keywords",
-             "priority_score": 0.8, "priority_class": "HIGH"},
-            {"chunk_id": "c2", "text": "other text",
-             "priority_score": 0.3, "priority_class": "MEDIUM"},
+            {"chunk_id": "c1", "text": "test query keywords", "priority_score": 0.8, "priority_class": "HIGH"},
+            {"chunk_id": "c2", "text": "other text", "priority_score": 0.3, "priority_class": "MEDIUM"},
         ] * 10
         result = self.guard.assess("test query", ranked)
         assert "score_margin" in result.signals

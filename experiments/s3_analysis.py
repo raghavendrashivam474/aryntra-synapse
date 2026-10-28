@@ -34,7 +34,9 @@ def main():
     print("\n" + "=" * 90)
     print("  ARYNTRA SYNAPSE — S2 STATIC COMPRESSED VS S3 PROGRESSIVE COMPLEXITY COMPARISON")
     print("=" * 90)
-    print(f"{'ID':<5} | {'Ctrl Ctx':<9} | {'S3 Init':<9} | {'S3 Peak':<9} | {'S3 Cum':<9} | {'Steps':<5} | {'Calls':<5} | {'Ctrl Lat':<8} | {'S3 Lat':<8}")
+    print(
+        f"{'ID':<5} | {'Ctrl Ctx':<9} | {'S3 Init':<9} | {'S3 Peak':<9} | {'S3 Cum':<9} | {'Steps':<5} | {'Calls':<5} | {'Ctrl Lat':<8} | {'S3 Lat':<8}"
+    )
     print("-" * 90)
 
     total_ctrl_ctx = 0
@@ -72,7 +74,9 @@ def main():
         total_ctrl_lat += ctrl_lat
         total_s3_lat += s3_lat
 
-        print(f"{qid:<5} | {ctrl_ctx:<9} | {s3_init:<9} | {s3_peak:<9} | {s3_cum:<9} | {steps:<5} | {calls:<5} | {ctrl_lat:<8.2f} | {s3_lat:<8.2f}")
+        print(
+            f"{qid:<5} | {ctrl_ctx:<9} | {s3_init:<9} | {s3_peak:<9} | {s3_cum:<9} | {steps:<5} | {calls:<5} | {ctrl_lat:<8.2f} | {s3_lat:<8.2f}"
+        )
 
     n = len(shared_ids)
     avg_ctrl_ctx = total_ctrl_ctx / n
@@ -88,18 +92,28 @@ def main():
     cum_overhead = ((avg_s3_cum - avg_ctrl_ctx) / avg_ctrl_ctx) * 100 if avg_ctrl_ctx > 0 else 0
 
     print("-" * 90)
-    print(f"{'AVG':<5} | {avg_ctrl_ctx:<9.1f} | {avg_s3_init:<9.1f} | {avg_s3_peak:<9.1f} | {avg_s3_cum:<9.1f} | {avg_steps:<5.1f} | {avg_calls:<5.1f} | {avg_ctrl_lat:<8.2f} | {avg_s3_lat:<8.2f}")
+    print(
+        f"{'AVG':<5} | {avg_ctrl_ctx:<9.1f} | {avg_s3_init:<9.1f} | {avg_s3_peak:<9.1f} | {avg_s3_cum:<9.1f} | {avg_steps:<5.1f} | {avg_calls:<5.1f} | {avg_ctrl_lat:<8.2f} | {avg_s3_lat:<8.2f}"
+    )
     print("=" * 90)
 
     print("\n📊 RESEARCH METRICS SUMMARY:")
     print(f"  • Average Initial Context Reduction:  {init_reduction:.2f}% (Saved initial prompt budget)")
     print(f"  • Average Cumulative Prompt Overhead: {cum_overhead:.2f}% (Extra processed characters across all loops)")
     print(f"  • Context Sufficiency Distribution:")
-    print(f"      - Stage 1 (1 Chunk Only):       {steps_distribution[0]} queries ({steps_distribution[0]/n*100:.1f}%)")
-    print(f"      - Stage 2 (2 Chunks):            {steps_distribution[1]} queries ({steps_distribution[1]/n*100:.1f}%)")
-    print(f"      - Stage 3 (3 Chunks Exposed):    {steps_distribution[2]} queries ({steps_distribution[2]/n*100:.1f}%)")
+    print(
+        f"      - Stage 1 (1 Chunk Only):       {steps_distribution[0]} queries ({steps_distribution[0] / n * 100:.1f}%)"
+    )
+    print(
+        f"      - Stage 2 (2 Chunks):            {steps_distribution[1]} queries ({steps_distribution[1] / n * 100:.1f}%)"
+    )
+    print(
+        f"      - Stage 3 (3 Chunks Exposed):    {steps_distribution[2]} queries ({steps_distribution[2] / n * 100:.1f}%)"
+    )
     print(f"  • Average LLM Invocations:           {avg_calls:.2f} calls per query (Baseline Control = 1.00)")
-    print(f"  • Total Latency Ratio:               {avg_s3_lat/avg_ctrl_lat if avg_ctrl_lat > 0 else 1.00:.2f}x (S3 Progressive vs Control)")
+    print(
+        f"  • Total Latency Ratio:               {avg_s3_lat / avg_ctrl_lat if avg_ctrl_lat > 0 else 1.00:.2f}x (S3 Progressive vs Control)"
+    )
     print("=" * 90 + "\n")
 
 

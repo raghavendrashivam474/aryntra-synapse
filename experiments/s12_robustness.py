@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 12: Robustness & Ablation Framework (RQ4, RQ5)
 
 Compares configurations:
@@ -10,6 +10,7 @@ Compares configurations:
 
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import json
@@ -34,9 +35,11 @@ logger = logging.getLogger(__name__)
 # Test Data
 # =====================================================================
 
+
 def build_test_corpus(n: int = 25):
     """Build a test corpus with known answer-bearing chunks."""
     from experiments.s12_corpus_scaling import generate_corpus
+
     return generate_corpus(n, n_answer_bearing=3, seed=42)
 
 
@@ -131,7 +134,10 @@ def run_ablation_experiment() -> dict:
             else:
                 decision = selector.select(query, chunks)
                 processed, pm_dict = selector.execute_path(
-                    decision, query, chunks, engine,
+                    decision,
+                    query,
+                    chunks,
+                    engine,
                 )
                 path = decision.path.value
 
@@ -147,18 +153,14 @@ def run_ablation_experiment() -> dict:
             latency = time.perf_counter() - t0
 
             tracker.mark_prefilter(qid, {c.get("chunk_id", "") for c in processed})
-            if (cfg["priority"] and isinstance(processed, list)
-                    and processed and "priority_score" in processed[0]):
+            if cfg["priority"] and isinstance(processed, list) and processed and "priority_score" in processed[0]:
                 tracker.mark_priority(qid, processed)
             final_ids = {c.get("chunk_id", "") for c in processed[:5]}
             tracker.mark_final_context(qid, final_ids)
 
             rates = tracker.get_survival_rates(qid)
 
-            top3_ab = sum(
-                1 for c in processed[:3]
-                if c.get("chunk_id", "") in answer_ids
-            )
+            top3_ab = sum(1 for c in processed[:3] if c.get("chunk_id", "") in answer_ids)
 
             record = {
                 "query": query,
@@ -172,7 +174,7 @@ def run_ablation_experiment() -> dict:
             cfg_results.append(record)
 
             print(
-                f"  [{qi+1}/{len(QUERIES)}] "
+                f"  [{qi + 1}/{len(QUERIES)}] "
                 f"path={path:<25} "
                 f"lat={latency:.4f}s "
                 f"top3ab={top3_ab} "

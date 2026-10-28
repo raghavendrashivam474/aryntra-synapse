@@ -1,4 +1,4 @@
-﻿"""
+"""
 S19 — Provenance & Decision Archaeology tests.
 
 These tests verify:
@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from app.evidence.provenance import (
     AdjudicationRecord,
     DecisionAction,
@@ -26,7 +24,6 @@ from app.evidence.provenance import (
     FinalStatus,
     NullDecisionRecorder,
 )
-
 
 # ---------------------------------------------------------------------------
 # Data model
@@ -137,9 +134,7 @@ class TestDecisionRecordModel:
     def test_deterministic_event_ordering(self):
         rec = DecisionRecord()
         for i in range(5):
-            rec.events.append(
-                DecisionEvent(stage="ranking", action="select", reason=f"r{i}")
-            )
+            rec.events.append(DecisionEvent(stage="ranking", action="select", reason=f"r{i}"))
         rec2 = DecisionRecord.from_json(rec.to_json())
         assert [e.reason for e in rec2.events] == [f"r{i}" for i in range(5)]
 
@@ -278,8 +273,9 @@ class TestRecorderRobustness:
     def test_recorder_never_raises_on_bad_input(self):
         r = DecisionRecorder(query="q")
         # Non-string inputs should not blow up (str-coerced)
-        r.record_event(stage=DecisionStage.RANKING.value, action=DecisionAction.SELECT.value,
-                       reason="ok", evidence_id=None)
+        r.record_event(
+            stage=DecisionStage.RANKING.value, action=DecisionAction.SELECT.value, reason="ok", evidence_id=None
+        )
         r.record_temporal("c1", True, "ok", metadata=None)
         r.record_relationship("c1", "c2", "supersede", "ok", metadata=None)
         # Should have events but never crashed
@@ -342,8 +338,7 @@ class TestS19BenchmarkScenarios:
         r.record_selection("c2", "temporally compatible")
         r.record_rejection("c1", "temporal mismatch")
         rec = self._finalized(r)
-        assert any(e.action == DecisionAction.TEMPORAL_MISMATCH.value
-                   for e in rec.temporal_events)
+        assert any(e.action == DecisionAction.TEMPORAL_MISMATCH.value for e in rec.temporal_events)
 
     def test_p4_version_chain_supersession(self):
         r = DecisionRecorder(query="policy latest")
@@ -354,8 +349,7 @@ class TestS19BenchmarkScenarios:
         r.record_rejection("c1", "superseded")
         r.record_rejection("c2", "superseded")
         rec = self._finalized(r)
-        supers = [e for e in rec.relationship_events
-                  if e.action == DecisionAction.SUPERSEDE.value]
+        supers = [e for e in rec.relationship_events if e.action == DecisionAction.SUPERSEDE.value]
         assert len(supers) == 2
 
     def test_p5_contradiction(self):
@@ -402,8 +396,7 @@ class TestS19BenchmarkScenarios:
         r.record_adjudication_invoked(["c1"], reason="deterministic insufficient")
         r.record_adjudication_result("accept", 0.95, "LLM accepted")
         r.record_safety_veto("deterministic safety: temporal invariant violated")
-        rec = r.finalize(status=FinalStatus.UNCERTAIN.value,
-                         reason="safety veto overrides LLM accept")
+        rec = r.finalize(status=FinalStatus.UNCERTAIN.value, reason="safety veto overrides LLM accept")
 
         # Trace shows accept
         adj_events = rec.events_for_stage(DecisionStage.ADJUDICATION.value)

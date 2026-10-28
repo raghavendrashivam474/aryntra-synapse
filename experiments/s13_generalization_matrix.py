@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 13: Master Generalization and Failure Mapping Matrix (Optimized)
 
 Executes systematic multi-dimensional evaluation with cached vector embeddings:
@@ -59,7 +59,7 @@ def classify_failure(
     top_k_recall: float,
     survival_rate: float,
     guard_triggered: bool,
-    is_contradictory_top: bool = False
+    is_contradictory_top: bool = False,
 ) -> str:
     if is_contradictory_top:
         return FailureSeverity.F4_DANGEROUS_UNSUPPORTED
@@ -78,7 +78,7 @@ def generate_controlled_corpus(
     target_size: int,
     distractor_type: str = "D1_random",
     seed: int = 42,
-    reused_ratio: float = 0.2
+    reused_ratio: float = 0.2,
 ) -> Tuple[List[Dict[str, Any]], Set[str]]:
     rng = random.Random(seed)
     chunks = []
@@ -87,15 +87,17 @@ def generate_controlled_corpus(
     expected_answers = query_item.get("expected_answers", [])
     for i, ans_text in enumerate(expected_answers):
         cid = f"ab_{query_item['id']}_{i}"
-        is_reused = (rng.random() < reused_ratio)
-        chunks.append({
-            "chunk_id": cid,
-            "text": ans_text,
-            "source": "ground_truth",
-            "category": "answer_bearing",
-            "reused": is_reused,
-            "score": 0.95
-        })
+        is_reused = rng.random() < reused_ratio
+        chunks.append(
+            {
+                "chunk_id": cid,
+                "text": ans_text,
+                "source": "ground_truth",
+                "category": "answer_bearing",
+                "reused": is_reused,
+                "score": 0.95,
+            }
+        )
         answer_ids.add(cid)
 
     remaining = max(0, target_size - len(chunks))
@@ -104,16 +106,18 @@ def generate_controlled_corpus(
     for i in range(remaining):
         base_text = pool[i % len(pool)]
         cid = f"dist_{distractor_type}_{i}"
-        suffix = f" [ref {i+1}]" if i >= len(pool) else ""
-        is_reused = (rng.random() < reused_ratio)
-        chunks.append({
-            "chunk_id": cid,
-            "text": base_text + suffix,
-            "source": distractor_type,
-            "category": "distractor",
-            "reused": is_reused,
-            "score": 0.60
-        })
+        suffix = f" [ref {i + 1}]" if i >= len(pool) else ""
+        is_reused = rng.random() < reused_ratio
+        chunks.append(
+            {
+                "chunk_id": cid,
+                "text": base_text + suffix,
+                "source": distractor_type,
+                "category": "distractor",
+                "reused": is_reused,
+                "score": 0.60,
+            }
+        )
 
     rng.shuffle(chunks)
     return chunks, answer_ids
@@ -141,8 +145,15 @@ class GeneralizationHarness:
     def run_full_matrix(
         self,
         corpus_sizes: List[int] = [5, 25, 50, 100, 150, 250],
-        distractor_types: List[str] = ["D1_random", "D2_topic", "D3_lexical", "D4_semantic", "D5_partial", "D6_contradictory"],
-        config_names: Optional[List[str]] = None
+        distractor_types: List[str] = [
+            "D1_random",
+            "D2_topic",
+            "D3_lexical",
+            "D4_semantic",
+            "D5_partial",
+            "D6_contradictory",
+        ],
+        config_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         if config_names is None:
             config_names = list(self.configurations.keys())
@@ -155,7 +166,7 @@ class GeneralizationHarness:
                 "corpus_sizes": corpus_sizes,
                 "distractor_types": distractor_types,
                 "configurations": config_names,
-                "query_count": len(self.query_suite)
+                "query_count": len(self.query_suite),
             },
             "evaluations": [],
             "summary_by_corpus": {},
@@ -168,8 +179,8 @@ class GeneralizationHarness:
                 "guard_triggers": 0,
                 "recoverable_failures": 0,
                 "recovered_failures": 0,
-                "recovery_rate": 0.0
-            }
+                "recovery_rate": 0.0,
+            },
         }
 
         total_trials = len(corpus_sizes) * len(distractor_types) * len(self.query_suite) * len(config_names)
@@ -184,7 +195,7 @@ class GeneralizationHarness:
                         distractor_pool=self.distractor_pool,
                         target_size=c_size,
                         distractor_type=d_type,
-                        seed=42 + c_size
+                        seed=42 + c_size,
                     )
 
                     q_text = q_item["query"]
@@ -195,7 +206,7 @@ class GeneralizationHarness:
                             embedding_model=self.embedder,
                             weights=weights,
                             query_cache=self.cache,
-                            evidence_cache=self.cache
+                            evidence_cache=self.cache,
                         )
 
                         qid = f"{q_item['id']}_c{c_size}_{d_type}_{cfg_name}"
@@ -209,7 +220,7 @@ class GeneralizationHarness:
                         # Routing & Guard
                         strategy_dec = self.selector.select(q_text, ranked)
                         guard_assess = self.guard.assess(q_text, ranked, metrics.to_dict())
-                        guard_triggered = (guard_assess.decision != FallbackDecision.TRUST_PRIORITY)
+                        guard_triggered = guard_assess.decision != FallbackDecision.TRUST_PRIORITY
 
                         self.tracker.mark_prefilter(qid, {c.get("chunk_id", "") for c in ranked})
                         self.tracker.mark_priority(qid, ranked)
@@ -233,7 +244,7 @@ class GeneralizationHarness:
                             top_k_recall=top_k_recall,
                             survival_rate=survival_rates.get("final_rate", 0.0),
                             guard_triggered=guard_triggered,
-                            is_contradictory_top=is_contradictory_top
+                            is_contradictory_top=is_contradictory_top,
                         )
 
                         recovered = False
@@ -259,7 +270,7 @@ class GeneralizationHarness:
                             "failure_severity": severity,
                             "recovered": recovered,
                             "high_count": metrics.high_priority_count,
-                            "avg_score": round(metrics.average_priority_score, 4)
+                            "avg_score": round(metrics.average_priority_score, 4),
                         }
 
                         results["evaluations"].append(eval_record)
@@ -285,7 +296,9 @@ class GeneralizationHarness:
         for ev in evals:
             s = ev["failure_severity"]
             sev_counts[s] = sev_counts.get(s, 0) + 1
-        results["failure_severity_distribution"] = {k: {"count": v, "ratio": round(v / n_total, 4)} for k, v in sev_counts.items()}
+        results["failure_severity_distribution"] = {
+            k: {"count": v, "ratio": round(v / n_total, 4)} for k, v in sev_counts.items()
+        }
 
         failures = [ev for ev in evals if not ev["top1_is_answer_bearing"]]
         recoverable = [ev for ev in failures if ev["top_k_recall"] > 0]
@@ -299,7 +312,7 @@ class GeneralizationHarness:
             "guard_triggers": len(triggers),
             "recoverable_failures": len(recoverable),
             "recovered_failures": len(recovered),
-            "recovery_rate": round(rec_rate, 4)
+            "recovery_rate": round(rec_rate, 4),
         }
 
         # By Corpus Size
@@ -316,9 +329,15 @@ class GeneralizationHarness:
                 "avg_recall": round(sum(r["top_k_recall"] for r in records) / n, 4),
                 "avg_latency_ms": round(sum(r["latency_ms"] for r in records) / n, 2),
                 "guard_trigger_rate": round(sum(1 for r in records if r["guard_triggered"]) / n, 4),
-                "f0_no_failure_rate": round(sum(1 for r in records if r["failure_severity"] == FailureSeverity.F0_NO_FAILURE) / n, 4),
-                "f3_pruned_rate": round(sum(1 for r in records if r["failure_severity"] == FailureSeverity.F3_EVIDENCE_PRUNED) / n, 4),
-                "f4_dangerous_rate": round(sum(1 for r in records if r["failure_severity"] == FailureSeverity.F4_DANGEROUS_UNSUPPORTED) / n, 4)
+                "f0_no_failure_rate": round(
+                    sum(1 for r in records if r["failure_severity"] == FailureSeverity.F0_NO_FAILURE) / n, 4
+                ),
+                "f3_pruned_rate": round(
+                    sum(1 for r in records if r["failure_severity"] == FailureSeverity.F3_EVIDENCE_PRUNED) / n, 4
+                ),
+                "f4_dangerous_rate": round(
+                    sum(1 for r in records if r["failure_severity"] == FailureSeverity.F4_DANGEROUS_UNSUPPORTED) / n, 4
+                ),
             }
 
         # By Distractor Type
@@ -333,7 +352,9 @@ class GeneralizationHarness:
                 "top1_accuracy": round(sum(1 for r in records if r["top1_is_answer_bearing"]) / n, 4),
                 "avg_recall": round(sum(r["top_k_recall"] for r in records) / n, 4),
                 "guard_trigger_rate": round(sum(1 for r in records if r["guard_triggered"]) / n, 4),
-                "f4_dangerous_count": sum(1 for r in records if r["failure_severity"] == FailureSeverity.F4_DANGEROUS_UNSUPPORTED)
+                "f4_dangerous_count": sum(
+                    1 for r in records if r["failure_severity"] == FailureSeverity.F4_DANGEROUS_UNSUPPORTED
+                ),
             }
 
         # By Query Complexity
@@ -347,7 +368,7 @@ class GeneralizationHarness:
                 "count": n,
                 "top1_accuracy": round(sum(1 for r in records if r["top1_is_answer_bearing"]) / n, 4),
                 "avg_recall": round(sum(r["top_k_recall"] for r in records) / n, 4),
-                "avg_survival_rate": round(sum(r["survival_rate"] for r in records) / n, 4)
+                "avg_survival_rate": round(sum(r["survival_rate"] for r in records) / n, 4),
             }
 
         # By Configuration
@@ -361,7 +382,7 @@ class GeneralizationHarness:
                 "count": n,
                 "top1_accuracy": round(sum(1 for r in records if r["top1_is_answer_bearing"]) / n, 4),
                 "avg_recall": round(sum(r["top_k_recall"] for r in records) / n, 4),
-                "avg_latency_ms": round(sum(r["latency_ms"] for r in records) / n, 2)
+                "avg_latency_ms": round(sum(r["latency_ms"] for r in records) / n, 2),
             }
 
 
@@ -374,31 +395,50 @@ def run_s13_generalization_experiment():
     results = harness.run_full_matrix(
         corpus_sizes=[5, 25, 50, 100, 150, 250],
         distractor_types=["D1_random", "D2_topic", "D3_lexical", "D4_semantic", "D5_partial", "D6_contradictory"],
-        config_names=["calibrated_blend", "semantic_only", "lexical_only", "semantic_lexical", "semantic_reuse", "lexical_reuse"]
+        config_names=[
+            "calibrated_blend",
+            "semantic_only",
+            "lexical_only",
+            "semantic_lexical",
+            "semantic_reuse",
+            "lexical_reuse",
+        ],
     )
 
     out_file = os.path.join(os.path.dirname(__file__), "S13_results.json")
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\nCompleted {len(results['evaluations'])} systematic evaluations in {results['metadata']['total_duration_s']}s")
+    print(
+        f"\nCompleted {len(results['evaluations'])} systematic evaluations in {results['metadata']['total_duration_s']}s"
+    )
     print(f"Results saved to: {out_file}")
 
     print("\n--- Corpus Scaling Performance ---")
     for c_key, data in results["summary_by_corpus"].items():
-        print(f"  {c_key:<6}: Top-1={data['top1_accuracy']*100:5.1f}% | Recall={data['avg_recall']*100:5.1f}% | Lat={data['avg_latency_ms']:6.2f}ms | GuardTrigger={data['guard_trigger_rate']*100:4.1f}%")
+        print(
+            f"  {c_key:<6}: Top-1={data['top1_accuracy'] * 100:5.1f}% | Recall={data['avg_recall'] * 100:5.1f}% | Lat={data['avg_latency_ms']:6.2f}ms | GuardTrigger={data['guard_trigger_rate'] * 100:4.1f}%"
+        )
 
     print("\n--- Distractor Taxonomy Vulnerability ---")
     for d_key, data in results["summary_by_distractor"].items():
-        print(f"  {d_key:<18}: Top-1={data['top1_accuracy']*100:5.1f}% | Recall={data['avg_recall']*100:5.1f}% | GuardTrigger={data['guard_trigger_rate']*100:4.1f}% | F4={data['f4_dangerous_count']}")
+        print(
+            f"  {d_key:<18}: Top-1={data['top1_accuracy'] * 100:5.1f}% | Recall={data['avg_recall'] * 100:5.1f}% | GuardTrigger={data['guard_trigger_rate'] * 100:4.1f}% | F4={data['f4_dangerous_count']}"
+        )
 
     print("\n--- Configuration Ranking ---")
-    for cfg_key, data in sorted(results["summary_by_config"].items(), key=lambda x: x[1]["top1_accuracy"], reverse=True):
-        print(f"  {cfg_key:<20}: Top-1={data['top1_accuracy']*100:5.1f}% | Recall={data['avg_recall']*100:5.1f}% | Lat={data['avg_latency_ms']:6.2f}ms")
+    for cfg_key, data in sorted(
+        results["summary_by_config"].items(), key=lambda x: x[1]["top1_accuracy"], reverse=True
+    ):
+        print(
+            f"  {cfg_key:<20}: Top-1={data['top1_accuracy'] * 100:5.1f}% | Recall={data['avg_recall'] * 100:5.1f}% | Lat={data['avg_latency_ms']:6.2f}ms"
+        )
 
     print("\n--- Recovery Metrics ---")
     rec = results["recovery_metrics"]
-    print(f"  Total Failures: {rec['total_failures']} | Recoverable: {rec['recoverable_failures']} | Recovered: {rec['recovered_failures']} | Recovery Rate: {rec['recovery_rate']*100:.1f}%")
+    print(
+        f"  Total Failures: {rec['total_failures']} | Recoverable: {rec['recoverable_failures']} | Recovered: {rec['recovered_failures']} | Recovery Rate: {rec['recovery_rate'] * 100:.1f}%"
+    )
     print("=" * 80)
 
 

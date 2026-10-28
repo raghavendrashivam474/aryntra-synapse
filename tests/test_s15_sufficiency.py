@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 15 Tests
 Minimum Sufficient Evidence Controller.
 
@@ -11,28 +11,31 @@ Tests cover:
   - Backward compatibility (assembler without evaluator)
   - Safety bounds (no infinite expansion)
 """
-import pytest
-from app.evidence.sufficiency import (
-    SufficiencyEvaluator,
-    SufficiencyDecision,
-    SufficiencyResult,
-)
-from app.evidence.config import S15SufficiencyConfig, S14ResolutionConfig
-from app.evidence.coverage import CoverageAnalyzer, CoverageReport
-from app.evidence.contradiction import ContradictionDetector, ConflictReport
-from app.evidence.assembly import EvidenceAssembler
-from app.evidence.state import EvidenceState
 
+import pytest
+
+from app.evidence.assembly import EvidenceAssembler
+from app.evidence.config import S14ResolutionConfig, S15SufficiencyConfig
+from app.evidence.contradiction import ConflictReport, ContradictionDetector
+from app.evidence.coverage import CoverageAnalyzer
+from app.evidence.state import EvidenceState
+from app.evidence.sufficiency import (
+    SufficiencyDecision,
+    SufficiencyEvaluator,
+)
 
 # ── Fixtures ──
+
 
 @pytest.fixture
 def evaluator():
     return SufficiencyEvaluator()
 
+
 @pytest.fixture
 def coverage_analyzer():
     return CoverageAnalyzer()
+
 
 @pytest.fixture
 def contradiction_detector():
@@ -45,8 +48,8 @@ def _chunk(chunk_id, text, score=0.7):
 
 # ── 1. Basic sufficiency decisions ──
 
-class TestSufficiencyDecisions:
 
+class TestSufficiencyDecisions:
     def test_sufficient_high_coverage_no_conflict(self, evaluator, coverage_analyzer):
         query = "What caused the server outage?"
         chunks = [_chunk("c1", "The server outage was caused by a memory leak in the auth service.")]
@@ -91,8 +94,8 @@ class TestSufficiencyDecisions:
 
 # ── 2. Signal tests ──
 
-class TestSignals:
 
+class TestSignals:
     def test_coverage_signal(self, evaluator, coverage_analyzer):
         query = "What caused the server outage?"
         chunks = [_chunk("c1", "The cause of the server outage was a power failure.")]
@@ -154,8 +157,8 @@ class TestSignals:
 
 # ── 3. Conflict veto ──
 
-class TestConflictVeto:
 
+class TestConflictVeto:
     def test_high_conflict_blocks_sufficient(self, evaluator, coverage_analyzer):
         query = "When was the system restored?"
         chunks = [_chunk("c1", "Restored in 2024.")]
@@ -170,8 +173,8 @@ class TestConflictVeto:
 
 # ── 4. Config presets ──
 
-class TestConfigPresets:
 
+class TestConfigPresets:
     def test_conservative_higher_threshold(self):
         cfg = S15SufficiencyConfig.conservative()
         assert cfg.sufficient_threshold > S15SufficiencyConfig.balanced().sufficient_threshold
@@ -188,8 +191,8 @@ class TestConfigPresets:
 
 # ── 5. Integration with EvidenceAssembler ──
 
-class TestAssemblerIntegration:
 
+class TestAssemblerIntegration:
     def test_assembler_without_evaluator_backward_compat(self, coverage_analyzer):
         """S14 behavior preserved when no evaluator is provided."""
         assembler = EvidenceAssembler(coverage_analyzer=coverage_analyzer)
@@ -242,8 +245,8 @@ class TestAssemblerIntegration:
 
 # ── 6. Safety bounds ──
 
-class TestSafetyBounds:
 
+class TestSafetyBounds:
     def test_max_chunks_respected(self):
         """Assembly never exceeds max_assembly_chunks."""
         config = S14ResolutionConfig(max_assembly_chunks=3, max_assembly_iterations=3)
@@ -261,10 +264,7 @@ class TestSafetyBounds:
         config = S14ResolutionConfig(max_assembly_iterations=2)
         assembler = EvidenceAssembler.with_sufficiency(s14_config=config)
         query = "What caused the outage and when and where and how?"
-        chunks = [
-            _chunk(f"c{i}", f"Chunk {i} about cause and time.", 0.9 - i * 0.05)
-            for i in range(8)
-        ]
+        chunks = [_chunk(f"c{i}", f"Chunk {i} about cause and time.", 0.9 - i * 0.05) for i in range(8)]
         result = assembler.assemble(query, chunks)
         assert result.metrics.iterations <= 2
 
@@ -278,8 +278,8 @@ class TestSafetyBounds:
 
 # ── 7. Regression: all S14 tests must still pass ──
 
-class TestBackwardCompatibility:
 
+class TestBackwardCompatibility:
     def test_s14_default_assembler_unchanged(self):
         """Default EvidenceAssembler() without evaluator behaves as S14."""
         assembler = EvidenceAssembler()
@@ -292,7 +292,9 @@ class TestBackwardCompatibility:
         result = assembler.assemble(query, chunks)
         # S14 metrics should work
         assert result.metrics.assembly_decision in (
-            "assembled_sufficient", "partial_coverage", "insufficient",
+            "assembled_sufficient",
+            "partial_coverage",
+            "insufficient",
             "conflict_detected_unresolved",
         )
 

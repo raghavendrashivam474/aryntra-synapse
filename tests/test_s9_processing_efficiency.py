@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/test_s9_processing_efficiency.py
 
 Aryntra Synapse — Sprint 9
@@ -7,20 +7,18 @@ lexical fast-path gating, and engine integration.
 """
 
 import numpy as np
-import pytest
-from app.optimization.embedding_cache import EmbeddingCache, fingerprint_text, _fingerprint
-from app.optimization.semantic_gate import LexicalSemanticGate, SemanticGate, FastPathDecision
+
 from app.context.evidence_priority import (
     EvidencePriorityEngine,
     EvidencePriorityWeights,
-    PriorityClass,
-    PriorityMetrics,
 )
-
+from app.optimization.embedding_cache import EmbeddingCache, _fingerprint, fingerprint_text
+from app.optimization.semantic_gate import LexicalSemanticGate
 
 # ==============================================================================
 # 1. Embedding Cache Tests
 # ==============================================================================
+
 
 def test_fingerprint_deterministic():
     assert _fingerprint("hello world") == fingerprint_text("hello world")
@@ -84,6 +82,7 @@ def test_cache_lru_eviction():
 # 2. Lexical Fast-Path Gate Tests
 # ==============================================================================
 
+
 def test_gate_high_confidence_bypass():
     gate = LexicalSemanticGate(high_confidence=0.5, low_confidence=0.1)
     query = "architecture core pipeline"
@@ -120,6 +119,7 @@ def test_gate_ambiguous_requires_semantic():
 # ==============================================================================
 # 3. Engine Integration Tests (S8 with S9 optimizations)
 # ==============================================================================
+
 
 class MockEmbedder:
     def __init__(self):

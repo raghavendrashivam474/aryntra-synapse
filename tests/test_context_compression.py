@@ -1,30 +1,31 @@
-﻿"""
+"""
 Tests for S2 Context Compressor
 
 Run with:
     pytest tests/test_context_compression.py -v
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.context.compressor import (
-    compress_chunks,
-    build_compressed_context,
+    _extract_sentences,
     _normalize_whitespace,
     _remove_structural_markers,
-    _truncate_at_sentence,
-    _extract_sentences,
     _sentence_similarity,
+    _truncate_at_sentence,
+    build_compressed_context,
+    compress_chunks,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def sample_chunks():
@@ -67,6 +68,7 @@ def single_chunk():
 # Whitespace normalization
 # ---------------------------------------------------------------------------
 
+
 class TestWhitespaceNormalization:
     def test_collapses_excess_newlines(self):
         text = "line1\n\n\n\n\nline2"
@@ -89,6 +91,7 @@ class TestWhitespaceNormalization:
 # ---------------------------------------------------------------------------
 # Structural marker removal
 # ---------------------------------------------------------------------------
+
 
 class TestStructuralMarkerRemoval:
     def test_removes_source_markers(self):
@@ -116,6 +119,7 @@ class TestStructuralMarkerRemoval:
 # ---------------------------------------------------------------------------
 # Sentence truncation
 # ---------------------------------------------------------------------------
+
 
 class TestSentenceTruncation:
     def test_short_text_unchanged(self):
@@ -145,6 +149,7 @@ class TestSentenceTruncation:
 # Sentence extraction
 # ---------------------------------------------------------------------------
 
+
 class TestSentenceExtraction:
     def test_splits_sentences(self):
         text = "First. Second. Third."
@@ -164,6 +169,7 @@ class TestSentenceExtraction:
 # ---------------------------------------------------------------------------
 # Sentence similarity
 # ---------------------------------------------------------------------------
+
 
 class TestSentenceSimilarity:
     def test_identical_sentences(self):
@@ -185,6 +191,7 @@ class TestSentenceSimilarity:
 # Compress chunks (integration)
 # ---------------------------------------------------------------------------
 
+
 class TestCompressChunks:
     def test_empty_input(self, empty_chunks):
         result = compress_chunks(empty_chunks)
@@ -204,7 +211,7 @@ class TestCompressChunks:
     def test_deterministic_output(self, sample_chunks):
         r1 = compress_chunks(sample_chunks)
         r2 = compress_chunks(sample_chunks)
-        for a, b in zip(r1, r2):
+        for a, b in zip(r1, r2, strict=False):
             assert a["text"] == b["text"]
             assert a["chunk_id"] == b["chunk_id"]
 
@@ -226,6 +233,7 @@ class TestCompressChunks:
 
     def test_does_not_mutate_input(self, sample_chunks):
         import copy
+
         original = copy.deepcopy(sample_chunks)
         compress_chunks(sample_chunks)
         assert sample_chunks == original
@@ -234,6 +242,7 @@ class TestCompressChunks:
 # ---------------------------------------------------------------------------
 # Build compressed context (full pipeline)
 # ---------------------------------------------------------------------------
+
 
 class TestBuildCompressedContext:
     def test_empty_returns_empty(self):

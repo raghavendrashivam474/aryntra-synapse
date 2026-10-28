@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 16 Benchmark
 Temporal & Version-Aware Evidence Selection Evaluation.
 
@@ -8,6 +8,7 @@ Compares:
 
 Evaluates scenarios T1 to T8 to measure exact research metrics.
 """
+
 import sys
 import os
 from pathlib import Path
@@ -28,6 +29,7 @@ from app.evidence.config import S15SufficiencyConfig, S16TemporalConfig
 
 # ── Test Corpus Definition ──────────────────────────────────────────
 
+
 def _c(cid: str, text: str, score: float = 0.8, **kwargs) -> Dict[str, Any]:
     chunk = {
         "chunk_id": cid,
@@ -47,7 +49,7 @@ BENCHMARK_CASES = [
         "query": "What is the company's current pricing for the Pro plan?",
         "chunks": [
             _c("T1_c1", "In 2026, the Pro plan is $30/month.", 0.85, timestamp="2026-01-01"),
-            _c("T1_c2", "In 2022, the Pro plan was $20/month.", 0.90), # higher semantic score, older info
+            _c("T1_c2", "In 2022, the Pro plan was $20/month.", 0.90),  # higher semantic score, older info
         ],
         "expected_top_1": "T1_c1",
         "expected_target_ids": ["T1_c1"],
@@ -59,7 +61,7 @@ BENCHMARK_CASES = [
         "query": "What was the pricing back in 2022?",
         "chunks": [
             _c("T2_c1", "In 2026, the Pro plan is $30/month.", 0.95, timestamp="2026-01-01"),
-            _c("T2_c2", "In 2022, the Pro plan was $20/month.", 0.80), # lower semantic, older info (correct match)
+            _c("T2_c2", "In 2022, the Pro plan was $20/month.", 0.80),  # lower semantic, older info (correct match)
         ],
         "expected_top_1": "T2_c2",
         "expected_target_ids": ["T2_c2"],
@@ -83,8 +85,16 @@ BENCHMARK_CASES = [
         "category": "T4_supersession",
         "query": "What is the active policy on remote work?",
         "chunks": [
-            _c("T4_c1", "Remote work policy v2 (2025) replaces v1. Remote work is fully approved.", 0.82, version="2", supersedes="1"),
-            _c("T4_c2", "Remote work policy v1 (2023). Remote work requires senior VP approval.", 0.90), # higher semantic, superseded
+            _c(
+                "T4_c1",
+                "Remote work policy v2 (2025) replaces v1. Remote work is fully approved.",
+                0.82,
+                version="2",
+                supersedes="1",
+            ),
+            _c(
+                "T4_c2", "Remote work policy v1 (2023). Remote work requires senior VP approval.", 0.90
+            ),  # higher semantic, superseded
         ],
         "expected_top_1": "T4_c1",
         "expected_target_ids": ["T4_c1"],
@@ -96,7 +106,9 @@ BENCHMARK_CASES = [
         "query": "What policy was in effect during February 2026?",
         "chunks": [
             _c("T5_c1", "Policy published January 2026. Effective from 2026-03-01 the rate increases.", 0.88),
-            _c("T5_c2", "Policy valid from 2025-01-01 until 2026-02-28. The rate remains standard.", 0.82), # correct for Feb 2026
+            _c(
+                "T5_c2", "Policy valid from 2025-01-01 until 2026-02-28. The rate remains standard.", 0.82
+            ),  # correct for Feb 2026
         ],
         "expected_top_1": "T5_c2",
         "expected_target_ids": ["T5_c2"],
@@ -107,7 +119,9 @@ BENCHMARK_CASES = [
         "category": "T6_unknown",
         "query": "Explain how the server authentication protocol works.",
         "chunks": [
-            _c("T6_c1", "Authentication uses SHA-256 signatures with a timestamp validation window.", 0.85), # missing temporal metadata (must not be suppressed)
+            _c(
+                "T6_c1", "Authentication uses SHA-256 signatures with a timestamp validation window.", 0.85
+            ),  # missing temporal metadata (must not be suppressed)
             _c("T6_c2", "Older servers used MD5 hashes which are now deprecated.", 0.80, timestamp="2018-05-12"),
         ],
         "expected_top_1": "T6_c1",
@@ -119,10 +133,10 @@ BENCHMARK_CASES = [
         "category": "T7_mixed",
         "query": "What is the active pricing tier today?",
         "chunks": [
-            _c("T7_c1", "Active pricing for Pro is $30/month as of 2025.", 0.85, timestamp="2025-01-01"), # target
-            _c("T7_c2", "In 2020, Pro pricing was $15/month.", 0.80), # old
-            _c("T7_c3", "The server room temperature must be kept at 20C.", 0.15), # irrelevant
-            _c("T7_c4", "Active pricing for Pro is $25/month.", 0.82, version="1", superseded="yes"), # superseded
+            _c("T7_c1", "Active pricing for Pro is $30/month as of 2025.", 0.85, timestamp="2025-01-01"),  # target
+            _c("T7_c2", "In 2020, Pro pricing was $15/month.", 0.80),  # old
+            _c("T7_c3", "The server room temperature must be kept at 20C.", 0.15),  # irrelevant
+            _c("T7_c4", "Active pricing for Pro is $25/month.", 0.82, version="1", superseded="yes"),  # superseded
         ],
         "expected_top_1": "T7_c1",
         "expected_target_ids": ["T7_c1"],
@@ -133,8 +147,8 @@ BENCHMARK_CASES = [
         "category": "T8_distractor",
         "query": "What is the current system API endpoint?",
         "chunks": [
-            _c("T8_c1", "The active API endpoint is now /v2/api.", 0.80, timestamp="2026-01-01"), # target
-            _c("T8_c2", "The legacy API endpoint was /v1/api.", 0.90), # distractor (higher semantic, past tense)
+            _c("T8_c1", "The active API endpoint is now /v2/api.", 0.80, timestamp="2026-01-01"),  # target
+            _c("T8_c2", "The legacy API endpoint was /v1/api.", 0.90),  # distractor (higher semantic, past tense)
         ],
         "expected_top_1": "T8_c1",
         "expected_target_ids": ["T8_c1"],
@@ -144,12 +158,13 @@ BENCHMARK_CASES = [
 
 # ── Runners ──────────────────────────────────────────────────────────
 
+
 def run_s15_baseline(query: str, chunks: List[Dict]) -> Dict[str, Any]:
     """Run S15 baseline progressive assembler (no temporal awareness)."""
     # Clone chunks to avoid side effects
     cloned_chunks = [dict(c) for c in chunks]
     assembler = EvidenceAssembler.with_sufficiency()
-    
+
     t0 = time.perf_counter()
     result = assembler.assemble(query, cloned_chunks)
     latency = time.perf_counter() - t0
@@ -168,7 +183,7 @@ def run_s16_temporal(query: str, chunks: List[Dict]) -> Dict[str, Any]:
     # Clone chunks to avoid side effects
     cloned_chunks = [dict(c) for c in chunks]
     assembler = EvidenceAssembler.with_temporal()
-    
+
     t0 = time.perf_counter()
     result = assembler.assemble(query, cloned_chunks)
     latency = time.perf_counter() - t0
@@ -185,6 +200,7 @@ def run_s16_temporal(query: str, chunks: List[Dict]) -> Dict[str, Any]:
 
 
 # ── Benchmark Evaluation ──────────────────────────────────────────────
+
 
 def run_benchmark():
     s15_results = {}
@@ -221,30 +237,54 @@ def run_benchmark():
 
     # Calculate Research Metrics
     total_cases = len(BENCHMARK_CASES)
-    
+
     # 1. Top-1 Selection Accuracy
     s15_top1_correct = sum(1 for c in BENCHMARK_CASES if s15_results[c["id"]]["top_1_id"] == c["expected_top_1"])
     s16_top1_correct = sum(1 for c in BENCHMARK_CASES if s16_results[c["id"]]["top_1_id"] == c["expected_top_1"])
-    
+
     # 2. Current-State Query Accuracy (T1, T4, T7, T8)
     current_cases = ["T1_current_info", "T4_superseded", "T7_mixed_corpus", "T8_temporal_distractor"]
-    s15_current_correct = sum(1 for cid in current_cases if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
-    s16_current_correct = sum(1 for cid in current_cases if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
+    s15_current_correct = sum(
+        1
+        for cid in current_cases
+        if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
+    s16_current_correct = sum(
+        1
+        for cid in current_cases
+        if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
 
     # 3. Historical Query Accuracy (T2, T5)
     historical_cases = ["T2_historical_info", "T5_effective_date"]
-    s15_hist_correct = sum(1 for cid in historical_cases if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
-    s16_hist_correct = sum(1 for cid in historical_cases if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
+    s15_hist_correct = sum(
+        1
+        for cid in historical_cases
+        if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
+    s16_hist_correct = sum(
+        1
+        for cid in historical_cases
+        if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
 
     # 4. Supersession accuracy (T3, T4)
     supersession_cases = ["T3_version_chain", "T4_superseded"]
-    s15_super_correct = sum(1 for cid in supersession_cases if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
-    s16_super_correct = sum(1 for cid in supersession_cases if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid))
+    s15_super_correct = sum(
+        1
+        for cid in supersession_cases
+        if s15_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
+    s16_super_correct = sum(
+        1
+        for cid in supersession_cases
+        if s16_results[cid]["top_1_id"] == next(c["expected_top_1"] for c in BENCHMARK_CASES if c["id"] == cid)
+    )
 
     # 5. False suppression count (Check T6 - unknown timestamp should not suppress T6_c1)
     s15_t6_selected = "T6_c1" in s15_results["T6_unknown_timestamp"]["selected_ids"]
     s16_t6_selected = "T6_c1" in s16_results["T6_unknown_timestamp"]["selected_ids"]
-    
+
     s15_false_suppression = 0 if s15_t6_selected else 1
     s16_false_suppression = 0 if s16_t6_selected else 1
 
@@ -259,10 +299,18 @@ def run_benchmark():
     print("=" * 90)
     print(f"  Metric                           S15 Baseline      S16 Temporal-Aware")
     print("-" * 90)
-    print(f"  Overall Top-1 Accuracy:          {s15_top1_correct / total_cases * 100:>14.1f}%     {s16_top1_correct / total_cases * 100:>14.1f}%")
-    print(f"  Current-Query Accuracy:          {s15_current_correct / len(current_cases) * 100:>14.1f}%     {s16_current_correct / len(current_cases) * 100:>14.1f}%")
-    print(f"  Historical-Query Accuracy:       {s15_hist_correct / len(historical_cases) * 100:>14.1f}%     {s16_hist_correct / len(historical_cases) * 100:>14.1f}%")
-    print(f"  Supersession Accuracy:           {s15_super_correct / len(supersession_cases) * 100:>14.1f}%     {s16_super_correct / len(supersession_cases) * 100:>14.1f}%")
+    print(
+        f"  Overall Top-1 Accuracy:          {s15_top1_correct / total_cases * 100:>14.1f}%     {s16_top1_correct / total_cases * 100:>14.1f}%"
+    )
+    print(
+        f"  Current-Query Accuracy:          {s15_current_correct / len(current_cases) * 100:>14.1f}%     {s16_current_correct / len(current_cases) * 100:>14.1f}%"
+    )
+    print(
+        f"  Historical-Query Accuracy:       {s15_hist_correct / len(historical_cases) * 100:>14.1f}%     {s16_hist_correct / len(historical_cases) * 100:>14.1f}%"
+    )
+    print(
+        f"  Supersession Accuracy:           {s15_super_correct / len(supersession_cases) * 100:>14.1f}%     {s16_super_correct / len(supersession_cases) * 100:>14.1f}%"
+    )
     print(f"  False Suppression:               {s15_false_suppression:>14d}      {s16_false_suppression:>14d}")
     print(f"  Average Execution Latency:       {avg_s15_latency:>12.3f}ms    {avg_s16_latency:>12.3f}ms")
     print(f"  Temporal Decision Overhead:                   —      {added_latency:>12.3f}ms")

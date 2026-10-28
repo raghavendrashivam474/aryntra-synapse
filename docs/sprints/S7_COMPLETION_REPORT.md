@@ -137,8 +137,8 @@ Controlled by `settings.evidence_reuse_enabled` (default `True`). When disabled,
 **Location:** `app/core/config.py`
 
 ```python
-evidence_reuse_enabled: bool = True   # S7 toggle
-app_version: str = "0.9.0"            # version bump
+evidence_reuse_enabled: bool = True  # S7 toggle
+app_version: str = "0.9.0"  # version bump
 ```
 
 ---

@@ -27,7 +27,7 @@ def load_queries():
         text = QUERY_FILE_ALT.read_text(encoding="utf-8")
     else:
         text = QUERY_FILE.read_text(encoding="utf-8")
-        
+
     pattern = re.compile(r"\|\s*(Q\d+)\s*\|[^|]+\|\s*(.*?)\s*\|")
     queries = []
     for match in pattern.finditer(text):
@@ -57,7 +57,7 @@ def health_check(client):
     print(f"  Embedding model:        {data.get('embedding_model')}")
     print(f"  LLM model:              {data.get('llm_model')}")
     print(f"  Context representation: {data.get('context_representation')}")
-    
+
     if data.get("context_representation") != "progressive_v1":
         print("\nWARNING: context_representation is not set to 'progressive_v1'!")
         print("Please check your .env or app/core/config.py settings before proceeding.")
@@ -86,32 +86,40 @@ def run_queries(client, queries):
             response.raise_for_status()
             data = response.json()
 
-            results.append({
-                "id": query_id,
-                "question": question,
-                "status": "PASS",
-                "answer": data.get("answer"),
-                "num_chunks_retrieved": data.get("num_chunks_retrieved"),
-                "representation_type": data.get("representation_type"),
-                "retrieval_latency": data.get("retrieval_latency"),
-                "sufficiency_latency": data.get("sufficiency_latency", 0.0),
-                "generation_latency": data.get("generation_latency"),
-                "total_latency": data.get("total_latency", round(elapsed, 4)),
-                "expansion_steps": data.get("expansion_steps", 0),
-                "total_model_calls": data.get("total_model_calls", 1),
-                "initial_context_length": data.get("initial_context_length", 0),
-                "final_context_length": data.get("final_context_length", 0),
-                "peak_context_length": data.get("peak_context_length", 0),
-                "cumulative_context_length": data.get("cumulative_context_length", 0),
-                "representation_metadata": data.get("representation_metadata", {}),
-                "retrieved_chunks": data.get("retrieved_chunks", []),
-            })
+            results.append(
+                {
+                    "id": query_id,
+                    "question": question,
+                    "status": "PASS",
+                    "answer": data.get("answer"),
+                    "num_chunks_retrieved": data.get("num_chunks_retrieved"),
+                    "representation_type": data.get("representation_type"),
+                    "retrieval_latency": data.get("retrieval_latency"),
+                    "sufficiency_latency": data.get("sufficiency_latency", 0.0),
+                    "generation_latency": data.get("generation_latency"),
+                    "total_latency": data.get("total_latency", round(elapsed, 4)),
+                    "expansion_steps": data.get("expansion_steps", 0),
+                    "total_model_calls": data.get("total_model_calls", 1),
+                    "initial_context_length": data.get("initial_context_length", 0),
+                    "final_context_length": data.get("final_context_length", 0),
+                    "peak_context_length": data.get("peak_context_length", 0),
+                    "cumulative_context_length": data.get("cumulative_context_length", 0),
+                    "representation_metadata": data.get("representation_metadata", {}),
+                    "retrieved_chunks": data.get("retrieved_chunks", []),
+                }
+            )
 
             r = results[-1]
             print(f"  Steps:        {r['expansion_steps']} (Model Calls: {r['total_model_calls']})")
-            print(f"  Init Context: {r['initial_context_length']} chars | Final Context: {r['final_context_length']} chars")
-            print(f"  Peak Context: {r['peak_context_length']} chars | Cumulative Exposure: {r['cumulative_context_length']} chars")
-            print(f"  Latencies:    Retrieval: {r['retrieval_latency']}s | Sufficiency: {r['sufficiency_latency']}s | Gen: {r['generation_latency']}s")
+            print(
+                f"  Init Context: {r['initial_context_length']} chars | Final Context: {r['final_context_length']} chars"
+            )
+            print(
+                f"  Peak Context: {r['peak_context_length']} chars | Cumulative Exposure: {r['cumulative_context_length']} chars"
+            )
+            print(
+                f"  Latencies:    Retrieval: {r['retrieval_latency']}s | Sufficiency: {r['sufficiency_latency']}s | Gen: {r['generation_latency']}s"
+            )
             print(f"  Total Time:   {r['total_latency']}s")
 
         except Exception as exc:
@@ -159,7 +167,7 @@ def main():
         except Exception as e:
             print(f"\nERROR: Could not communicate with server at {BASE_URL}. Ensure uvicorn is running.")
             sys.exit(1)
-            
+
         results = run_queries(client, queries)
         save_results(health, results)
         print_summary(results)

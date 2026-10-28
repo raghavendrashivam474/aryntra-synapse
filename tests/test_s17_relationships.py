@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 17
 Evidence Relationship Graph Tests.
 
@@ -13,33 +13,33 @@ Covers:
   R8 — Graph bounds
   R9 — Assembly integration (non-regression)
 """
-import pytest
-from typing import List, Dict, Any
 
+from typing import Any
+
+from app.evidence.assembly import EvidenceAssembler
+from app.evidence.config import S17RelationshipConfig
 from app.evidence.relationships import (
+    EvidenceGraph,
+    Relationship,
     RelationshipAnalyzer,
     RelationshipType,
-    Relationship,
-    EvidenceGraph,
 )
-from app.evidence.config import S17RelationshipConfig, S14ResolutionConfig
-from app.evidence.assembly import EvidenceAssembler
-
 
 # ── Helpers ───────────────────────────────────────────────────────────
+
 
 def _chunk(
     chunk_id: str,
     text: str = "Some evidence text about policy compliance.",
     score: float = 0.80,
-    document_id: str = None,
-    version: str = None,
-    supersedes: str = None,
-    effective_from: str = None,
-    effective_until: str = None,
-    parent_id: str = None,
+    document_id: str | None = None,
+    version: str | None = None,
+    supersedes: str | None = None,
+    effective_from: str | None = None,
+    effective_until: str | None = None,
+    parent_id: str | None = None,
     **extra,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     c = {
         "chunk_id": chunk_id,
         "text": text,
@@ -63,6 +63,7 @@ def _chunk(
 
 
 # ── R1: Version Chain ────────────────────────────────────────────────
+
 
 class TestVersionChain:
     def setup_method(self):
@@ -114,6 +115,7 @@ class TestVersionChain:
 
 # ── R2: Contradiction (Consumes S14) ────────────────────────────────
 
+
 class TestContradiction:
     def setup_method(self):
         self.analyzer = RelationshipAnalyzer(config=S17RelationshipConfig())
@@ -150,6 +152,7 @@ class TestContradiction:
 
 # ── R3: Same Document ────────────────────────────────────────────────
 
+
 class TestSameDocument:
     def setup_method(self):
         self.analyzer = RelationshipAnalyzer(config=S17RelationshipConfig())
@@ -171,6 +174,7 @@ class TestSameDocument:
 
 
 # ── R4: Temporal Adjacency ──────────────────────────────────────────
+
 
 class TestTemporalAdjacency:
     def setup_method(self):
@@ -208,22 +212,19 @@ class TestTemporalAdjacency:
 
 # ── R5: Mixed Evidence Coherence ─────────────────────────────────────
 
+
 class TestMixedEvidence:
     def setup_method(self):
         self.analyzer = RelationshipAnalyzer(config=S17RelationshipConfig())
 
     def test_mixed_pool_graph(self):
         chunks = [
-            _chunk("current", version="3", document_id="policy_v3",
-                   text="Current policy is active and enabled."),
-            _chunk("old", version="1", document_id="policy_v1",
-                   text="Old policy was active and enabled."),
-            _chunk("contradictor",
-                   text="The policy is disabled and deprecated for all users.",
-                   document_id="other_doc"),
-            _chunk("distractor",
-                   text="The weather forecast predicts rain tomorrow.",
-                   document_id="weather"),
+            _chunk("current", version="3", document_id="policy_v3", text="Current policy is active and enabled."),
+            _chunk("old", version="1", document_id="policy_v1", text="Old policy was active and enabled."),
+            _chunk(
+                "contradictor", text="The policy is disabled and deprecated for all users.", document_id="other_doc"
+            ),
+            _chunk("distractor", text="The weather forecast predicts rain tomorrow.", document_id="weather"),
         ]
         graph = self.analyzer.build_graph(chunks)
         assert graph.node_count == 4
@@ -237,6 +238,7 @@ class TestMixedEvidence:
 
 
 # ── R6: No False Relationships ──────────────────────────────────────
+
 
 class TestNoFalseRelationships:
     def setup_method(self):
@@ -259,6 +261,7 @@ class TestNoFalseRelationships:
 
 
 # ── R7: Transitive Supersession ──────────────────────────────────────
+
 
 class TestTransitiveSupersession:
     def setup_method(self):
@@ -289,21 +292,22 @@ class TestTransitiveSupersession:
         # Direct edges still exist
         assert "v2" in graph.get_supersedes("v3")
         # But transitive v3->v1 should NOT exist (only direct v3->v2 and v2->v1)
-        direct_v3_targets = [
-            e.target_id for e in graph.get_outgoing_edges("v3")
-            if e.relation == RelationshipType.SUPERSEDES
-            and not e.metadata.get("transitive")
+        [
+            e.target_id
+            for e in graph.get_outgoing_edges("v3")
+            if e.relation == RelationshipType.SUPERSEDES and not e.metadata.get("transitive")
         ]
         # v1 should only appear via transitive (which is disabled)
         transitive_v3_targets = [
-            e.target_id for e in graph.get_outgoing_edges("v3")
-            if e.relation == RelationshipType.SUPERSEDES
-            and e.metadata.get("transitive")
+            e.target_id
+            for e in graph.get_outgoing_edges("v3")
+            if e.relation == RelationshipType.SUPERSEDES and e.metadata.get("transitive")
         ]
         assert "v1" not in transitive_v3_targets
 
 
 # ── R8: Graph Bounds ────────────────────────────────────────────────
+
 
 class TestGraphBounds:
     def setup_method(self):
@@ -329,15 +333,13 @@ class TestGraphBounds:
     def test_max_edges_cap(self):
         config = S17RelationshipConfig(max_relationship_edges=2)
         analyzer = RelationshipAnalyzer(config=config)
-        chunks = [
-            _chunk(f"c{i}", document_id="same_doc", version=str(i + 1))
-            for i in range(5)
-        ]
+        chunks = [_chunk(f"c{i}", document_id="same_doc", version=str(i + 1)) for i in range(5)]
         graph = analyzer.build_graph(chunks)
         assert graph.edge_count <= 2
 
 
 # ── R9: Assembly Integration (Non-Regression) ──────────────────────
+
 
 class TestAssemblyIntegration:
     def test_assembler_with_relationships_factory(self):
@@ -349,10 +351,8 @@ class TestAssemblyIntegration:
         assembler = EvidenceAssembler.with_relationships()
         query = "What is the current policy?"
         chunks = [
-            _chunk("v3", text="Current policy v3 is active.", version="3",
-                   document_id="policy_v3", score=0.90),
-            _chunk("v1", text="Old policy v1 was active.", version="1",
-                   document_id="policy_v1", score=0.85),
+            _chunk("v3", text="Current policy v3 is active.", version="3", document_id="policy_v3", score=0.90),
+            _chunk("v1", text="Old policy v1 was active.", version="1", document_id="policy_v1", score=0.85),
         ]
         result = assembler.assemble(query, chunks)
         assert len(result.selected_chunks) >= 1
@@ -381,10 +381,8 @@ class TestAssemblyIntegration:
         assembler = EvidenceAssembler.with_relationships()
         query = "system status"
         chunks = [
-            _chunk("c1", text="The system is enabled and active for production.",
-                   score=0.9),
-            _chunk("c2", text="The system is disabled and deprecated for production.",
-                   score=0.85),
+            _chunk("c1", text="The system is enabled and active for production.", score=0.9),
+            _chunk("c2", text="The system is disabled and deprecated for production.", score=0.85),
         ]
         result = assembler.assemble(query, chunks)
         graph = result.evidence_graph
@@ -409,6 +407,7 @@ class TestAssemblyIntegration:
 
 
 # ── EvidenceGraph Unit Tests ─────────────────────────────────────────
+
 
 class TestEvidenceGraph:
     def test_add_node_and_edge(self):
@@ -454,6 +453,7 @@ class TestEvidenceGraph:
 
 
 # ── Config Tests ─────────────────────────────────────────────────────
+
 
 class TestS17Config:
     def test_balanced_defaults(self):

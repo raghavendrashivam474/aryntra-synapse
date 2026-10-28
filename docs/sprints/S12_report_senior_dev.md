@@ -110,7 +110,7 @@ config = PriorityCalibrationConfig(
     reuse_weight=0.20,
     high_threshold=0.55,
     medium_threshold=0.25,
-    label="production_calibrated"
+    label="production_calibrated",
 )
 engine = EvidencePriorityEngine(weights=config.to_weights())
 ```

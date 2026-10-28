@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s7_experiment.py
 
 Aryntra Synapse — Sprint 7
@@ -59,9 +59,16 @@ def health_check(client):
     r = client.get(f"{BASE_URL}/health", timeout=TIMEOUT)
     r.raise_for_status()
     d = r.json()
-    for k in ["status", "app_name", "version", "retriever_ready",
-              "chunk_count", "llm_model", "evidence_reuse_enabled",
-              "evidence_store_size"]:
+    for k in [
+        "status",
+        "app_name",
+        "version",
+        "retriever_ready",
+        "chunk_count",
+        "llm_model",
+        "evidence_reuse_enabled",
+        "evidence_store_size",
+    ]:
         print(f"  {k}: {d.get(k)}")
     if not d.get("evidence_reuse_enabled"):
         print("\n  WARNING: evidence_reuse_enabled is False!")
@@ -124,9 +131,7 @@ def save_results(health, workloads):
         "workloads": workloads,
     }
     result_file.parent.mkdir(parents=True, exist_ok=True)
-    result_file.write_text(
-        json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    result_file.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nResults saved to: {result_file}")
 
 

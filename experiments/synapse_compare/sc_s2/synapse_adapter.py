@@ -1,4 +1,4 @@
-﻿"""
+"""
 SC-S2 Synapse Adapter.
 
 Loads the canonical SC-S1 fixtures, maps them to the format expected
@@ -8,6 +8,7 @@ the response into a structured result for comparison.
 This adapter does NOT select evidence on behalf of Synapse.
 It delegates all reasoning to the actual engine.
 """
+
 from __future__ import annotations
 
 import json
@@ -25,19 +26,14 @@ from app.evidence.unified import UnifiedEvidenceEngine, UnifiedProcessResult
 # ---------------------------------------------------------------------------
 # Paths to canonical SC-S1 fixtures (reused, not duplicated)
 # ---------------------------------------------------------------------------
-SC_S1_FIXTURE_DIR = (
-    Path(__file__).resolve().parent.parent / "sc_s1" / "fixtures"
-)
+SC_S1_FIXTURE_DIR = Path(__file__).resolve().parent.parent / "sc_s1" / "fixtures"
 
 # ---------------------------------------------------------------------------
 # Scenario constants (must match SC-S1 exactly)
 # ---------------------------------------------------------------------------
 SCHEMA_VERSION = "1.0"
 EXPERIMENT_ID = "SC-S1-TEMPORAL-001"
-QUERY = (
-    "What authentication policy is currently in effect "
-    "for internal systems?"
-)
+QUERY = "What authentication policy is currently in effect for internal systems?"
 EXPECTED_CURRENT_DOCUMENT = "AUTH-POLICY-V2"
 SYSTEM_LABEL = "synapse"
 
@@ -52,13 +48,14 @@ def load_sc_s1_fixtures(fixture_dir: Path = SC_S1_FIXTURE_DIR) -> list[dict]:
     (document_id, version, publication_date, status, content, supersedes).
     """
     if not fixture_dir.is_dir():
-        raise FileNotFoundError(
-            f"SC-S1 fixture directory not found: {fixture_dir}"
-        )
+        raise FileNotFoundError(f"SC-S1 fixture directory not found: {fixture_dir}")
 
     required_keys = {
-        "document_id", "version", "publication_date",
-        "status", "content",
+        "document_id",
+        "version",
+        "publication_date",
+        "status",
+        "content",
     }
     documents: list[dict] = []
 
@@ -67,9 +64,7 @@ def load_sc_s1_fixtures(fixture_dir: Path = SC_S1_FIXTURE_DIR) -> list[dict]:
             doc = json.load(f)
         missing = required_keys - doc.keys()
         if missing:
-            raise ValueError(
-                f"{path.name} missing required fields: {missing}"
-            )
+            raise ValueError(f"{path.name} missing required fields: {missing}")
         documents.append(doc)
 
     if not documents:
@@ -139,22 +134,13 @@ def normalize_engine_result(
     Preserves all available engine signals without fabrication.
     """
     # Build a lookup from engine id -> original document_id
-    id_lookup = {
-        doc["document_id"]: doc["document_id"]
-        for doc in sc_s1_documents
-    }
+    id_lookup = {doc["document_id"]: doc["document_id"] for doc in sc_s1_documents}
 
     # Extract selected evidence IDs from engine output
-    selected_ids = [
-        e.get("chunk_id", "unknown")
-        for e in engine_result.selected_evidence
-    ]
+    selected_ids = [e.get("chunk_id", "unknown") for e in engine_result.selected_evidence]
 
     # Extract rejected evidence IDs
-    rejected_ids = [
-        e.get("chunk_id", "unknown")
-        for e in engine_result.rejected_evidence
-    ]
+    rejected_ids = [e.get("chunk_id", "unknown") for e in engine_result.rejected_evidence]
 
     # Determine decision output text
     # The engine returns a calibrated decision string (ANSWER/REJECT/UNCERTAIN)
@@ -187,31 +173,16 @@ def normalize_engine_result(
             "outcome": decision_output,
             "selected_evidence": selected_ids,
             "confidence": engine_result.confidence,
-            "output": (
-                f"Synapse decision: {decision_output} "
-                f"(confidence: {engine_result.confidence:.2f})"
-            ),
+            "output": (f"Synapse decision: {decision_output} (confidence: {engine_result.confidence:.2f})"),
         },
         "signals": {
             "temporal_context": engine_result.temporal_context,
-            "conflict_detected": engine_result.signals.get(
-                "conflict_detected", False
-            ),
-            "conflict_score": engine_result.signals.get(
-                "conflict_score", 0.0
-            ),
-            "adjudication_triggered": engine_result.signals.get(
-                "adjudication_triggered", False
-            ),
-            "adjudication_decision": engine_result.signals.get(
-                "adjudication_decision", "NONE"
-            ),
-            "safety_veto": engine_result.signals.get(
-                "safety_veto", False
-            ),
-            "sufficiency_score": engine_result.signals.get(
-                "sufficiency_score", 0.0
-            ),
+            "conflict_detected": engine_result.signals.get("conflict_detected", False),
+            "conflict_score": engine_result.signals.get("conflict_score", 0.0),
+            "adjudication_triggered": engine_result.signals.get("adjudication_triggered", False),
+            "adjudication_decision": engine_result.signals.get("adjudication_decision", "NONE"),
+            "safety_veto": engine_result.signals.get("safety_veto", False),
+            "sufficiency_score": engine_result.signals.get("sufficiency_score", 0.0),
             "relationships": engine_result.relationships,
         },
         "evaluation": {
@@ -261,4 +232,3 @@ def build_error_result(query: str, error: Exception) -> dict:
             "status": "NOT_EVALUATED",
         },
     }
-

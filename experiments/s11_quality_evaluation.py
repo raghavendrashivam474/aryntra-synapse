@@ -17,6 +17,7 @@ Hypothesis:
 
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import json
@@ -79,12 +80,19 @@ ALL_QUERIES = QUERIES_SIMPLE + QUERIES_MEDIUM + QUERIES_COMPLEX
 # =====================================================================
 
 REFUSAL_PHRASES = [
-    "i don't know", "i cannot answer", "i'm not sure",
-    "insufficient information", "not enough context",
-    "i don't have enough", "unable to determine",
-    "no information available", "cannot provide",
-    "i do not have", "based on the provided context i cannot",
-    "the provided context does not", "not mentioned in",
+    "i don't know",
+    "i cannot answer",
+    "i'm not sure",
+    "insufficient information",
+    "not enough context",
+    "i don't have enough",
+    "unable to determine",
+    "no information available",
+    "cannot provide",
+    "i do not have",
+    "based on the provided context i cannot",
+    "the provided context does not",
+    "not mentioned in",
 ]
 
 
@@ -97,14 +105,34 @@ def detect_refusal(answer: str) -> bool:
 def measure_keyword_coverage(answer: str, query: str) -> float:
     """Fraction of query keywords that appear in the answer."""
     stop = {
-        "the", "a", "an", "is", "are", "was", "were", "how", "what",
-        "does", "do", "in", "of", "to", "and", "for", "with", "on",
-        "at", "by", "from", "or", "it", "its", "that", "this",
+        "the",
+        "a",
+        "an",
+        "is",
+        "are",
+        "was",
+        "were",
+        "how",
+        "what",
+        "does",
+        "do",
+        "in",
+        "of",
+        "to",
+        "and",
+        "for",
+        "with",
+        "on",
+        "at",
+        "by",
+        "from",
+        "or",
+        "it",
+        "its",
+        "that",
+        "this",
     }
-    q_tokens = {
-        t for t in re.findall(r"[a-z0-9]{3,}", query.lower())
-        if t not in stop
-    }
+    q_tokens = {t for t in re.findall(r"[a-z0-9]{3,}", query.lower()) if t not in stop}
     if not q_tokens:
         return 1.0
     a_lower = answer.lower()
@@ -121,10 +149,7 @@ def measure_evidence_grounding(answer: str, chunks: list) -> float:
     if not evidence_words:
         return 0.0
 
-    sentences = [
-        s.strip() for s in re.split(r"[.!?]+", answer)
-        if len(s.strip()) > 10
-    ]
+    sentences = [s.strip() for s in re.split(r"[.!?]+", answer) if len(s.strip()) > 10]
     if not sentences:
         return 0.0
 
@@ -195,6 +220,7 @@ def evaluate_quality(query: str, answer: str, chunks: list) -> dict:
 # Component Initialization (mirrors routes.py wiring)
 # =====================================================================
 
+
 def init_components() -> dict:
     """Build all shared components once."""
     retriever = Retriever()
@@ -220,12 +246,8 @@ def init_components() -> dict:
 
     llm = OllamaProvider()
     evidence_store = EvidenceStore()
-    query_cache = EmbeddingCache(
-        max_entries=settings.embedding_cache_max_entries
-    )
-    evidence_cache = EmbeddingCache(
-        max_entries=settings.embedding_cache_max_entries
-    )
+    query_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries)
+    evidence_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries)
     semantic_gate = LexicalSemanticGate(
         high_confidence=settings.lexical_gate_high_confidence,
         low_confidence=settings.lexical_gate_low_confidence,
@@ -253,6 +275,7 @@ def init_components() -> dict:
 # =====================================================================
 # Config Runners
 # =====================================================================
+
 
 def run_config_a(query: str, comp: dict) -> dict:
     """Config A — Frozen Baseline: retrieve -> generate. No processing."""
@@ -327,10 +350,7 @@ def run_config_b(query: str, comp: dict) -> dict:
         "selected_candidate": "full_processing",
         "strategy_reason": "config_b_always_deep",
         "semantic_calls": pm_dict.get("semantic_calls", 0),
-        "cache_hits": (
-            pm_dict.get("query_cache_hits", 0)
-            + pm_dict.get("semantic_cache_hits", 0)
-        ),
+        "cache_hits": (pm_dict.get("query_cache_hits", 0) + pm_dict.get("semantic_cache_hits", 0)),
         "reused_count": reuse_dict.get("reused_count", 0),
         "high_priority_count": pm_dict.get("high_priority_count", 0),
         "quality": quality,
@@ -351,12 +371,8 @@ def run_config_c(query: str, comp: dict) -> dict:
 
     # S10: Adaptive strategy selection
     t_pre = time.perf_counter()
-    cache_stats = (
-        comp["query_cache"].stats() if comp["query_cache"] else {}
-    )
-    decision = comp["selector"].select(
-        query, tagged, reuse_dict, cache_stats
-    )
+    cache_stats = comp["query_cache"].stats() if comp["query_cache"] else {}
+    decision = comp["selector"].select(query, tagged, reuse_dict, cache_stats)
 
     processed, pm_dict = comp["selector"].execute_path(
         decision=decision,
@@ -386,10 +402,7 @@ def run_config_c(query: str, comp: dict) -> dict:
         "selected_candidate": decision.candidate,
         "strategy_reason": decision.reason,
         "semantic_calls": pm_dict.get("semantic_calls", 0),
-        "cache_hits": (
-            pm_dict.get("query_cache_hits", 0)
-            + pm_dict.get("semantic_cache_hits", 0)
-        ),
+        "cache_hits": (pm_dict.get("query_cache_hits", 0) + pm_dict.get("semantic_cache_hits", 0)),
         "reused_count": reuse_dict.get("reused_count", 0),
         "high_priority_count": pm_dict.get("high_priority_count", 0),
         "quality": quality,
@@ -399,6 +412,7 @@ def run_config_c(query: str, comp: dict) -> dict:
 # =====================================================================
 # Experiment Orchestrator
 # =====================================================================
+
 
 def run_experiment() -> dict:
     """Run all queries through all configs with cold + warm passes."""
@@ -429,11 +443,7 @@ def run_experiment() -> dict:
                 comp["query_cache"].clear()
 
         for qi, query in enumerate(ALL_QUERIES):
-            tag = (
-                "simple" if query in QUERIES_SIMPLE
-                else "medium" if query in QUERIES_MEDIUM
-                else "complex"
-            )
+            tag = "simple" if query in QUERIES_SIMPLE else "medium" if query in QUERIES_MEDIUM else "complex"
             print(f"  [{qi + 1:2d}/{n_queries}] ({tag}) {query[:55]}...")
 
             for cfg_name, runner in runners.items():
@@ -445,25 +455,24 @@ def run_experiment() -> dict:
                     all_results[cfg_name].append(result)
                     tier = result["quality"]["quality_tier"]
                     lat = result["total_latency"]
-                    print(
-                        f"         {cfg_name}: {tier:<11} "
-                        f"lat={lat:.3f}s"
-                    )
+                    print(f"         {cfg_name}: {tier:<11} lat={lat:.3f}s")
                 except Exception as e:
                     logger.error("ERROR [%s] %s: %s", cfg_name, query, e)
-                    all_results[cfg_name].append({
-                        "config": cfg_name,
-                        "run": run_label,
-                        "query": query,
-                        "query_complexity": tag,
-                        "error": str(e),
-                        "answer": "",
-                        "total_latency": 0.0,
-                        "quality": {
-                            "quality_tier": "ERROR",
-                            "failure_category": "OTHER",
-                        },
-                    })
+                    all_results[cfg_name].append(
+                        {
+                            "config": cfg_name,
+                            "run": run_label,
+                            "query": query,
+                            "query_complexity": tag,
+                            "error": str(e),
+                            "answer": "",
+                            "total_latency": 0.0,
+                            "quality": {
+                                "quality_tier": "ERROR",
+                                "failure_category": "OTHER",
+                            },
+                        }
+                    )
                     print(f"         {cfg_name}: ERROR — {e}")
 
     return all_results
@@ -472,6 +481,7 @@ def run_experiment() -> dict:
 # =====================================================================
 # Analysis
 # =====================================================================
+
 
 def analyze_results(results: dict) -> dict:
     """Compute aggregate metrics per configuration."""
@@ -487,57 +497,33 @@ def analyze_results(results: dict) -> dict:
         pre_lats = [t["preprocessing_latency"] for t in valid]
         gen_lats = [t["generation_latency"] for t in valid]
         tiers = [t["quality"]["quality_tier"] for t in valid]
-        failures = [
-            t["quality"]["failure_category"] for t in valid
-        ]
+        failures = [t["quality"]["failure_category"] for t in valid]
         groundings = [t["quality"]["evidence_grounding"] for t in valid]
         coverages = [t["quality"]["keyword_coverage"] for t in valid]
         refusals = sum(1 for t in valid if t["quality"]["refusal"])
         sem_calls = sum(t.get("semantic_calls", 0) for t in valid)
 
-        good_count = sum(
-            1 for t in tiers if t in ("GOOD", "ACCEPTABLE")
-        )
+        good_count = sum(1 for t in tiers if t in ("GOOD", "ACCEPTABLE"))
 
         analysis[cfg] = {
             "total_queries": len(valid),
             "mean_total_latency": round(float(np.mean(lats)), 4),
-            "p95_total_latency": round(
-                float(np.percentile(lats, 95)), 4
-            ),
-            "mean_preprocessing_latency": round(
-                float(np.mean(pre_lats)), 4
-            ),
-            "mean_generation_latency": round(
-                float(np.mean(gen_lats)), 4
-            ),
-            "mean_evidence_grounding": round(
-                float(np.mean(groundings)), 4
-            ),
-            "mean_keyword_coverage": round(
-                float(np.mean(coverages)), 4
-            ),
+            "p95_total_latency": round(float(np.percentile(lats, 95)), 4),
+            "mean_preprocessing_latency": round(float(np.mean(pre_lats)), 4),
+            "mean_generation_latency": round(float(np.mean(gen_lats)), 4),
+            "mean_evidence_grounding": round(float(np.mean(groundings)), 4),
+            "mean_keyword_coverage": round(float(np.mean(coverages)), 4),
             "refusal_count": refusals,
             "refusal_rate": round(refusals / len(valid), 4),
             "total_semantic_calls": sem_calls,
-            "good_or_acceptable_rate": round(
-                good_count / len(valid), 4
-            ),
-            "quality_distribution": {
-                tier: tiers.count(tier) for tier in sorted(set(tiers))
-            },
-            "failure_distribution": {
-                cat: failures.count(cat)
-                for cat in sorted(set(failures))
-                if cat != "NONE"
-            },
+            "good_or_acceptable_rate": round(good_count / len(valid), 4),
+            "quality_distribution": {tier: tiers.count(tier) for tier in sorted(set(tiers))},
+            "failure_distribution": {cat: failures.count(cat) for cat in sorted(set(failures)) if cat != "NONE"},
         }
 
         if cfg == "C_adaptive":
             paths = [t.get("selected_path", "?") for t in valid]
-            analysis[cfg]["path_distribution"] = {
-                p: paths.count(p) for p in sorted(set(paths))
-            }
+            analysis[cfg]["path_distribution"] = {p: paths.count(p) for p in sorted(set(paths))}
 
     return analysis
 
@@ -545,6 +531,7 @@ def analyze_results(results: dict) -> dict:
 # =====================================================================
 # Reporting
 # =====================================================================
+
 
 def print_summary(analysis: dict):
     """Print the main comparison table and hypothesis verdict."""
@@ -583,21 +570,9 @@ def print_summary(analysis: dict):
         print("\n  VERDICT: INCONCLUSIVE (insufficient data)")
         return
 
-    q1_better = (
-        ab.get("good_or_acceptable_rate", 0)
-        > af.get("good_or_acceptable_rate", 0)
-    )
-    q2_preserved = (
-        abs(
-            ac.get("good_or_acceptable_rate", 0)
-            - ab.get("good_or_acceptable_rate", 0)
-        )
-        < 0.15
-    )
-    q3_cheaper = (
-        ac.get("mean_total_latency", 999)
-        < ab.get("mean_total_latency", 0)
-    )
+    q1_better = ab.get("good_or_acceptable_rate", 0) > af.get("good_or_acceptable_rate", 0)
+    q2_preserved = abs(ac.get("good_or_acceptable_rate", 0) - ab.get("good_or_acceptable_rate", 0)) < 0.15
+    q3_cheaper = ac.get("mean_total_latency", 999) < ab.get("mean_total_latency", 0)
 
     q1_str = "YES" if q1_better else "NO"
     q2_str = "YES" if q2_preserved else "NO"
@@ -641,6 +616,7 @@ def print_summary(analysis: dict):
 # Main
 # =====================================================================
 
+
 def main():
     results = run_experiment()
     analysis = analyze_results(results)
@@ -650,10 +626,7 @@ def main():
         "sprint": "S11",
         "version": "1.3.0",
         "purpose": "End-to-end quality evaluation",
-        "hypothesis": (
-            "Adaptive strategy selection preserves quality "
-            "while reducing cost"
-        ),
+        "hypothesis": ("Adaptive strategy selection preserves quality while reducing cost"),
         "configs": {
             "A_frozen": "v0.2.0 baseline: retrieve then generate",
             "B_full": "Full pipeline: S7 reuse + S8 deep priority",
@@ -668,10 +641,7 @@ def main():
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
     print(f"[+] Full results saved to {out_path}")
-    print(
-        f"[+] Total trace records: "
-        f"{sum(len(v) for v in results.values())}"
-    )
+    print(f"[+] Total trace records: {sum(len(v) for v in results.values())}")
 
 
 if __name__ == "__main__":

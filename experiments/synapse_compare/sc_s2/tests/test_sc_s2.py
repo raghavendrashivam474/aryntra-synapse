@@ -1,9 +1,10 @@
-﻿"""
+"""
 SC-S2 Test Suite.
 
 Tests the Synapse adapter, comparison logic, result contracts,
 and regression safety against SC-S1.
 """
+
 from __future__ import annotations
 
 import json
@@ -47,6 +48,7 @@ SYNAPSE_RESULT_PATH = SC_S2_DIR / "results" / "sc_s2_result.json"
 # ADAPTER TESTS
 # ===================================================================
 
+
 class TestLoadFixtures:
     def test_loads_all_documents(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)
@@ -55,7 +57,14 @@ class TestLoadFixtures:
     def test_document_ids_preserved(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)
         ids = {d["document_id"] for d in docs}
-        assert ids == {"ACCESS-CONTROL-V1", "AUTH-POLICY-V1", "AUTH-POLICY-V2", "AUTH-POLICY-V2-AMENDMENT", "PASSWORD-POLICY-V1", "SSO-GUIDELINE-V1"}
+        assert ids == {
+            "ACCESS-CONTROL-V1",
+            "AUTH-POLICY-V1",
+            "AUTH-POLICY-V2",
+            "AUTH-POLICY-V2-AMENDMENT",
+            "PASSWORD-POLICY-V1",
+            "SSO-GUIDELINE-V1",
+        }
 
     def test_required_fields_present(self):
         docs = load_sc_s1_fixtures(FIXTURE_DIR)
@@ -135,20 +144,15 @@ class TestBuildErrorResult:
 
 
 class TestNormalizeEngineResult:
-    def _make_mock_result(self, selected_ids=None, decision="ANSWER",
-                          confidence=0.8):
+    def _make_mock_result(self, selected_ids=None, decision="ANSWER", confidence=0.8):
         """Create a mock UnifiedProcessResult."""
         mock = MagicMock()
         mock.query = QUERY
         mock.decision = decision
         mock.confidence = confidence
         mock.pipeline_time_ms = 5.0
-        mock.selected_evidence = [
-            {"chunk_id": eid} for eid in (selected_ids or ["AUTH-POLICY-V1"])
-        ]
-        mock.rejected_evidence = [
-            {"chunk_id": "AUTH-POLICY-V2"}
-        ]
+        mock.selected_evidence = [{"chunk_id": eid} for eid in (selected_ids or ["AUTH-POLICY-V1"])]
+        mock.rejected_evidence = [{"chunk_id": "AUTH-POLICY-V2"}]
         mock.temporal_context = {"query_intent": "current", "target_date": None}
         mock.relationships = {"node_count": 2, "edge_count": 1}
         mock.signals = {
@@ -199,6 +203,7 @@ class TestNormalizeEngineResult:
 # ===================================================================
 # COMPARISON TESTS
 # ===================================================================
+
 
 class TestIntegrityChecks:
     def test_matching_results_pass(self):
@@ -278,6 +283,7 @@ class TestComparison:
 # ===================================================================
 # REGRESSION TESTS
 # ===================================================================
+
 
 class TestRegression:
     def test_sc_s1_result_unchanged(self):

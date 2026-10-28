@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/test_s6_semantic_gate.py
 
 Aryntra Synapse — Sprint 6
@@ -14,20 +14,20 @@ Tests cover:
 - S5 mode preservation
 """
 
-import pytest
-import numpy as np
 from unittest.mock import MagicMock
 
-from app.context.semantic_gate import SemanticGate, SemanticResult, cosine_similarity
+import numpy as np
+import pytest
+
+from app.context.semantic_gate import SemanticGate, cosine_similarity
 from app.context.sufficiency import (
+    SemanticSufficiencyEngine,
     SufficiencyEngine,
     SufficiencyResult,
-    SemanticSufficiencyEngine,
-    SemanticSufficiencyResult,
 )
 
-
 # --- Fixtures ---
+
 
 @pytest.fixture
 def mock_embedder():
@@ -56,9 +56,7 @@ def mock_embedder():
             return np.array([0.0, 0.0, 0.0, 0.0, 1.0], dtype=np.float32)
 
     embedder.embed = MagicMock(side_effect=fake_embed)
-    embedder.embed_batch = MagicMock(
-        side_effect=lambda texts: np.array([fake_embed(t) for t in texts])
-    )
+    embedder.embed_batch = MagicMock(side_effect=lambda texts: np.array([fake_embed(t) for t in texts]))
     return embedder
 
 
@@ -94,6 +92,7 @@ def semantic_only_engine(lexical_engine, semantic_gate):
 
 # --- cosine_similarity tests ---
 
+
 class TestCosineSimilarity:
     def test_identical_vectors(self):
         v = np.array([1.0, 2.0, 3.0])
@@ -116,6 +115,7 @@ class TestCosineSimilarity:
 
 
 # --- SemanticGate tests ---
+
 
 class TestSemanticGate:
     def test_empty_chunks(self, semantic_gate):
@@ -152,43 +152,44 @@ class TestSemanticGate:
 
 # --- SemanticSufficiencyEngine tests ---
 
+
 class TestSemanticSufficiencyEngine:
     def test_blended_both_pass(self, blended_engine):
         """Both lexical and semantic signals pass -> sufficient."""
-        chunks = [{
-            "text": "Information is stored in the workspace for retention.",
-            "score": 0.80,
-        }]
-        result = blended_engine.evaluate(
-            "How is data retained in the workspace?", chunks
-        )
+        chunks = [
+            {
+                "text": "Information is stored in the workspace for retention.",
+                "score": 0.80,
+            }
+        ]
+        result = blended_engine.evaluate("How is data retained in the workspace?", chunks)
         assert result.is_sufficient is True
         assert "sufficient" in result.reason
 
     def test_blended_semantic_fails(self, blended_engine):
         """Lexical passes but semantic fails -> insufficient in blended."""
-        chunks = [{
-            # Contains "event" to pass the lexical keyword coverage filter
-            "text": "The event occurred in 2024.",
-            "score": 0.80,
-        }]
+        chunks = [
+            {
+                # Contains "event" to pass the lexical keyword coverage filter
+                "text": "The event occurred in 2024.",
+                "score": 0.80,
+            }
+        ]
         # Query maps to Dimension 1 ("cause"); chunks map to Dimension 2 ("event"). Orthogonal!
-        result = blended_engine.evaluate(
-            "What caused the event?", chunks
-        )
+        result = blended_engine.evaluate("What caused the event?", chunks)
         assert result.semantic_score == 0.0
         assert result.is_sufficient is False
         assert result.reason == "lexical_pass_semantic_insufficient"
 
     def test_semantic_only_mode(self, semantic_only_engine):
         """semantic_only mode ignores lexical signal."""
-        chunks = [{
-            "text": "Information is stored in the workspace.",
-            "score": 0.10,  # Would fail S5 lexical score threshold
-        }]
-        result = semantic_only_engine.evaluate(
-            "How is data retained?", chunks
-        )
+        chunks = [
+            {
+                "text": "Information is stored in the workspace.",
+                "score": 0.10,  # Would fail S5 lexical score threshold
+            }
+        ]
+        result = semantic_only_engine.evaluate("How is data retained?", chunks)
         # Should pass on semantic alone (1.0 similarity) despite low S5 retrieval score
         assert result.semantic_score == pytest.approx(1.0, abs=1e-6)
         assert result.is_sufficient is True
@@ -199,10 +200,12 @@ class TestSemanticSufficiencyEngine:
 
     def test_result_observability(self, blended_engine):
         """Result contains both lexical and semantic details (§17)."""
-        chunks = [{
-            "text": "Information is stored in the workspace.",
-            "score": 0.60,
-        }]
+        chunks = [
+            {
+                "text": "Information is stored in the workspace.",
+                "score": 0.60,
+            }
+        ]
         result = blended_engine.evaluate("How is data retained?", chunks)
         d = result.to_dict()
         assert "lexical" in d
@@ -234,10 +237,12 @@ class TestSemanticSufficiencyEngine:
 
     def test_s5_lexical_preserved(self, blended_engine):
         """The lexical result inside S6 should match S5 behavior."""
-        chunks = [{
-            "text": "Information is stored in the workspace.",
-            "score": 0.80,
-        }]
+        chunks = [
+            {
+                "text": "Information is stored in the workspace.",
+                "score": 0.80,
+            }
+        ]
         result = blended_engine.evaluate("How is information retained?", chunks)
         # The lexical sub-result should be a valid S5 SufficiencyResult
         assert isinstance(result.lexical_result, SufficiencyResult)

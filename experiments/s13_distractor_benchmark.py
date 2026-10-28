@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 13: Distractor Benchmark Deep-Dive (Optimized)
 
 Evaluates calibrated Synapse against controlled distractor densities:
@@ -50,12 +50,7 @@ def run_distractor_density_benchmark() -> Dict[str, Any]:
     embedder = EmbeddingModel()
     cache = EmbeddingCache(max_entries=8192)
     weights = EvidencePriorityWeights(semantic_weight=0.50, lexical_weight=0.35, reuse_weight=0.15)
-    engine = EvidencePriorityEngine(
-        embedding_model=embedder,
-        weights=weights,
-        query_cache=cache,
-        evidence_cache=cache
-    )
+    engine = EvidencePriorityEngine(embedding_model=embedder, weights=weights, query_cache=cache, evidence_cache=cache)
     guard = ConfidenceGuard()
     selector = AdaptiveSelector()
     tracker = EvidenceSurvivalTracker()
@@ -95,7 +90,7 @@ def run_distractor_density_benchmark() -> Dict[str, Any]:
                     distractor_pool=distractor_pool,
                     target_size=target_size,
                     distractor_type=d_class,
-                    seed=100 + target_size
+                    seed=100 + target_size,
                 )
 
                 qid = f"{q_item['id']}_{d_label}_{d_class}"
@@ -108,7 +103,7 @@ def run_distractor_density_benchmark() -> Dict[str, Any]:
                 lat_ms = (time.perf_counter() - t0) * 1000
 
                 guard_assess = guard.assess(q_text, ranked, metrics.to_dict())
-                guard_trig = (guard_assess.decision != FallbackDecision.TRUST_PRIORITY)
+                guard_trig = guard_assess.decision != FallbackDecision.TRUST_PRIORITY
                 strat_dec = selector.select(q_text, ranked)
 
                 tracker.mark_prefilter(qid, {c.get("chunk_id", "") for c in ranked})
@@ -123,14 +118,14 @@ def run_distractor_density_benchmark() -> Dict[str, Any]:
                 top_k_bearing = sum(1 for c in ranked[:top_k] if c.get("chunk_id", "") in answer_ids)
                 top_k_recall = top_k_bearing / max(1, len(answer_ids))
 
-                is_contradictory_top = (d_class == "D6_contradictory" and top1_id.startswith("dist_D6"))
+                is_contradictory_top = d_class == "D6_contradictory" and top1_id.startswith("dist_D6")
 
                 severity = classify_failure(
                     top1_bearing=top1_bearing,
                     top_k_recall=top_k_recall,
                     survival_rate=survival.get("final_rate", 0.0),
                     guard_triggered=guard_trig,
-                    is_contradictory_top=is_contradictory_top
+                    is_contradictory_top=is_contradictory_top,
                 )
 
                 rec = {
@@ -177,15 +172,21 @@ def run_distractor_density_benchmark() -> Dict[str, Any]:
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(benchmark_results, f, indent=2)
 
-    print(f"\nDistractor Benchmark completed in {benchmark_results['metadata']['duration_s']}s. Results saved to {out_file}")
+    print(
+        f"\nDistractor Benchmark completed in {benchmark_results['metadata']['duration_s']}s. Results saved to {out_file}"
+    )
 
     print("\n--- Summary By Distractor Density ---")
     for k, v in benchmark_results["summary_by_density"].items():
-        print(f"  {k:<20}: Top-1={v['top1_acc']*100:5.1f}% | Recall={v['avg_recall']*100:5.1f}% | GuardTrigger={v['guard_trig_rate']*100:4.1f}% | F4={v['f4_count']}")
+        print(
+            f"  {k:<20}: Top-1={v['top1_acc'] * 100:5.1f}% | Recall={v['avg_recall'] * 100:5.1f}% | GuardTrigger={v['guard_trig_rate'] * 100:4.1f}% | F4={v['f4_count']}"
+        )
 
     print("\n--- Summary By Distractor Taxonomy ---")
     for k, v in benchmark_results["summary_by_class"].items():
-        print(f"  {k:<20}: Top-1={v['top1_acc']*100:5.1f}% | Recall={v['avg_recall']*100:5.1f}% | GuardTrigger={v['guard_trig_rate']*100:4.1f}% | F4={v['f4_count']}")
+        print(
+            f"  {k:<20}: Top-1={v['top1_acc'] * 100:5.1f}% | Recall={v['avg_recall'] * 100:5.1f}% | GuardTrigger={v['guard_trig_rate'] * 100:4.1f}% | F4={v['f4_count']}"
+        )
     print("=" * 80)
 
     return benchmark_results

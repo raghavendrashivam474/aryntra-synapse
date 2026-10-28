@@ -105,7 +105,9 @@ def run_queries(client, queries):
                 "representation_metadata": data.get("representation_metadata", {}),
             }
 
-            print(f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)")
+            print(
+                f"  Representation: {result['representation_type']} (build: {result['representation_build_latency']}s)"
+            )
             print(f"  Retrieval:      {result['retrieval_latency']}s")
             print(f"  Generation:     {result['generation_latency']}s")
             print(f"  Total:          {result['total_latency']}s")
@@ -156,8 +158,8 @@ def print_summary(results):
                 b = b_results.get(qid, {})
                 b_gen = f"{b.get('generation_latency', 0.0):.2f}"
                 s_gen = f"{r.get('generation_latency', 0.0):.2f}"
-                b_ctx = str(b.get('context_length', 0))
-                s_ctx = str(r.get('context_length', 0))
+                b_ctx = str(b.get("context_length", 0))
+                s_ctx = str(r.get("context_length", 0))
                 print(f"{qid:<5} | {b_gen:<13} | {s_gen:<13} | {b_ctx:<10} | {s_ctx:<10}")
         except Exception as e:
             print(f"Could not load baseline comparison: {e}")

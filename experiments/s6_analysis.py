@@ -1,4 +1,4 @@
-﻿import json
+import json
 import sys
 from pathlib import Path
 
@@ -17,10 +17,7 @@ def load_results(path):
 def extract_passing(data):
     if not data:
         return {}
-    return {
-        r["id"]: r for r in data.get("results", [])
-        if r.get("status") == "PASS"
-    }
+    return {r["id"]: r for r in data.get("results", []) if r.get("status") == "PASS"}
 
 
 def compute_stats(results_dict, ids):
@@ -28,8 +25,12 @@ def compute_stats(results_dict, ids):
     if n == 0:
         return {}
     sums = {
-        "calls": 0, "cum_ctx": 0, "latency": 0,
-        "steps": 0, "active": 0, "early_stops": 0,
+        "calls": 0,
+        "cum_ctx": 0,
+        "latency": 0,
+        "steps": 0,
+        "active": 0,
+        "early_stops": 0,
         "semantic_scores": [],
     }
     stop_counts = {}
@@ -59,8 +60,7 @@ def compute_stats(results_dict, ids):
         "early_stop_rate": sums["early_stops"] / n * 100,
         "stop_counts": stop_counts,
         "avg_semantic_score": (
-            sum(sums["semantic_scores"]) / len(sums["semantic_scores"])
-            if sums["semantic_scores"] else None
+            sum(sums["semantic_scores"]) / len(sums["semantic_scores"]) if sums["semantic_scores"] else None
         ),
     }
 
@@ -178,11 +178,7 @@ def main():
         s6b_stop = s6br[qid].get("stop_reason", "?") if s6br and qid in s6br else "N/A"
         safe_a = "SAFE" if s6a_stop != "evidence_sufficient" else "WARNING: FALSE STOP"
         safe_b = "SAFE" if s6b_stop != "evidence_sufficient" else "WARNING: FALSE STOP"
-        print(
-            f"  {qid}: S5={s5_stop:<22} "
-            f"S6-A={s6a_stop:<22} [{safe_a}] "
-            f"S6-B={s6b_stop:<22} [{safe_b}]"
-        )
+        print(f"  {qid}: S5={s5_stop:<22} S6-A={s6a_stop:<22} [{safe_a}] S6-B={s6b_stop:<22} [{safe_b}]")
 
     print("\n" + "=" * 120 + "\n")
 

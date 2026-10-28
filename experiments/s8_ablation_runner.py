@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiments/s8_ablation_runner.py
 
 Aryntra Synapse — Sprint 8
@@ -20,6 +20,7 @@ Metrics:
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import json
 import time
@@ -226,7 +227,7 @@ def run_experiment():
                 "sufficient_rate": round(
                     sum(1 for r in config_query_results if r["stop_reason"] == "evidence_sufficient")
                     / len(config_query_results),
-                    2
+                    2,
                 ),
             },
         }
@@ -239,7 +240,9 @@ def run_experiment():
 
     # Print summary table
     print("\n" + "=" * 80)
-    print(f"{'Configuration':<26} | {'Avg Ctx Len':<12} | {'Active Chunks':<14} | {'Pri Latency':<12} | {'Sufficiency Rate'}")
+    print(
+        f"{'Configuration':<26} | {'Avg Ctx Len':<12} | {'Active Chunks':<14} | {'Pri Latency':<12} | {'Sufficiency Rate'}"
+    )
     print("-" * 80)
     for c_name, data in all_results.items():
         agg = data["aggregate"]
@@ -251,4 +254,3 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
-
