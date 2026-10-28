@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/retrieval/chunking.py
 
 Aryntra Synapse — Sprint 0.2
@@ -13,7 +13,6 @@ Responsibilities:
 This module knows nothing about embeddings, FAISS, FastAPI or LLMs.
 """
 
-from typing import List, Dict
 from app.core.config import settings
 
 
@@ -21,7 +20,7 @@ def load_text(filepath: str) -> str:
     """
     Read a plain text file and return its contents as a string.
     """
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         return f.read()
 
 
@@ -30,7 +29,7 @@ def chunk_text(
     chunk_size: int = settings.chunk_size,
     chunk_overlap: int = settings.chunk_overlap,
     doc_id: str = "doc1",
-) -> List[Dict]:
+) -> list[dict]:
     """
     Split text into overlapping fixed-size character chunks.
 
@@ -65,10 +64,12 @@ def chunk_text(
 
         if chunk_text_slice:
             chunk_id = f"{doc_id}_chunk_{index:03d}"
-            chunks.append({
-                "id":   chunk_id,
-                "text": chunk_text_slice,
-            })
+            chunks.append(
+                {
+                    "id": chunk_id,
+                    "text": chunk_text_slice,
+                }
+            )
             index += 1
 
         # Advance by chunk_size minus overlap
@@ -85,7 +86,7 @@ def load_and_chunk(
     chunk_size: int = settings.chunk_size,
     chunk_overlap: int = settings.chunk_overlap,
     doc_id: str = "doc1",
-) -> List[Dict]:
+) -> list[dict]:
     """
     Convenience function: load a file and return its chunks.
     """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/optimization/semantic_gate.py
 
 Aryntra Synapse — Sprint 9
@@ -6,9 +6,12 @@ Cheap lexical pre-filter. Decides whether expensive semantic scoring is needed.
 The gate never assigns semantic truth on its own — it routes whether
 semantic computation is required.
 """
+
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Set, Dict, Any, Optional, Union
+from typing import Any
+
 from app.context.sufficiency import extract_keywords
 
 
@@ -17,7 +20,7 @@ class FastPathDecision:
     needs_semantic: bool
     lexical_score: float
     reason: str
-    suggested_semantic_score: Optional[float] = None
+    suggested_semantic_score: float | None = None
 
 
 # Alias for backward compatibility
@@ -46,7 +49,7 @@ class LexicalSemanticGate:
         self.fast_path_hits = 0
         self.semantic_fallbacks = 0
 
-    def compute_lexical_score(self, query: Union[str, Set[str]], chunk_text: str) -> float:
+    def compute_lexical_score(self, query: str | set[str], chunk_text: str) -> float:
         if not query or not chunk_text.strip():
             return 0.0
         query_keywords = extract_keywords(query) if isinstance(query, str) else query
@@ -60,7 +63,7 @@ class LexicalSemanticGate:
 
     def decide(
         self,
-        query: Union[str, Set[str]],
+        query: str | set[str],
         chunk_text: str,
     ) -> FastPathDecision:
         score = self.compute_lexical_score(query, chunk_text)
@@ -91,10 +94,10 @@ class LexicalSemanticGate:
             suggested_semantic_score=None,
         )
 
-    def score(self, query: Union[str, Set[str]], chunk_text: str) -> float:
+    def score(self, query: str | set[str], chunk_text: str) -> float:
         return self.compute_lexical_score(query, chunk_text)
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         total = self.fast_path_hits + self.semantic_fallbacks
         return {
             "fast_path_hits": self.fast_path_hits,

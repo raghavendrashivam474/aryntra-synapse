@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/retrieval/evidence_fingerprint.py
 
 Aryntra Synapse — Sprint 7
@@ -19,7 +19,7 @@ It does NOT answer:
 
 import hashlib
 import re
-from typing import List, Dict, Any
+from typing import Any
 
 
 class EvidenceFingerprint:
@@ -57,11 +57,11 @@ class EvidenceFingerprint:
         normalized = self.normalize(text)
         return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
-    def fingerprint_batch(self, texts: List[str]) -> List[str]:
+    def fingerprint_batch(self, texts: list[str]) -> list[str]:
         """Fingerprint multiple texts."""
         return [self.fingerprint(t) for t in texts]
 
-    def tag_chunks(self, chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def tag_chunks(self, chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Add a 'fingerprint' key to each chunk dict.
         Returns new dicts (does not mutate originals).

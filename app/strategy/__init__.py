@@ -9,15 +9,16 @@ Responsibilities:
 - Record full decision telemetry for observability
 - Zero LLM calls; zero neural classifiers; fully deterministic
 """
+
+from app.strategy.candidates import CANDIDATE_REGISTRY, StrategyDecision, StrategyPath
 from app.strategy.selector import AdaptiveSelector, StrategyTelemetry
-from app.strategy.candidates import StrategyPath, StrategyDecision, CANDIDATE_REGISTRY
 from app.strategy.signals import extract_query_signals
 
 __all__ = [
-    "AdaptiveSelector",
-    "StrategyTelemetry",
-    "StrategyPath",
-    "StrategyDecision",
     "CANDIDATE_REGISTRY",
+    "AdaptiveSelector",
+    "StrategyDecision",
+    "StrategyPath",
+    "StrategyTelemetry",
     "extract_query_signals",
 ]

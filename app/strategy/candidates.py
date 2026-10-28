@@ -10,9 +10,10 @@ Candidate C: Reuse Confidence Router
 Candidate D: Priority Pre-screener
 Candidate E: Composite Score Router
 """
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Any
+from typing import Any
 
 
 class StrategyPath(str, Enum):
@@ -26,7 +27,7 @@ class StrategyDecision:
     path: StrategyPath
     candidate: str
     reason: str
-    signals: Dict[str, Any] = field(default_factory=dict)
+    signals: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -37,7 +38,7 @@ class StrategyDecision:
         }
 
 
-def candidate_a_lexical_complexity(signals: Dict[str, Any]) -> StrategyDecision:
+def candidate_a_lexical_complexity(signals: dict[str, Any]) -> StrategyDecision:
     q_len = signals.get("query_length", 0)
     kw_count = signals.get("query_keyword_count", 0)
 
@@ -63,7 +64,7 @@ def candidate_a_lexical_complexity(signals: Dict[str, Any]) -> StrategyDecision:
     )
 
 
-def candidate_b_cache_warmth(signals: Dict[str, Any]) -> StrategyDecision:
+def candidate_b_cache_warmth(signals: dict[str, Any]) -> StrategyDecision:
     hit_rate = signals.get("cache_hit_rate", 0.0)
     chunk_count = signals.get("chunk_count", 0)
 
@@ -89,7 +90,7 @@ def candidate_b_cache_warmth(signals: Dict[str, Any]) -> StrategyDecision:
     )
 
 
-def candidate_c_reuse_confidence(signals: Dict[str, Any]) -> StrategyDecision:
+def candidate_c_reuse_confidence(signals: dict[str, Any]) -> StrategyDecision:
     reuse_rate = signals.get("reuse_rate", 0.0)
     chunk_count = signals.get("chunk_count", 0)
 
@@ -115,7 +116,7 @@ def candidate_c_reuse_confidence(signals: Dict[str, Any]) -> StrategyDecision:
     )
 
 
-def candidate_d_priority_prescreen(signals: Dict[str, Any]) -> StrategyDecision:
+def candidate_d_priority_prescreen(signals: dict[str, Any]) -> StrategyDecision:
     lexical = signals.get("first_chunk_lexical_overlap", 0.0)
     avg_lex = signals.get("avg_lexical_overlap", 0.0)
     chunk_count = signals.get("chunk_count", 0)
@@ -149,7 +150,7 @@ def candidate_d_priority_prescreen(signals: Dict[str, Any]) -> StrategyDecision:
     )
 
 
-def candidate_e_composite(signals: Dict[str, Any]) -> StrategyDecision:
+def candidate_e_composite(signals: dict[str, Any]) -> StrategyDecision:
     q_complexity = min(signals.get("query_length", 0) / 15.0, 1.0)
     kw_complexity = min(signals.get("query_keyword_count", 0) / 10.0, 1.0)
     cache_warmth = signals.get("cache_hit_rate", 0.0)
@@ -158,10 +159,10 @@ def candidate_e_composite(signals: Dict[str, Any]) -> StrategyDecision:
 
     raw = (
         +0.30 * q_complexity
-        +0.25 * kw_complexity
-        -0.20 * cache_warmth
-        -0.15 * reuse_confidence
-        -0.10 * lexical_clarity
+        + 0.25 * kw_complexity
+        - 0.20 * cache_warmth
+        - 0.15 * reuse_confidence
+        - 0.10 * lexical_clarity
     )
     score = max(0.0, min(1.0, (raw + 0.45) / 1.0))
 

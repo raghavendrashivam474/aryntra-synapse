@@ -1,15 +1,22 @@
-﻿import time
 import logging
+import time
+
 import ollama
-from app.core.config import settings
+
+from app.context.evidence_priority import (
+    EvidencePriorityEngine,
+    EvidencePriorityWeights,
+)
+from app.context.progressive import (
+    SUFFICIENCY_PROMPT_TEMPLATE,
+    ProgressiveContextEngine,
+)
 from app.context.representation import BaseContextRepresenter, get_representer
-from app.context.progressive import ProgressiveContextEngine, SUFFICIENCY_PROMPT_TEMPLATE
-from app.context.workspace import EvidenceWorkspace
-from app.context.sufficiency import SufficiencyEngine, SemanticSufficiencyEngine
 from app.context.semantic_gate import SemanticGate
-from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriorityWeights
+from app.context.sufficiency import SemanticSufficiencyEngine, SufficiencyEngine
+from app.context.workspace import EvidenceWorkspace
+from app.core.config import settings
 from app.retrieval.embeddings import EmbeddingModel
-from app.context.compressor import build_compressed_context
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +113,7 @@ class OllamaProvider:
             weights=weights,
         )
 
-    def generate_raw(self, prompt: str, context: list = None) -> dict:
+    def generate_raw(self, prompt: str, context: list | None = None) -> dict:
         """Direct model generation for arbitrary prompts."""
         kwargs = {"model": self.model, "prompt": prompt}
         if context is not None:
@@ -134,9 +141,7 @@ class OllamaProvider:
 
     # ── S6 / S8: Semantic-Aware Sufficiency Mode ──
 
-    def _generate_semantic_aware(
-        self, question: str, retrieved_chunks: list[dict], mode: str = "blended_v1"
-    ) -> dict:
+    def _generate_semantic_aware(self, question: str, retrieved_chunks: list[dict], mode: str = "blended_v1") -> dict:
         """
         S6 / S8 semantic-aware selective promotion.
         Evaluates evidence sufficiency using semantic similarity (semantic_v1)
@@ -184,9 +189,7 @@ class OllamaProvider:
 
         # Final generation (exactly 1 LLM call)
         final_context = workspace.build_active_context()
-        gen_prompt = PROMPT_TEMPLATE.format(
-            context=final_context, question=question
-        )
+        gen_prompt = PROMPT_TEMPLATE.format(context=final_context, question=question)
 
         total_model_calls = 1
         t0 = time.perf_counter()
@@ -207,7 +210,9 @@ class OllamaProvider:
             "representation_build_latency": 0.0,
             "expansion_steps": expansion_steps,
             "total_model_calls": total_model_calls,
-            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"] if ws_summary["promotion_history"] else 0,
+            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"]
+            if ws_summary["promotion_history"]
+            else 0,
             "final_context_length": final_ctx_len,
             "peak_context_length": final_ctx_len,
             "cumulative_context_length": final_ctx_len,
@@ -224,9 +229,7 @@ class OllamaProvider:
 
     # ── S5: Selective Promotion Mode ──
 
-    def _generate_selective(
-        self, question: str, retrieved_chunks: list[dict]
-    ) -> dict:
+    def _generate_selective(self, question: str, retrieved_chunks: list[dict]) -> dict:
         """
         S5 selective promotion: uses deterministic sufficiency signals
         instead of LLM-based sufficiency checks.
@@ -271,9 +274,7 @@ class OllamaProvider:
 
         # Final generation (exactly 1 LLM call)
         final_context = workspace.build_active_context()
-        gen_prompt = PROMPT_TEMPLATE.format(
-            context=final_context, question=question
-        )
+        gen_prompt = PROMPT_TEMPLATE.format(context=final_context, question=question)
 
         total_model_calls = 1
         t0 = time.perf_counter()
@@ -294,7 +295,9 @@ class OllamaProvider:
             "representation_build_latency": 0.0,
             "expansion_steps": expansion_steps,
             "total_model_calls": total_model_calls,
-            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"] if ws_summary["promotion_history"] else 0,
+            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"]
+            if ws_summary["promotion_history"]
+            else 0,
             "final_context_length": final_ctx_len,
             "peak_context_length": final_ctx_len,
             "cumulative_context_length": final_ctx_len,
@@ -311,9 +314,7 @@ class OllamaProvider:
 
     # ── S4: Evidence Workspace Mode (retained) ──
 
-    def _generate_workspace(
-        self, question: str, retrieved_chunks: list[dict]
-    ) -> dict:
+    def _generate_workspace(self, question: str, retrieved_chunks: list[dict]) -> dict:
         workspace = EvidenceWorkspace(
             chunks=retrieved_chunks,
             max_active=settings.max_active_chunks,
@@ -327,9 +328,7 @@ class OllamaProvider:
 
         while True:
             active_context = workspace.build_active_context()
-            suff_prompt = SUFFICIENCY_PROMPT_TEMPLATE.format(
-                query=question, context=active_context
-            )
+            suff_prompt = SUFFICIENCY_PROMPT_TEMPLATE.format(query=question, context=active_context)
             total_model_calls += 1
             t0 = time.perf_counter()
             if reuse_active and ollama_ctx is not None:
@@ -369,10 +368,14 @@ class OllamaProvider:
             "representation_build_latency": 0.0,
             "expansion_steps": expansion_steps,
             "total_model_calls": total_model_calls,
-            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"] if ws_summary["promotion_history"] else 0,
+            "initial_context_length": ws_summary["promotion_history"][0]["new_context_length"]
+            if ws_summary["promotion_history"]
+            else 0,
             "final_context_length": final_ctx_len,
             "peak_context_length": final_ctx_len,
-            "cumulative_context_length": ws_summary["total_new_context"] + ws_summary["total_repeated_context"] + final_ctx_len,
+            "cumulative_context_length": ws_summary["total_new_context"]
+            + ws_summary["total_repeated_context"]
+            + final_ctx_len,
             "sufficiency_latency": total_sufficiency_latency,
             "new_context_length": ws_summary["total_new_context"],
             "repeated_context_length": ws_summary["total_repeated_context"],
@@ -386,9 +389,7 @@ class OllamaProvider:
 
     # ── S3: Progressive Mode (retained) ──
 
-    def _generate_progressive(
-        self, question: str, retrieved_chunks: list[dict]
-    ) -> dict:
+    def _generate_progressive(self, question: str, retrieved_chunks: list[dict]) -> dict:
         prog_result = self.progressive_engine.run(question, retrieved_chunks)
         context = prog_result["context_string"]
         prompt = PROMPT_TEMPLATE.format(context=context, question=question)
@@ -401,8 +402,10 @@ class OllamaProvider:
         final_peak = max(prog_result["peak_context_length"], len(context))
 
         return {
-            "answer": answer, "generation_latency": gen_latency,
-            "context_length": len(context), "model": self.model,
+            "answer": answer,
+            "generation_latency": gen_latency,
+            "context_length": len(context),
+            "model": self.model,
             "representation_type": "progressive_v1",
             "representation_metadata": {"stages": prog_result["stages"]},
             "representation_build_latency": 0.0,
@@ -413,17 +416,19 @@ class OllamaProvider:
             "peak_context_length": final_peak,
             "cumulative_context_length": final_cum,
             "sufficiency_latency": prog_result["sufficiency_latency"],
-            "new_context_length": 0, "repeated_context_length": 0,
-            "workspace_active_chunks": 0, "workspace_available_chunks": 0,
-            "promotion_history": [], "reuse_ollama_context": False,
-            "stop_reason": "progressive_complete", "sufficiency_log": [],
+            "new_context_length": 0,
+            "repeated_context_length": 0,
+            "workspace_active_chunks": 0,
+            "workspace_available_chunks": 0,
+            "promotion_history": [],
+            "reuse_ollama_context": False,
+            "stop_reason": "progressive_complete",
+            "sufficiency_log": [],
         }
 
     # ── Static Mode (S0.2 / S1 / S2) ──
 
-    def _generate_static(
-        self, question: str, retrieved_chunks: list[dict]
-    ) -> dict:
+    def _generate_static(self, question: str, retrieved_chunks: list[dict]) -> dict:
         represented = self.representer.represent(question, retrieved_chunks)
         context = represented["context_string"]
         prompt = PROMPT_TEMPLATE.format(context=context, question=question)
@@ -434,17 +439,26 @@ class OllamaProvider:
         ctx_len = len(context)
 
         return {
-            "answer": answer, "generation_latency": gen_latency,
-            "context_length": ctx_len, "model": self.model,
+            "answer": answer,
+            "generation_latency": gen_latency,
+            "context_length": ctx_len,
+            "model": self.model,
             "representation_type": represented["representation_type"],
             "representation_metadata": represented["representation_metadata"],
             "representation_build_latency": represented["build_latency"],
-            "expansion_steps": 0, "total_model_calls": 1,
-            "initial_context_length": ctx_len, "final_context_length": ctx_len,
-            "peak_context_length": ctx_len, "cumulative_context_length": ctx_len,
+            "expansion_steps": 0,
+            "total_model_calls": 1,
+            "initial_context_length": ctx_len,
+            "final_context_length": ctx_len,
+            "peak_context_length": ctx_len,
+            "cumulative_context_length": ctx_len,
             "sufficiency_latency": 0.0,
-            "new_context_length": ctx_len, "repeated_context_length": 0,
-            "workspace_active_chunks": 0, "workspace_available_chunks": 0,
-            "promotion_history": [], "reuse_ollama_context": False,
-            "stop_reason": "static", "sufficiency_log": [],
+            "new_context_length": ctx_len,
+            "repeated_context_length": 0,
+            "workspace_active_chunks": 0,
+            "workspace_available_chunks": 0,
+            "promotion_history": [],
+            "reuse_ollama_context": False,
+            "stop_reason": "static",
+            "sufficiency_log": [],
         }

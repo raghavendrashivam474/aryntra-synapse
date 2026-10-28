@@ -1,19 +1,22 @@
-﻿import time
-from typing import Optional
+import time
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from app.retrieval.chunking import load_and_chunk
-from app.retrieval.retriever import Retriever
-from app.llm.ollama_provider import OllamaProvider
-from app.core.config import settings
+
+# S8 / S9: Evidence Priority Engine with Optimization
+from app.context.evidence_priority import (
+    EvidencePriorityEngine,
+    EvidencePriorityWeights,
+)
 
 # S7: Cross-query evidence reuse
 from app.context.evidence_store import EvidenceStore
-
-# S8 / S9: Evidence Priority Engine with Optimization
-from app.context.evidence_priority import EvidencePriorityEngine, EvidencePriorityWeights
+from app.core.config import settings
+from app.llm.ollama_provider import OllamaProvider
 from app.optimization.embedding_cache import EmbeddingCache
 from app.optimization.semantic_gate import LexicalSemanticGate
+from app.retrieval.chunking import load_and_chunk
+from app.retrieval.retriever import Retriever
 
 # S10: Adaptive Evidence Strategy Selection
 from app.strategy.selector import AdaptiveSelector
@@ -24,12 +27,22 @@ _retriever = Retriever()
 _llm = OllamaProvider()
 _evidence_store = EvidenceStore()
 
-_query_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_query_embedding_cache else None
-_evidence_cache = EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_evidence_embedding_cache else None
-_semantic_gate = LexicalSemanticGate(
-    high_confidence=settings.lexical_gate_high_confidence,
-    low_confidence=settings.lexical_gate_low_confidence,
-) if settings.enable_lexical_semantic_gate else None
+_query_cache = (
+    EmbeddingCache(max_entries=settings.embedding_cache_max_entries) if settings.enable_query_embedding_cache else None
+)
+_evidence_cache = (
+    EmbeddingCache(max_entries=settings.embedding_cache_max_entries)
+    if settings.enable_evidence_embedding_cache
+    else None
+)
+_semantic_gate = (
+    LexicalSemanticGate(
+        high_confidence=settings.lexical_gate_high_confidence,
+        low_confidence=settings.lexical_gate_low_confidence,
+    )
+    if settings.enable_lexical_semantic_gate
+    else None
+)
 
 _priority_engine = EvidencePriorityEngine(
     embedding_model=_retriever._embedding_model,
@@ -45,11 +58,15 @@ _priority_engine = EvidencePriorityEngine(
     semantic_gate=_semantic_gate,
 )
 
-_strategy_selector = AdaptiveSelector(
-    mode=settings.s10_mode,
-    primary_candidate=settings.s10_primary_candidate,
-    fallback_candidate=settings.s10_fallback_candidate,
-) if settings.enable_adaptive_strategy else None
+_strategy_selector = (
+    AdaptiveSelector(
+        mode=settings.s10_mode,
+        primary_candidate=settings.s10_primary_candidate,
+        fallback_candidate=settings.s10_fallback_candidate,
+    )
+    if settings.enable_adaptive_strategy
+    else None
+)
 
 
 def initialise_retriever() -> None:
@@ -66,13 +83,13 @@ class RetrievedChunk(BaseModel):
     chunk_id: str
     text: str
     score: float
-    fingerprint: Optional[str] = None
-    evidence_status: Optional[str] = None
-    priority_score: Optional[float] = None
-    priority_class: Optional[str] = None
-    semantic_score: Optional[float] = None
-    lexical_score: Optional[float] = None
-    reuse_score: Optional[float] = None
+    fingerprint: str | None = None
+    evidence_status: str | None = None
+    priority_score: float | None = None
+    priority_class: str | None = None
+    semantic_score: float | None = None
+    lexical_score: float | None = None
+    reuse_score: float | None = None
 
 
 class AskResponse(BaseModel):
@@ -158,9 +175,13 @@ class HealthResponse(BaseModel):
 @router.get("/health", response_model=HealthResponse)
 def health():
     return HealthResponse(
-        status="ok", app_name=settings.app_name, version=settings.app_version,
-        retriever_ready=_retriever.is_ready, chunk_count=_retriever.chunk_count,
-        embedding_model=settings.embedding_model, llm_model=settings.llm_model,
+        status="ok",
+        app_name=settings.app_name,
+        version=settings.app_version,
+        retriever_ready=_retriever.is_ready,
+        chunk_count=_retriever.chunk_count,
+        embedding_model=settings.embedding_model,
+        llm_model=settings.llm_model,
         context_representation=settings.context_representation,
         evidence_reuse_enabled=settings.evidence_reuse_enabled,
         evidence_store_size=_evidence_store.size,
@@ -253,7 +274,8 @@ def ask(request: AskRequest):
     total_latency = round(time.perf_counter() - t0, 4)
 
     return AskResponse(
-        question=request.text, answer=llm_result["answer"],
+        question=request.text,
+        answer=llm_result["answer"],
         retrieved_chunks=[
             RetrievedChunk(
                 chunk_id=c["chunk_id"],

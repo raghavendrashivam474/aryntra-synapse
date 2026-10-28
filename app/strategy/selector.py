@@ -3,16 +3,17 @@ S10 - Adaptive Strategy Selector.
 
 Orchestrates signal extraction, candidate evaluation, and path execution.
 """
-import time
-import logging
-from typing import Dict, Any, List, Tuple, Optional
 
-from app.strategy.signals import extract_query_signals
+import logging
+import time
+from typing import Any
+
 from app.strategy.candidates import (
-    StrategyPath,
-    StrategyDecision,
     CANDIDATE_REGISTRY,
+    StrategyDecision,
+    StrategyPath,
 )
+from app.strategy.signals import extract_query_signals
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class StrategyTelemetry:
     """Records S10 decision and execution metrics for observability."""
 
     def __init__(self):
-        self.decisions: List[Dict[str, Any]] = []
+        self.decisions: list[dict[str, Any]] = []
         self.total_light = 0
         self.total_standard = 0
         self.total_deep = 0
@@ -72,8 +73,7 @@ class AdaptiveSelector:
             "adaptive_fallback",
         ):
             raise ValueError(
-                f"Unknown S10 mode: {mode}. "
-                f"Valid: {list(CANDIDATE_REGISTRY.keys())} + adaptive, adaptive_fallback"
+                f"Unknown S10 mode: {mode}. Valid: {list(CANDIDATE_REGISTRY.keys())} + adaptive, adaptive_fallback"
             )
         self.mode = mode
         self.primary_candidate = primary_candidate
@@ -83,9 +83,9 @@ class AdaptiveSelector:
     def select(
         self,
         query: str,
-        chunks: List[Dict[str, Any]],
-        reuse_metrics: Optional[Dict[str, Any]] = None,
-        cache_stats: Optional[Dict[str, Any]] = None,
+        chunks: list[dict[str, Any]],
+        reuse_metrics: dict[str, Any] | None = None,
+        cache_stats: dict[str, Any] | None = None,
     ) -> StrategyDecision:
         t0 = time.perf_counter()
 
@@ -154,9 +154,9 @@ class AdaptiveSelector:
         self,
         decision: StrategyDecision,
         query: str,
-        chunks: List[Dict[str, Any]],
+        chunks: list[dict[str, Any]],
         priority_engine,
-    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         t0 = time.perf_counter()
 
         empty_metrics = {

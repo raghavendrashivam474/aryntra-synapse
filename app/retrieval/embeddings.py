@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/retrieval/embeddings.py
 
 Aryntra Synapse — Sprint 0.2
@@ -14,6 +14,7 @@ It accepts text. It returns vectors. That is all.
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
 from app.core.config import settings
 
 

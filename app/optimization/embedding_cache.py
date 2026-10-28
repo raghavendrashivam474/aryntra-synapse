@@ -1,15 +1,19 @@
-﻿"""
+"""
 app/optimization/embedding_cache.py
 
 Aryntra Synapse — Sprint 9
 Deterministic, bounded, fingerprint-keyed cache for evidence and query embeddings.
 Non-destructive. Transparent to S6/S7/S8.
 """
+
 from __future__ import annotations
-from collections import OrderedDict
-from threading import Lock
-from typing import Callable, Optional, Dict, Any, List
+
 import hashlib
+from collections import OrderedDict
+from collections.abc import Callable
+from threading import Lock
+from typing import Any
+
 import numpy as np
 
 
@@ -35,7 +39,7 @@ class EmbeddingCache:
         self.hits = 0
         self.misses = 0
 
-    def get(self, key: str) -> Optional[np.ndarray]:
+    def get(self, key: str) -> np.ndarray | None:
         with self._lock:
             if key in self._store:
                 self._store.move_to_end(key)
@@ -55,7 +59,7 @@ class EmbeddingCache:
         self,
         text: str,
         compute_fn: Callable[[str], np.ndarray],
-        precomputed_key: Optional[str] = None,
+        precomputed_key: str | None = None,
     ) -> np.ndarray:
         key = precomputed_key or fingerprint_text(text)
         with self._lock:
@@ -78,17 +82,17 @@ class EmbeddingCache:
 
     def get_or_compute_batch(
         self,
-        texts: List[str],
-        compute_batch_fn: Callable[[List[str]], np.ndarray],
-        precomputed_keys: Optional[List[str]] = None,
-    ) -> List[np.ndarray]:
+        texts: list[str],
+        compute_batch_fn: Callable[[list[str]], np.ndarray],
+        precomputed_keys: list[str] | None = None,
+    ) -> list[np.ndarray]:
         if not texts:
             return []
 
         keys = precomputed_keys or [fingerprint_text(t) for t in texts]
-        results: List[Optional[np.ndarray]] = [None] * len(texts)
-        missing_indices: List[int] = []
-        missing_texts: List[str] = []
+        results: list[np.ndarray | None] = [None] * len(texts)
+        missing_indices: list[int] = []
+        missing_texts: list[str] = []
 
         with self._lock:
             for idx, key in enumerate(keys):
@@ -104,7 +108,7 @@ class EmbeddingCache:
         if missing_texts:
             computed_vectors = compute_batch_fn(missing_texts)
             with self._lock:
-                for orig_idx, vec in zip(missing_indices, computed_vectors):
+                for orig_idx, vec in zip(missing_indices, computed_vectors, strict=False):
                     key = keys[orig_idx]
                     self._store[key] = vec
                     self._store.move_to_end(key)
@@ -114,7 +118,7 @@ class EmbeddingCache:
 
         return [r for r in results if r is not None]
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         total = self.hits + self.misses
         return {
             "hits": self.hits,

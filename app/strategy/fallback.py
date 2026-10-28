@@ -18,7 +18,7 @@ Signals evaluated (all cheap, no embeddings or LLM):
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class ConfidenceAssessment:
     decision: FallbackDecision
     confidence_score: float
     reason: str
-    signals: Dict[str, Any]
+    signals: dict[str, Any]
 
     def to_dict(self) -> dict:
         return {
@@ -74,14 +74,14 @@ class ConfidenceGuard:
     def assess(
         self,
         query: str,
-        ranked_chunks: List[Dict[str, Any]],
-        priority_metrics: Optional[Dict[str, Any]] = None,
-        conflict_report: Optional[Any] = None,
-        coverage_report: Optional[Any] = None,
+        ranked_chunks: list[dict[str, Any]],
+        priority_metrics: dict[str, Any] | None = None,
+        conflict_report: Any | None = None,
+        coverage_report: Any | None = None,
     ) -> ConfidenceAssessment:
         """Evaluate whether to trust priority results, fall back, or expand/resolve."""
-        signals: Dict[str, Any] = {}
-        reasons: List[str] = []
+        signals: dict[str, Any] = {}
+        reasons: list[str] = []
         confidence = 0.50  # neutral baseline
 
         if not ranked_chunks:
@@ -106,9 +106,7 @@ class ConfidenceGuard:
             signals["score_margin"] = 0.0
 
         # Signal 2: HIGH priority count
-        high_count = sum(
-            1 for c in ranked_chunks if c.get("priority_class") == "HIGH"
-        )
+        high_count = sum(1 for c in ranked_chunks if c.get("priority_class") == "HIGH")
         signals["high_count"] = high_count
         if high_count >= self.min_high_count:
             confidence += 0.10
@@ -119,6 +117,7 @@ class ConfidenceGuard:
         # Signal 3: Lexical agreement with top chunk
         try:
             from app.context.sufficiency import extract_keywords
+
             query_kw = extract_keywords(query)
             if query_kw and ranked_chunks:
                 top_text = ranked_chunks[0].get("text", "")
@@ -157,7 +156,7 @@ class ConfidenceGuard:
             signals["contradiction_detected"] = c_detected
             signals["contradiction_score"] = round(c_score, 4)
             if c_detected and c_score > 0.30:
-                confidence -= (self.conflict_penalty_weight * c_score)
+                confidence -= self.conflict_penalty_weight * c_score
                 reasons.append("contradiction_detected")
         else:
             signals["contradiction_detected"] = False
@@ -168,7 +167,7 @@ class ConfidenceGuard:
             cov_ratio = getattr(coverage_report, "coverage_ratio", 1.0)
             signals["coverage_ratio"] = round(cov_ratio, 4)
             if cov_ratio < 0.50:
-                confidence -= (self.coverage_penalty_weight * (1.0 - cov_ratio))
+                confidence -= self.coverage_penalty_weight * (1.0 - cov_ratio)
                 reasons.append("low_concept_coverage")
             elif cov_ratio >= 0.80:
                 confidence += 0.10
@@ -176,9 +175,7 @@ class ConfidenceGuard:
             signals["coverage_ratio"] = 1.0
 
         # Signal 8 [S16]: Temporal coherence
-        t_scores = [
-            c.get("temporal_score", 0.5) for c in ranked_chunks
-        ]
+        t_scores = [c.get("temporal_score", 0.5) for c in ranked_chunks]
         if t_scores:
             avg_temporal = sum(t_scores) / len(t_scores)
             signals["avg_temporal_score"] = round(avg_temporal, 4)
@@ -211,7 +208,9 @@ class ConfidenceGuard:
 
         logger.debug(
             "ConfidenceGuard: %.2f -> %s (%s)",
-            confidence, decision.value, reason_str,
+            confidence,
+            decision.value,
+            reason_str,
         )
 
         return ConfidenceAssessment(

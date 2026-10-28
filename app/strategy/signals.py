@@ -8,16 +8,18 @@ They rely only on:
 - Cache statistics (hit rate from S9)
 - Lexical overlap (keyword intersection with top chunk)
 """
-from typing import Dict, Any, List, Optional
+
+from typing import Any
+
 from app.context.sufficiency import extract_keywords
 
 
 def extract_query_signals(
     query: str,
-    chunks: List[Dict[str, Any]],
-    reuse_metrics: Optional[Dict[str, Any]] = None,
-    cache_stats: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    chunks: list[dict[str, Any]],
+    reuse_metrics: dict[str, Any] | None = None,
+    cache_stats: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Extract cheap deterministic signals from query/evidence state.
     """
@@ -52,9 +54,7 @@ def extract_query_signals(
         avg_chunk_len = sum(len(c.get("text", "")) for c in chunks) / len(chunks)
 
     # Reuse count from chunk metadata
-    reused_in_chunks = sum(
-        1 for c in chunks if c.get("evidence_status") == "reused"
-    )
+    reused_in_chunks = sum(1 for c in chunks if c.get("evidence_status") == "reused")
 
     return {
         "query_length": len(query_tokens),

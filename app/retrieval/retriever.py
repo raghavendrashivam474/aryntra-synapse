@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/retrieval/retriever.py
 
 Aryntra Synapse — Sprint 0.2
@@ -22,11 +22,11 @@ It depends on EmbeddingModel and chunk dicts only.
 """
 
 import time
-import numpy as np
+
 import faiss
-from typing import List, Dict
-from app.retrieval.embeddings import EmbeddingModel
+
 from app.core.config import settings
+from app.retrieval.embeddings import EmbeddingModel
 
 
 class Retriever:
@@ -44,13 +44,13 @@ class Retriever:
     def __init__(self, embedding_model: EmbeddingModel = None):
         self._embedding_model = embedding_model or EmbeddingModel()
         self._index = None
-        self._chunks: List[Dict] = []
+        self._chunks: list[dict] = []
 
     # ------------------------------------------------------------------
     # Indexing
     # ------------------------------------------------------------------
 
-    def index_chunks(self, chunks: List[Dict]) -> None:
+    def index_chunks(self, chunks: list[dict]) -> None:
         """
         Embed all chunks and build a FAISS flat L2 index.
 
@@ -79,7 +79,7 @@ class Retriever:
         self,
         query_text: str,
         top_k: int = settings.top_k,
-    ) -> Dict:
+    ) -> dict:
         """
         Retrieve the Top-K most similar chunks for a query string.
 
@@ -108,21 +108,23 @@ class Retriever:
         retrieval_latency = time.perf_counter() - t0
 
         results = []
-        for rank, (dist, idx) in enumerate(zip(distances[0], indices[0])):
+        for _rank, (dist, idx) in enumerate(zip(distances[0], indices[0], strict=False)):
             if idx < 0 or idx >= len(self._chunks):
                 continue
             chunk = self._chunks[idx]
             # Convert L2 distance to a similarity-style score
             # Lower L2 distance = higher similarity
             score = float(1 / (1 + dist))
-            results.append({
-                "chunk_id": chunk["id"],
-                "text":     chunk["text"],
-                "score":    round(score, 4),
-            })
+            results.append(
+                {
+                    "chunk_id": chunk["id"],
+                    "text": chunk["text"],
+                    "score": round(score, 4),
+                }
+            )
 
         return {
-            "results":           results,
+            "results": results,
             "retrieval_latency": round(retrieval_latency, 4),
         }
 
