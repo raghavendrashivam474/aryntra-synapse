@@ -1,14 +1,15 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 14 + Sprint 15 + Sprint 16
 Configurable Resolution, Assembly, Sufficiency, and Temporal Weights.
 """
-from dataclasses import dataclass, field
-from typing import Optional, Dict
+
+from dataclasses import dataclass
 
 
 @dataclass
 class S14ResolutionConfig:
     """Configurable weights for S14 conflict-aware ranking and assembly."""
+
     relevance_weight: float = 0.45
     lexical_weight: float = 0.25
     coverage_weight: float = 0.20
@@ -81,6 +82,7 @@ class S15SufficiencyConfig:
       score < insufficient_threshold → INSUFFICIENT (EXPAND)
       between                        → UNCERTAIN (conservative EXPAND)
     """
+
     # Signal weights (sum ≈ 1.0)
     coverage_weight: float = 0.30
     support_weight: float = 0.15
@@ -95,8 +97,8 @@ class S15SufficiencyConfig:
     insufficient_threshold: float = 0.40
 
     # Marginal gain computation
-    marginal_gain_floor: float = 0.02   # gains below this are treated as zero
-    marginal_probe_count: int = 5        # how many remaining candidates to probe
+    marginal_gain_floor: float = 0.02  # gains below this are treated as zero
+    marginal_probe_count: int = 5  # how many remaining candidates to probe
 
     # Conflict veto: high conflict + low coverage → never declare sufficient
     conflict_veto_threshold: float = 0.40
@@ -147,6 +149,7 @@ class S15SufficiencyConfig:
 
 # ── Sprint 16: Temporal Configuration ─────────────────────────────────
 
+
 @dataclass
 class S16TemporalConfig:
     """
@@ -155,13 +158,14 @@ class S16TemporalConfig:
     The compatibility matrix maps (query_intent, evidence_state) pairs
     to a 0.0-1.0 score. UNKNOWN states always return unknown_neutral_score.
     """
+
     temporal_weight: float = 0.25
     unknown_neutral_score: float = 0.50
     superseded_penalty: float = 0.10
     version_boost: float = 0.05
 
     # Stored as flat dict: "intent:state" -> score
-    _compatibility: Optional[Dict[str, float]] = None
+    _compatibility: dict[str, float] | None = None
 
     def __post_init__(self):
         if self._compatibility is None:
@@ -170,12 +174,10 @@ class S16TemporalConfig:
     def get_compatibility(self, intent: str, state: str) -> float:
         if self._compatibility is None:
             self._compatibility = self._default_matrix()
-        return self._compatibility.get(
-            f"{intent}:{state}", self.unknown_neutral_score
-        )
+        return self._compatibility.get(f"{intent}:{state}", self.unknown_neutral_score)
 
     @staticmethod
-    def _default_matrix() -> Dict[str, float]:
+    def _default_matrix() -> dict[str, float]:
         return {
             # CURRENT queries
             "current:current": 1.0,
@@ -235,16 +237,16 @@ class S16TemporalConfig:
         cfg = cls(temporal_weight=0.10, unknown_neutral_score=0.55)
         for key in cfg._compatibility:
             if "unknown" not in key:
-                cfg._compatibility[key] = max(
-                    cfg._compatibility[key], 0.35
-                )
+                cfg._compatibility[key] = max(cfg._compatibility[key], 0.35)
         return cfg
 
     @classmethod
     def balanced(cls) -> "S16TemporalConfig":
         return cls()
 
+
 # ── Sprint 17: Relationship Configuration ──────────────────────────────
+
 
 @dataclass
 class S17RelationshipConfig:
@@ -254,6 +256,7 @@ class S17RelationshipConfig:
     Controls graph edge detection, bounds, and relationship-aware
     assembly re-ranking weights.
     """
+
     relationship_enabled: bool = True
     relationship_weight: float = 0.15
     max_relationship_edges: int = 50

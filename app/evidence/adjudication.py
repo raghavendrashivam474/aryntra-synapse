@@ -1,4 +1,4 @@
-﻿"""
+"""
 S18 — Controlled Semantic Adjudication
 
 This module provides a gated semantic adjudication layer for resolving
@@ -24,7 +24,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Tuple
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,10 @@ logger = logging.getLogger(__name__)
 # Decision vocabulary — deliberately small
 # ---------------------------------------------------------------------------
 
+
 class AdjudicationDecision(Enum):
     """Three possible adjudication outcomes. No more."""
+
     ACCEPT = "ACCEPT"
     REJECT = "REJECT"
     UNCERTAIN = "UNCERTAIN"
@@ -44,6 +46,7 @@ class AdjudicationDecision(Enum):
 # Adjudication result — structured, validated
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class AdjudicationResult:
     """Immutable structured judgment from the adjudicator.
@@ -52,25 +55,27 @@ class AdjudicationResult:
     Free-form text is stored in `rationale` for traceability but has
     zero influence on the control decision.
     """
+
     decision: AdjudicationDecision
     confidence: float
-    selected_evidence_ids: Tuple[str, ...]
+    selected_evidence_ids: tuple[str, ...]
     rationale: str
     adjudication_time_ms: float
-    raw_response: Optional[str] = None
+    raw_response: str | None = None
 
     def __post_init__(self):
         if not isinstance(self.decision, AdjudicationDecision):
-            raise ValueError(f"Invalid decision type: {type(self.decision)}")
+            raise TypeError(f"Invalid decision type: {type(self.decision)}")
         if not (0.0 <= self.confidence <= 1.0):
             raise ValueError(f"Confidence must be [0.0, 1.0], got {self.confidence}")
         if not isinstance(self.selected_evidence_ids, tuple):
-            raise ValueError("selected_evidence_ids must be a tuple")
+            raise TypeError("selected_evidence_ids must be a tuple")
 
 
 # ---------------------------------------------------------------------------
 # Conflict context — what the deterministic layer identified
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class ConflictContext:
@@ -79,10 +84,11 @@ class ConflictContext:
     This is what the deterministic pipeline identified as ambiguous.
     The adjudicator receives ONLY this context, never the full corpus.
     """
+
     conflict_type: str  # e.g., "contradiction", "scope_ambiguity", "version_conflict"
-    evidence_ids: Tuple[str, ...]
-    relationship_signals: Dict[str, Any] = field(default_factory=dict)
-    temporal_signals: Dict[str, Any] = field(default_factory=dict)
+    evidence_ids: tuple[str, ...]
+    relationship_signals: dict[str, Any] = field(default_factory=dict)
+    temporal_signals: dict[str, Any] = field(default_factory=dict)
     confidence_gap: float = 0.0
     description: str = ""
 
@@ -91,6 +97,7 @@ class ConflictContext:
 # Evidence candidate — bounded view for the adjudicator
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class AdjudicationCandidate:
     """A single piece of evidence presented to the adjudicator.
@@ -98,15 +105,17 @@ class AdjudicationCandidate:
     This is a deliberately limited view — only what the adjudicator
     needs to make a judgment about the specific conflict.
     """
+
     evidence_id: str
     content: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     relevance_score: float = 0.0
 
 
 # ---------------------------------------------------------------------------
 # Adjudicator abstract interface
 # ---------------------------------------------------------------------------
+
 
 class EvidenceAdjudicator(ABC):
     """Abstract adjudicator interface.
@@ -123,7 +132,7 @@ class EvidenceAdjudicator(ABC):
     def adjudicate(
         self,
         query: str,
-        candidates: List[AdjudicationCandidate],
+        candidates: list[AdjudicationCandidate],
         conflict_context: ConflictContext,
     ) -> AdjudicationResult:
         """Evaluate ambiguous candidates and return a structured judgment.
@@ -147,12 +156,14 @@ class EvidenceAdjudicator(ABC):
 # Adjudication gate — decides whether to invoke the adjudicator
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AdjudicationGateConfig:
     """Configuration for the adjudication gate.
 
     Controls when and how the LLM is invoked.
     """
+
     # Maximum candidates sent to adjudicator
     max_candidates: int = 3
 
@@ -181,11 +192,12 @@ class AdjudicationGateConfig:
 @dataclass
 class GateDecision:
     """Result of the adjudication gate evaluation."""
+
     should_adjudicate: bool
     reason: str
-    trigger_signals: Dict[str, Any] = field(default_factory=dict)
-    selected_candidates: List[AdjudicationCandidate] = field(default_factory=list)
-    conflict_context: Optional[ConflictContext] = None
+    trigger_signals: dict[str, Any] = field(default_factory=dict)
+    selected_candidates: list[AdjudicationCandidate] = field(default_factory=list)
+    conflict_context: ConflictContext | None = None
 
 
 class AdjudicationGate:
@@ -199,7 +211,7 @@ class AdjudicationGate:
     a second conflict system.
     """
 
-    def __init__(self, config: Optional[AdjudicationGateConfig] = None):
+    def __init__(self, config: AdjudicationGateConfig | None = None):
         self.config = config or AdjudicationGateConfig()
         self._call_count = 0
         self._skip_count = 0
@@ -207,8 +219,8 @@ class AdjudicationGate:
     def evaluate(
         self,
         query: str,
-        candidates: List[AdjudicationCandidate],
-        deterministic_signals: Dict[str, Any],
+        candidates: list[AdjudicationCandidate],
+        deterministic_signals: dict[str, Any],
     ) -> GateDecision:
         """Evaluate whether adjudication should be triggered.
 
@@ -297,21 +309,15 @@ class AdjudicationGate:
             )
 
         # Select bounded candidates for adjudication
-        selected = candidates[:self.config.max_candidates]
+        selected = candidates[: self.config.max_candidates]
 
         # Build conflict context from deterministic signals
         conflict_type = deterministic_signals.get("conflict_type", "unknown")
         conflict_context = ConflictContext(
             conflict_type=conflict_type,
             evidence_ids=tuple(c.evidence_id for c in selected),
-            relationship_signals={
-                k: v for k, v in deterministic_signals.items()
-                if k.startswith("rel_")
-            },
-            temporal_signals={
-                k: v for k, v in deterministic_signals.items()
-                if k.startswith("temp_")
-            },
+            relationship_signals={k: v for k, v in deterministic_signals.items() if k.startswith("rel_")},
+            temporal_signals={k: v for k, v in deterministic_signals.items() if k.startswith("temp_")},
             confidence_gap=confidence_gap,
             description=deterministic_signals.get("conflict_description", ""),
         )
@@ -334,7 +340,7 @@ class AdjudicationGate:
         return self._call_count / total
 
     @property
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "adjudication_calls": self._call_count,
             "skipped": self._skip_count,
@@ -345,6 +351,7 @@ class AdjudicationGate:
 # ---------------------------------------------------------------------------
 # Response validator — structural validation of LLM output
 # ---------------------------------------------------------------------------
+
 
 class AdjudicationValidator:
     """Validates structured LLM output before it enters the control path.
@@ -359,7 +366,7 @@ class AdjudicationValidator:
         cls,
         raw: str,
         valid_evidence_ids: set,
-    ) -> Tuple[bool, Optional[AdjudicationResult], str]:
+    ) -> tuple[bool, AdjudicationResult | None, str]:
         """Parse and validate a raw LLM response string.
 
         Args:
@@ -430,6 +437,7 @@ class AdjudicationValidator:
 # Mock adjudicator — deterministic, for testing
 # ---------------------------------------------------------------------------
 
+
 class MockAdjudicator(EvidenceAdjudicator):
     """Deterministic adjudicator for testing.
 
@@ -437,15 +445,15 @@ class MockAdjudicator(EvidenceAdjudicator):
     """
 
     def __init__(self):
-        self._responses: List[AdjudicationResult] = []
-        self._calls: List[Dict[str, Any]] = []
+        self._responses: list[AdjudicationResult] = []
+        self._calls: list[dict[str, Any]] = []
         self._default_decision = AdjudicationDecision.UNCERTAIN
 
     def set_response(self, result: AdjudicationResult):
         """Set the next response to return."""
         self._responses.append(result)
 
-    def set_responses(self, results: List[AdjudicationResult]):
+    def set_responses(self, results: list[AdjudicationResult]):
         """Set multiple responses (consumed in order)."""
         self._responses.extend(results)
 
@@ -454,23 +462,25 @@ class MockAdjudicator(EvidenceAdjudicator):
         return len(self._calls)
 
     @property
-    def calls(self) -> List[Dict[str, Any]]:
+    def calls(self) -> list[dict[str, Any]]:
         return list(self._calls)
 
     def adjudicate(
         self,
         query: str,
-        candidates: List[AdjudicationCandidate],
+        candidates: list[AdjudicationCandidate],
         conflict_context: ConflictContext,
     ) -> AdjudicationResult:
         start = time.perf_counter()
 
-        self._calls.append({
-            "query": query,
-            "candidate_count": len(candidates),
-            "candidate_ids": [c.evidence_id for c in candidates],
-            "conflict_type": conflict_context.conflict_type,
-        })
+        self._calls.append(
+            {
+                "query": query,
+                "candidate_count": len(candidates),
+                "candidate_ids": [c.evidence_id for c in candidates],
+                "conflict_type": conflict_context.conflict_type,
+            }
+        )
 
         elapsed_ms = (time.perf_counter() - start) * 1000
 
@@ -498,6 +508,7 @@ class MockAdjudicator(EvidenceAdjudicator):
 # ---------------------------------------------------------------------------
 # LLM adjudicator — real implementation (provider-isolated)
 # ---------------------------------------------------------------------------
+
 
 class LLMProvider(Protocol):
     """Protocol for LLM providers. Provider-agnostic."""
@@ -557,7 +568,7 @@ Respond with ONLY the JSON object. No other text."""
     def adjudicate(
         self,
         query: str,
-        candidates: List[AdjudicationCandidate],
+        candidates: list[AdjudicationCandidate],
         conflict_context: ConflictContext,
     ) -> AdjudicationResult:
         """Adjudicate using the LLM provider.
@@ -584,9 +595,7 @@ Respond with ONLY the JSON object. No other text."""
 
             # Validate response
             valid_ids = {c.evidence_id for c in candidates}
-            is_valid, result, error = AdjudicationValidator.validate_raw_response(
-                raw_response, valid_ids
-            )
+            is_valid, result, error = AdjudicationValidator.validate_raw_response(raw_response, valid_ids)
 
             if is_valid and result is not None:
                 # Replace timing with actual
@@ -599,9 +608,7 @@ Respond with ONLY the JSON object. No other text."""
                     raw_response=raw_response,
                 )
             else:
-                logger.warning(
-                    "Adjudication response validation failed: %s", error
-                )
+                logger.warning("Adjudication response validation failed: %s", error)
                 self._error_count += 1
                 self._fallback_count += 1
                 return self._uncertain_fallback(start, f"validation_failed: {error}")
@@ -612,18 +619,16 @@ Respond with ONLY the JSON object. No other text."""
             self._fallback_count += 1
             return self._uncertain_fallback(start, "timeout")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Adjudication error: %s", e)
             self._error_count += 1
             self._fallback_count += 1
             return self._uncertain_fallback(start, f"error: {e}")
 
-    def _format_candidates(self, candidates: List[AdjudicationCandidate]) -> str:
+    def _format_candidates(self, candidates: list[AdjudicationCandidate]) -> str:
         parts = []
         for c in candidates:
-            parts.append(
-                f"[{c.evidence_id}] (relevance: {c.relevance_score:.3f})\n{c.content}"
-            )
+            parts.append(f"[{c.evidence_id}] (relevance: {c.relevance_score:.3f})\n{c.content}")
         return "\n\n".join(parts)
 
     def _uncertain_fallback(self, start_time: float, reason: str) -> AdjudicationResult:
@@ -637,7 +642,7 @@ Respond with ONLY the JSON object. No other text."""
         )
 
     @property
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "total_calls": self._call_count,
             "errors": self._error_count,
@@ -650,9 +655,11 @@ Respond with ONLY the JSON object. No other text."""
 # Adjudication controller — orchestrates gate + adjudicator + guard
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AdjudicationControllerConfig:
     """Configuration for the full adjudication pipeline."""
+
     gate_config: AdjudicationGateConfig = field(default_factory=AdjudicationGateConfig)
 
     # Minimum confidence from adjudicator to accept
@@ -665,14 +672,15 @@ class AdjudicationControllerConfig:
 @dataclass(frozen=True)
 class ControlledAdjudicationResult:
     """Final result after gate + adjudication + safety checks."""
+
     adjudication_was_triggered: bool
     gate_reason: str
-    adjudication_result: Optional[AdjudicationResult]
+    adjudication_result: AdjudicationResult | None
     deterministic_veto_applied: bool
     final_decision: AdjudicationDecision
     final_confidence: float
     total_time_ms: float
-    trace: Dict[str, Any] = field(default_factory=dict)
+    trace: dict[str, Any] = field(default_factory=dict)
 
 
 class AdjudicationController:
@@ -690,8 +698,8 @@ class AdjudicationController:
     def __init__(
         self,
         adjudicator: EvidenceAdjudicator,
-        config: Optional[AdjudicationControllerConfig] = None,
-        deterministic_safety_check: Optional[Any] = None,
+        config: AdjudicationControllerConfig | None = None,
+        deterministic_safety_check: Any | None = None,
     ):
         self.config = config or AdjudicationControllerConfig()
         self._gate = AdjudicationGate(self.config.gate_config)
@@ -710,8 +718,8 @@ class AdjudicationController:
     def process(
         self,
         query: str,
-        candidates: List[AdjudicationCandidate],
-        deterministic_signals: Dict[str, Any],
+        candidates: list[AdjudicationCandidate],
+        deterministic_signals: dict[str, Any],
     ) -> ControlledAdjudicationResult:
         """Run the full adjudication pipeline.
 
@@ -726,7 +734,7 @@ class AdjudicationController:
         overall_start = time.perf_counter()
         self._total_queries += 1
 
-        trace: Dict[str, Any] = {}
+        trace: dict[str, Any] = {}
 
         # --- Gate evaluation ---
         gate_start = time.perf_counter()
@@ -756,8 +764,9 @@ class AdjudicationController:
         conflict_ctx = gate_decision.conflict_context
 
         assert conflict_ctx is not None, "Gate triggered but no conflict context"
-        assert len(selected) <= self.config.gate_config.max_candidates, \
+        assert len(selected) <= self.config.gate_config.max_candidates, (
             f"Candidate bound violated: {len(selected)} > {self.config.gate_config.max_candidates}"
+        )
 
         trace["adjudication_candidate_count"] = len(selected)
         trace["adjudication_candidate_ids"] = [c.evidence_id for c in selected]
@@ -772,9 +781,7 @@ class AdjudicationController:
         deterministic_veto = False
 
         if self.config.enforce_deterministic_veto:
-            deterministic_veto = self._apply_deterministic_veto(
-                adj_result, deterministic_signals
-            )
+            deterministic_veto = self._apply_deterministic_veto(adj_result, deterministic_signals)
             trace["deterministic_veto"] = deterministic_veto
 
         # --- Final decision ---
@@ -815,7 +822,7 @@ class AdjudicationController:
     def _apply_deterministic_veto(
         self,
         adj_result: AdjudicationResult,
-        deterministic_signals: Dict[str, Any],
+        deterministic_signals: dict[str, Any],
     ) -> bool:
         """Check if deterministic safety should veto the LLM decision.
 
@@ -830,7 +837,7 @@ class AdjudicationController:
             try:
                 is_safe = self._deterministic_safety_check(adj_result, deterministic_signals)
                 return not is_safe
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Deterministic safety check error: %s", e)
                 return True  # Fail closed
 
@@ -847,7 +854,7 @@ class AdjudicationController:
             return True
 
         # Rule 3: If confidence guard score is below hard floor
-        guard_score = deterministic_signals.get("confidence_guard_score", None)
+        guard_score = deterministic_signals.get("confidence_guard_score")
         if guard_score is not None and guard_score < 0.1:
             logger.info("Deterministic veto: guard score below hard floor")
             return True
@@ -855,7 +862,7 @@ class AdjudicationController:
         return False
 
     @property
-    def metrics(self) -> Dict[str, Any]:
+    def metrics(self) -> dict[str, Any]:
         """Comprehensive S18 metrics."""
         return {
             "total_queries": self._total_queries,
@@ -863,25 +870,13 @@ class AdjudicationController:
             "adjudications_accepted": self._adjudications_accepted,
             "adjudications_vetoed": self._adjudications_vetoed,
             "safe_fallbacks": self._safe_fallbacks,
-            "trigger_rate": (
-                self._adjudications_triggered / max(self._total_queries, 1)
-            ),
-            "acceptance_rate": (
-                self._adjudications_accepted / max(self._adjudications_triggered, 1)
-            ),
-            "veto_rate": (
-                self._adjudications_vetoed / max(self._adjudications_triggered, 1)
-            ),
-            "fallback_rate": (
-                self._safe_fallbacks / max(self._adjudications_triggered, 1)
-            ),
+            "trigger_rate": (self._adjudications_triggered / max(self._total_queries, 1)),
+            "acceptance_rate": (self._adjudications_accepted / max(self._adjudications_triggered, 1)),
+            "veto_rate": (self._adjudications_vetoed / max(self._adjudications_triggered, 1)),
+            "fallback_rate": (self._safe_fallbacks / max(self._adjudications_triggered, 1)),
             "avg_deterministic_ms": (
-                self._total_deterministic_ms / max(
-                    self._total_queries - self._adjudications_triggered, 1
-                )
+                self._total_deterministic_ms / max(self._total_queries - self._adjudications_triggered, 1)
             ),
-            "avg_adjudication_ms": (
-                self._total_adjudication_ms / max(self._adjudications_triggered, 1)
-            ),
+            "avg_adjudication_ms": (self._total_adjudication_ms / max(self._adjudications_triggered, 1)),
             "gate_stats": self._gate.stats,
         }
