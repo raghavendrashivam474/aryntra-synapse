@@ -1,4 +1,4 @@
-﻿"""
+"""
 S18 Test Suite — Controlled Semantic Adjudication
 
 Tests the complete adjudication pipeline:
@@ -14,9 +14,9 @@ I. Regression → existing tests unaffected
 """
 
 import json
-import time
+from typing import Any
+
 import pytest
-from typing import Any, Dict, List, Optional
 
 from app.evidence.adjudication import (
     AdjudicationCandidate,
@@ -28,16 +28,14 @@ from app.evidence.adjudication import (
     AdjudicationResult,
     AdjudicationValidator,
     ConflictContext,
-    ControlledAdjudicationResult,
-    EvidenceAdjudicator,
     LLMAdjudicator,
     MockAdjudicator,
 )
 
-
 # ===================================================================
 # Helpers
 # ===================================================================
+
 
 def make_candidate(eid: str, content: str = "", score: float = 0.8) -> AdjudicationCandidate:
     return AdjudicationCandidate(
@@ -74,7 +72,7 @@ def make_result(
     )
 
 
-def signals_no_conflict() -> Dict[str, Any]:
+def signals_no_conflict() -> dict[str, Any]:
     return {
         "has_conflict": False,
         "is_sufficient": True,
@@ -82,7 +80,7 @@ def signals_no_conflict() -> Dict[str, Any]:
     }
 
 
-def signals_with_conflict(severity: float = 0.5) -> Dict[str, Any]:
+def signals_with_conflict(severity: float = 0.5) -> dict[str, Any]:
     return {
         "has_conflict": True,
         "conflict_type": "contradiction",
@@ -97,8 +95,8 @@ class FakeLLMProvider:
     """Fake LLM provider for testing LLMAdjudicator."""
 
     def __init__(self):
-        self.responses: List[str] = []
-        self.calls: List[str] = []
+        self.responses: list[str] = []
+        self.calls: list[str] = []
         self.should_timeout = False
         self.should_raise = False
         self.raise_exception = None
@@ -117,6 +115,7 @@ class FakeLLMProvider:
 # ===================================================================
 # Test A: No ambiguity — LLM not called
 # ===================================================================
+
 
 class TestNoAmbiguity:
     """When deterministic analysis is sufficient, the LLM must NOT be called."""
@@ -145,9 +144,7 @@ class TestNoAmbiguity:
 
     def test_disabled_gate_skips_adjudication(self):
         mock = MockAdjudicator()
-        config = AdjudicationControllerConfig(
-            gate_config=AdjudicationGateConfig(enabled=False)
-        )
+        config = AdjudicationControllerConfig(gate_config=AdjudicationGateConfig(enabled=False))
         controller = AdjudicationController(adjudicator=mock, config=config)
 
         candidates = [make_candidate("c1")]
@@ -162,17 +159,20 @@ class TestNoAmbiguity:
 # Test B: Genuine contradiction — correct resolution
 # ===================================================================
 
+
 class TestGenuineContradiction:
     """When real contradictions exist, adjudication should resolve them."""
 
     def test_contradiction_triggers_adjudication(self):
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.9,
-            evidence_ids=("c1",),
-            rationale="c1 is the current policy; c2 was superseded.",
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.9,
+                evidence_ids=("c1",),
+                rationale="c1 is the current policy; c2 was superseded.",
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [
@@ -209,18 +209,21 @@ class TestGenuineContradiction:
 # Test C: False contradiction — scopes distinguished
 # ===================================================================
 
+
 class TestFalseContradiction:
     """Evidence that appears contradictory but actually refers to
     different scopes should be correctly classified."""
 
     def test_scope_disambiguation(self):
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.REJECT,
-            confidence=0.88,
-            evidence_ids=("c1", "c2"),
-            rationale="c1 applies to general employees; c2 applies only to regulated roles. Not a true contradiction.",
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.REJECT,
+                confidence=0.88,
+                evidence_ids=("c1", "c2"),
+                rationale="c1 applies to general employees; c2 applies only to regulated roles. Not a true contradiction.",
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [
@@ -240,17 +243,20 @@ class TestFalseContradiction:
 # Test D: Uncertain case — UNCERTAIN preserved
 # ===================================================================
 
+
 class TestUncertainCase:
     """When evidence is genuinely insufficient, UNCERTAIN must be the result."""
 
     def test_adjudicator_returns_uncertain(self):
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.UNCERTAIN,
-            confidence=0.3,
-            evidence_ids=(),
-            rationale="Evidence is genuinely ambiguous.",
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.UNCERTAIN,
+                confidence=0.3,
+                evidence_ids=(),
+                rationale="Evidence is genuinely ambiguous.",
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -263,11 +269,13 @@ class TestUncertainCase:
     def test_low_confidence_becomes_uncertain(self):
         """Even ACCEPT with low confidence should become UNCERTAIN."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.3,  # Below min_accept_confidence (0.6)
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.3,  # Below min_accept_confidence (0.6)
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -283,6 +291,7 @@ class TestUncertainCase:
 # Test E: Malformed LLM response — safe fallback
 # ===================================================================
 
+
 class TestMalformedResponse:
     """Invalid LLM output must result in safe fallback, never propagate."""
 
@@ -296,63 +305,73 @@ class TestMalformedResponse:
         assert "invalid_json" in error
 
     def test_empty_response(self):
-        is_valid, result, error = AdjudicationValidator.validate_raw_response("", {"c1"})
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response("", {"c1"})
         assert is_valid is False
         assert "empty_response" in error
 
     def test_missing_decision(self):
         raw = json.dumps({"confidence": 0.5, "selected_evidence_ids": []})
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, set())
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response(raw, set())
         assert is_valid is False
         assert "invalid_decision" in error
 
     def test_invalid_decision_value(self):
-        raw = json.dumps({
-            "decision": "MAYBE",
-            "confidence": 0.5,
-            "selected_evidence_ids": [],
-        })
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, set())
+        raw = json.dumps(
+            {
+                "decision": "MAYBE",
+                "confidence": 0.5,
+                "selected_evidence_ids": [],
+            }
+        )
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response(raw, set())
         assert is_valid is False
         assert "invalid_decision" in error
 
     def test_missing_confidence(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "selected_evidence_ids": [],
-        })
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, set())
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "selected_evidence_ids": [],
+            }
+        )
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response(raw, set())
         assert is_valid is False
         assert "missing_confidence" in error
 
     def test_confidence_out_of_range(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 1.5,
-            "selected_evidence_ids": [],
-        })
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, set())
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "confidence": 1.5,
+                "selected_evidence_ids": [],
+            }
+        )
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response(raw, set())
         assert is_valid is False
         assert "confidence_out_of_range" in error
 
     def test_invalid_evidence_ids(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 0.8,
-            "selected_evidence_ids": ["c99"],
-        })
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, {"c1"})
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "confidence": 0.8,
+                "selected_evidence_ids": ["c99"],
+            }
+        )
+        is_valid, _result, error = AdjudicationValidator.validate_raw_response(raw, {"c1"})
         assert is_valid is False
         assert "invalid_evidence_ids" in error
 
     def test_valid_response_parses(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 0.87,
-            "selected_evidence_ids": ["c1", "c2"],
-            "reason": "c2 explicitly limits the broader policy in c1.",
-        })
-        is_valid, result, error = AdjudicationValidator.validate_raw_response(raw, {"c1", "c2"})
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "confidence": 0.87,
+                "selected_evidence_ids": ["c1", "c2"],
+                "reason": "c2 explicitly limits the broader policy in c1.",
+            }
+        )
+        is_valid, result, _error = AdjudicationValidator.validate_raw_response(raw, {"c1", "c2"})
         assert is_valid is True
         assert result is not None
         assert result.decision == AdjudicationDecision.ACCEPT
@@ -377,6 +396,7 @@ class TestMalformedResponse:
 # ===================================================================
 # Test F: LLM timeout — safe fallback
 # ===================================================================
+
 
 class TestLLMTimeout:
     """LLM unavailability must result in UNCERTAIN, never crash."""
@@ -429,6 +449,7 @@ class TestLLMTimeout:
 # Test G: Deterministic veto — LLM cannot override safety
 # ===================================================================
 
+
 class TestDeterministicVeto:
     """THE most important S18 test.
     LLM says ACCEPT, but deterministic safety says NO → final is safe."""
@@ -436,11 +457,13 @@ class TestDeterministicVeto:
     def test_veto_on_unsafe_flag(self):
         """deterministic_unsafe flag vetoes LLM ACCEPT."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.95,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.95,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -457,11 +480,13 @@ class TestDeterministicVeto:
     def test_veto_on_superseded_evidence(self):
         """LLM accepts evidence that was deterministically superseded → veto."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.9,
-            evidence_ids=("c2",),  # c2 is superseded
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.9,
+                evidence_ids=("c2",),  # c2 is superseded
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -476,11 +501,13 @@ class TestDeterministicVeto:
     def test_veto_on_guard_score_below_floor(self):
         """ConfidenceGuard score below hard floor → veto."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.92,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.92,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -495,11 +522,13 @@ class TestDeterministicVeto:
     def test_no_veto_when_safe(self):
         """LLM ACCEPT without safety flags → accepted."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.85,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.85,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -514,11 +543,13 @@ class TestDeterministicVeto:
     def test_veto_only_applies_to_accept(self):
         """REJECT decisions are not vetoed (veto only prevents unsafe acceptance)."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.REJECT,
-            confidence=0.9,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.REJECT,
+                confidence=0.9,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -533,16 +564,19 @@ class TestDeterministicVeto:
 
     def test_custom_safety_check(self):
         """Custom deterministic safety check function."""
+
         def strict_safety(adj_result, signals):
             # Custom rule: never accept if specific flag is set
             return not signals.get("requires_human_review", False)
 
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.95,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.95,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(
             adjudicator=mock,
@@ -559,15 +593,18 @@ class TestDeterministicVeto:
 
     def test_safety_check_error_fails_closed(self):
         """If safety check itself errors, fail closed (veto)."""
+
         def broken_safety(adj_result, signals):
             raise RuntimeError("safety check crashed")
 
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.95,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.95,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(
             adjudicator=mock,
@@ -586,6 +623,7 @@ class TestDeterministicVeto:
 # Test H: Candidate bound — enforced
 # ===================================================================
 
+
 class TestCandidateBound:
     """LLM must never receive more than the configured candidate limit."""
 
@@ -597,9 +635,7 @@ class TestCandidateBound:
         mock = MockAdjudicator()
         mock.set_response(make_result())
 
-        config = AdjudicationControllerConfig(
-            gate_config=AdjudicationGateConfig(max_candidates=2)
-        )
+        config = AdjudicationControllerConfig(gate_config=AdjudicationGateConfig(max_candidates=2))
         controller = AdjudicationController(adjudicator=mock, config=config)
 
         # 5 candidates, but only 2 should reach adjudicator
@@ -623,6 +659,7 @@ class TestCandidateBound:
 # ===================================================================
 # Gate trigger tests
 # ===================================================================
+
 
 class TestAdjudicationGate:
     """Test the gate logic in isolation."""
@@ -705,44 +742,49 @@ class TestAdjudicationGate:
 # Validator tests (additional edge cases)
 # ===================================================================
 
+
 class TestValidator:
     """Additional validator edge cases."""
 
     def test_response_not_dict(self):
-        is_valid, _, error = AdjudicationValidator.validate_raw_response(
-            '"just a string"', set()
-        )
+        is_valid, _, error = AdjudicationValidator.validate_raw_response('"just a string"', set())
         assert is_valid is False
         assert "not_dict" in error
 
     def test_confidence_non_numeric(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "confidence": "high",
-            "selected_evidence_ids": [],
-        })
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "confidence": "high",
+                "selected_evidence_ids": [],
+            }
+        )
         is_valid, _, error = AdjudicationValidator.validate_raw_response(raw, set())
         assert is_valid is False
         assert "invalid_confidence" in error
 
     def test_evidence_ids_not_list(self):
-        raw = json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 0.8,
-            "selected_evidence_ids": "c1",
-        })
+        raw = json.dumps(
+            {
+                "decision": "ACCEPT",
+                "confidence": 0.8,
+                "selected_evidence_ids": "c1",
+            }
+        )
         is_valid, _, error = AdjudicationValidator.validate_raw_response(raw, {"c1"})
         assert is_valid is False
         assert "not_list" in error
 
     def test_all_three_decisions_valid(self):
         for decision in ["ACCEPT", "REJECT", "UNCERTAIN"]:
-            raw = json.dumps({
-                "decision": decision,
-                "confidence": 0.5,
-                "selected_evidence_ids": [],
-                "reason": "test",
-            })
+            raw = json.dumps(
+                {
+                    "decision": decision,
+                    "confidence": 0.5,
+                    "selected_evidence_ids": [],
+                    "reason": "test",
+                }
+            )
             is_valid, result, _ = AdjudicationValidator.validate_raw_response(raw, set())
             assert is_valid is True
             assert result.decision == AdjudicationDecision(decision)
@@ -751,6 +793,7 @@ class TestValidator:
 # ===================================================================
 # Data class validation tests
 # ===================================================================
+
 
 class TestDataclassValidation:
     """Ensure data classes enforce their contracts."""
@@ -776,7 +819,7 @@ class TestDataclassValidation:
             )
 
     def test_result_evidence_ids_must_be_tuple(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             AdjudicationResult(
                 decision=AdjudicationDecision.ACCEPT,
                 confidence=0.5,
@@ -795,17 +838,22 @@ class TestDataclassValidation:
 # LLMAdjudicator with FakeLLMProvider
 # ===================================================================
 
+
 class TestLLMAdjudicator:
     """Test the LLM adjudicator with fake provider."""
 
     def test_valid_llm_response(self):
         provider = FakeLLMProvider()
-        provider.responses.append(json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 0.87,
-            "selected_evidence_ids": ["c1"],
-            "reason": "c1 is the authoritative source.",
-        }))
+        provider.responses.append(
+            json.dumps(
+                {
+                    "decision": "ACCEPT",
+                    "confidence": 0.87,
+                    "selected_evidence_ids": ["c1"],
+                    "reason": "c1 is the authoritative source.",
+                }
+            )
+        )
 
         adj = LLMAdjudicator(provider=provider)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -821,11 +869,15 @@ class TestLLMAdjudicator:
     def test_llm_stats_tracked(self):
         provider = FakeLLMProvider()
         # First call: valid
-        provider.responses.append(json.dumps({
-            "decision": "ACCEPT",
-            "confidence": 0.8,
-            "selected_evidence_ids": [],
-        }))
+        provider.responses.append(
+            json.dumps(
+                {
+                    "decision": "ACCEPT",
+                    "confidence": 0.8,
+                    "selected_evidence_ids": [],
+                }
+            )
+        )
         # Second call: malformed
         provider.responses.append("not json")
 
@@ -846,6 +898,7 @@ class TestLLMAdjudicator:
 # Metrics / reporting tests
 # ===================================================================
 
+
 class TestMetrics:
     """Controller metrics are correctly tracked."""
 
@@ -858,18 +911,22 @@ class TestMetrics:
         controller.process("q1", candidates, signals_no_conflict())
 
         # Query 2: conflict → adjudication with ACCEPT
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.9,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.9,
+                evidence_ids=("c1",),
+            )
+        )
         controller.process("q2", candidates, signals_with_conflict())
 
         # Query 3: conflict → adjudication with UNCERTAIN
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.UNCERTAIN,
-            confidence=0.2,
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.UNCERTAIN,
+                confidence=0.2,
+            )
+        )
         controller.process("q3", candidates, signals_with_conflict())
 
         metrics = controller.metrics
@@ -883,6 +940,7 @@ class TestMetrics:
 # ===================================================================
 # Integration: Full pipeline end-to-end
 # ===================================================================
+
 
 class TestFullPipeline:
     """End-to-end tests of the complete S18 pipeline."""
@@ -905,12 +963,14 @@ class TestFullPipeline:
     def test_difficult_case_end_to_end(self):
         """Difficult case: conflict → adjudication → resolution."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.88,
-            evidence_ids=("c1",),
-            rationale="c1 is the updated policy from 2024.",
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.88,
+                evidence_ids=("c1",),
+                rationale="c1 is the updated policy from 2024.",
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [
@@ -945,11 +1005,13 @@ class TestFullPipeline:
     def test_veto_case_end_to_end(self):
         """Veto case: LLM accepts, but deterministic safety says no."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.95,
-            evidence_ids=("c2",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.95,
+                evidence_ids=("c2",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]
@@ -965,11 +1027,13 @@ class TestFullPipeline:
     def test_decision_trace_complete(self):
         """Trace contains all expected diagnostic information."""
         mock = MockAdjudicator()
-        mock.set_response(make_result(
-            decision=AdjudicationDecision.ACCEPT,
-            confidence=0.85,
-            evidence_ids=("c1",),
-        ))
+        mock.set_response(
+            make_result(
+                decision=AdjudicationDecision.ACCEPT,
+                confidence=0.85,
+                evidence_ids=("c1",),
+            )
+        )
 
         controller = AdjudicationController(adjudicator=mock)
         candidates = [make_candidate("c1"), make_candidate("c2")]

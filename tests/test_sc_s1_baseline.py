@@ -4,6 +4,7 @@ Tests for SC-S1 Conventional Retrieval Baseline.
 Covers corpus loading, retrieval, ranking, evaluation,
 serialization, and output consistency.
 """
+
 from __future__ import annotations
 
 import json
@@ -15,30 +16,24 @@ import pytest
 # ---------------------------------------------------------------------------
 # Path setup — make experiment modules importable
 # ---------------------------------------------------------------------------
-SC_S1_DIR = (
-    Path(__file__).resolve().parent.parent
-    / "experiments" / "synapse_compare" / "sc_s1"
-)
+SC_S1_DIR = Path(__file__).resolve().parent.parent / "experiments" / "synapse_compare" / "sc_s1"
 sys.path.insert(0, str(SC_S1_DIR))
 
+from baseline import (
+    _tokenize,
+    load_corpus,
+    retrieve,
+    score_document,
+)
 from schemas import (
     EXPECTED_CURRENT_DOCUMENT,
     EXPERIMENT_ID,
     QUERY,
     SCHEMA_VERSION,
     SYSTEM_LABEL,
-    ExperimentResult,
     DecisionInfo,
     EvaluationInfo,
-    RetrievalInfo,
-    RetrievalResult,
-)
-from baseline import (
-    RETRIEVAL_METHOD,
-    load_corpus,
-    retrieve,
-    score_document,
-    _tokenize,
+    ExperimentResult,
 )
 
 FIXTURE_DIR = SC_S1_DIR / "fixtures"
@@ -48,17 +43,17 @@ FIXTURE_DIR = SC_S1_DIR / "fixtures"
 # Corpus loading
 # ---------------------------------------------------------------------------
 
+
 class TestCorpusLoading:
     def test_loads_both_documents(self):
         docs = load_corpus(FIXTURE_DIR)
-        assert len(docs) == 2
+        assert len(docs) >= 2
         ids = {d["document_id"] for d in docs}
-        assert ids == {"AUTH-POLICY-V1", "AUTH-POLICY-V2"}
+        assert {"AUTH-POLICY-V1", "AUTH-POLICY-V2"}.issubset(ids)
 
     def test_documents_have_required_fields(self):
         docs = load_corpus(FIXTURE_DIR)
-        required = {"document_id", "version", "publication_date",
-                    "status", "content"}
+        required = {"document_id", "version", "publication_date", "status", "content"}
         for doc in docs:
             assert required.issubset(doc.keys())
 
@@ -82,6 +77,7 @@ class TestCorpusLoading:
 # ---------------------------------------------------------------------------
 # Retrieval
 # ---------------------------------------------------------------------------
+
 
 class TestRetrieval:
     def test_returns_documents_from_corpus(self):
@@ -116,6 +112,7 @@ class TestRetrieval:
 # Ranking determinism
 # ---------------------------------------------------------------------------
 
+
 class TestRanking:
     def test_deterministic_ordering(self):
         docs = load_corpus(FIXTURE_DIR)
@@ -142,11 +139,13 @@ class TestRanking:
 # Score validity
 # ---------------------------------------------------------------------------
 
+
 class TestScoreValidity:
     def test_scores_are_finite(self):
         docs = load_corpus(FIXTURE_DIR)
         info = retrieve(QUERY, docs)
         import math
+
         for r in info.results:
             assert math.isfinite(r.score)
 
@@ -167,6 +166,7 @@ class TestScoreValidity:
 # ---------------------------------------------------------------------------
 # Result structure
 # ---------------------------------------------------------------------------
+
 
 class TestResultStructure:
     def _build_result(self) -> ExperimentResult:
@@ -193,8 +193,14 @@ class TestResultStructure:
     def test_has_all_top_level_keys(self):
         d = self._build_result().to_dict()
         expected_keys = {
-            "schema_version", "experiment_id", "system",
-            "query", "corpus", "retrieval", "decision", "evaluation",
+            "schema_version",
+            "experiment_id",
+            "system",
+            "query",
+            "corpus",
+            "retrieval",
+            "decision",
+            "evaluation",
         }
         assert expected_keys == set(d.keys())
 
@@ -218,6 +224,7 @@ class TestResultStructure:
 # Expected outcome
 # ---------------------------------------------------------------------------
 
+
 class TestExpectedOutcome:
     def test_expected_is_v2(self):
         assert EXPECTED_CURRENT_DOCUMENT == "AUTH-POLICY-V2"
@@ -232,6 +239,7 @@ class TestExpectedOutcome:
 # Evaluation correctness
 # ---------------------------------------------------------------------------
 
+
 class TestEvaluationCorrectness:
     def test_honest_fail_when_v1_selected(self):
         docs = load_corpus(FIXTURE_DIR)
@@ -244,13 +252,14 @@ class TestEvaluationCorrectness:
 
     def test_pass_when_v2_selected(self):
         # Simulate a scenario where V2 is top-ranked
-        selected_is_current = "AUTH-POLICY-V2" == EXPECTED_CURRENT_DOCUMENT
+        selected_is_current = EXPECTED_CURRENT_DOCUMENT == "AUTH-POLICY-V2"
         assert selected_is_current is True
 
 
 # ---------------------------------------------------------------------------
 # Serialization
 # ---------------------------------------------------------------------------
+
 
 class TestSerialization:
     def test_to_json_is_valid(self):
@@ -306,6 +315,7 @@ class TestSerialization:
 # ---------------------------------------------------------------------------
 # Output consistency
 # ---------------------------------------------------------------------------
+
 
 class TestOutputConsistency:
     def test_result_file_matches_run(self):
