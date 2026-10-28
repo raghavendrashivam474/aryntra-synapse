@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/context/semantic_gate.py
 
 Aryntra Synapse — Sprint 6
@@ -15,8 +15,9 @@ new dependencies.
 """
 
 import logging
+from typing import Any
+
 import numpy as np
-from typing import List, Dict, Any
 
 from app.retrieval.embeddings import EmbeddingModel
 
@@ -74,7 +75,7 @@ class SemanticGate:
     def evaluate(
         self,
         query: str,
-        active_chunks: List[Dict[str, Any]],
+        active_chunks: list[dict[str, Any]],
     ) -> SemanticResult:
         """
         Compute semantic similarity between query and active evidence.
@@ -127,7 +128,6 @@ class SemanticGate:
         )
 
         logger.info(
-            f"SemanticGate: score={semantic_score:.4f} "
-            f"(max_chunk={max_chunk_sim:.4f}, mean_chunk={mean_chunk_sim:.4f})"
+            f"SemanticGate: score={semantic_score:.4f} (max_chunk={max_chunk_sim:.4f}, mean_chunk={mean_chunk_sim:.4f})"
         )
         return result

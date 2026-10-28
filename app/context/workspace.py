@@ -1,6 +1,7 @@
-﻿import time
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+import time
+from typing import Any
+
 from app.context.compressor import build_compressed_context
 
 logger = logging.getLogger(__name__)
@@ -56,30 +57,30 @@ class EvidenceWorkspace:
 
     def __init__(
         self,
-        chunks: List[Dict[str, Any]],
+        chunks: list[dict[str, Any]],
         max_active: int = 3,
         max_chunk_chars: int = 400,
         dedup_threshold: float = 0.90,
     ):
         self._all_chunks = list(chunks)
         self._chunk_map = {c["chunk_id"]: c for c in chunks}
-        self._active_ids: List[str] = []
-        self._available_ids: List[str] = [c["chunk_id"] for c in chunks]
-        self._promotion_history: List[PromotionEvent] = []
+        self._active_ids: list[str] = []
+        self._available_ids: list[str] = [c["chunk_id"] for c in chunks]
+        self._promotion_history: list[PromotionEvent] = []
         self._max_active = max_active
         self._max_chunk_chars = max_chunk_chars
         self._dedup_threshold = dedup_threshold
 
         # Track what context was introduced at each stage
-        self._stage_new_context: Dict[int, int] = {}
-        self._stage_repeated_context: Dict[int, int] = {}
+        self._stage_new_context: dict[int, int] = {}
+        self._stage_repeated_context: dict[int, int] = {}
 
     # ── State queries ──
 
-    def active(self) -> List[Dict[str, Any]]:
+    def active(self) -> list[dict[str, Any]]:
         return [self._chunk_map[cid] for cid in self._active_ids]
 
-    def available(self) -> List[Dict[str, Any]]:
+    def available(self) -> list[dict[str, Any]]:
         return [self._chunk_map[cid] for cid in self._available_ids]
 
     def has_available(self) -> bool:
@@ -97,7 +98,7 @@ class EvidenceWorkspace:
         return len(self._available_ids)
 
     @property
-    def promotion_history(self) -> List[Dict[str, Any]]:
+    def promotion_history(self) -> list[dict[str, Any]]:
         return [e.to_dict() for e in self._promotion_history]
 
     # ── Context construction ──
@@ -123,7 +124,7 @@ class EvidenceWorkspace:
 
     # ── Promotion ──
 
-    def promote_next(self, reason: str = "insufficient_evidence") -> Optional[PromotionEvent]:
+    def promote_next(self, reason: str = "insufficient_evidence") -> PromotionEvent | None:
         """
         Promote the highest-ranked available chunk to active.
         Returns the PromotionEvent or None if no promotion is possible.
@@ -177,7 +178,7 @@ class EvidenceWorkspace:
         )
         return event
 
-    def promote_initial(self, count: int = 1) -> List[PromotionEvent]:
+    def promote_initial(self, count: int = 1) -> list[PromotionEvent]:
         """Promote the first N chunks as the initial active set."""
         events = []
         for _ in range(min(count, len(self._available_ids))):
@@ -186,16 +187,13 @@ class EvidenceWorkspace:
                 events.append(event)
         return events
 
-    def promote_priority_initial(self, fallback_count: int = 1) -> List[PromotionEvent]:
+    def promote_priority_initial(self, fallback_count: int = 1) -> list[PromotionEvent]:
         """
         S8 Priority Initial Promotion:
         Promotes all HIGH priority chunks (up to max_active).
         If no chunks are HIGH priority, promotes fallback_count chunks.
         """
-        high_ids = [
-            cid for cid in self._available_ids
-            if self._chunk_map[cid].get("priority_class") == "HIGH"
-        ]
+        high_ids = [cid for cid in self._available_ids if self._chunk_map[cid].get("priority_class") == "HIGH"]
         promote_count = len(high_ids) if high_ids else fallback_count
         promote_count = min(promote_count, self._max_active)
 
@@ -214,7 +212,7 @@ class EvidenceWorkspace:
     def total_repeated_context(self) -> int:
         return sum(self._stage_repeated_context.values())
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "total_chunks": len(self._all_chunks),
             "active_chunks": self.active_count,

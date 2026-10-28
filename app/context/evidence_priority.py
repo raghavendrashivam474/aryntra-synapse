@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/context/evidence_priority.py
 
 Aryntra Synapse — Sprint 8 / Sprint 9
@@ -14,16 +14,18 @@ Responsibilities:
 - Zero LLM calls; completely deterministic
 """
 
-import time
 import logging
+import time
 from enum import Enum
-from typing import List, Dict, Any, Tuple, Optional, Set
+from typing import Any
+
 import numpy as np
-from app.context.sufficiency import extract_keywords
+
 from app.context.semantic_gate import cosine_similarity
-from app.retrieval.embeddings import EmbeddingModel
+from app.context.sufficiency import extract_keywords
 from app.optimization.embedding_cache import EmbeddingCache, fingerprint_text
-from app.optimization.semantic_gate import LexicalSemanticGate, FastPathDecision
+from app.optimization.semantic_gate import FastPathDecision, LexicalSemanticGate
+from app.retrieval.embeddings import EmbeddingModel
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +75,7 @@ class PrioritizedEvidenceChunk:
 
     def __init__(
         self,
-        chunk: Dict[str, Any],
+        chunk: dict[str, Any],
         semantic_score: float,
         lexical_score: float,
         reuse_score: float,
@@ -91,17 +93,19 @@ class PrioritizedEvidenceChunk:
         self.priority_class = priority_class
         self.state = state
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert prioritized chunk to flat dict preserving existing keys."""
         d = dict(self.chunk)
-        d.update({
-            "semantic_score": round(self.semantic_score, 4),
-            "lexical_score": round(self.lexical_score, 4),
-            "reuse_score": round(self.reuse_score, 4),
-            "priority_score": round(self.priority_score, 4),
-            "priority_class": self.priority_class.value,
-            "state": self.state,
-        })
+        d.update(
+            {
+                "semantic_score": round(self.semantic_score, 4),
+                "lexical_score": round(self.lexical_score, 4),
+                "reuse_score": round(self.reuse_score, 4),
+                "priority_score": round(self.priority_score, 4),
+                "priority_class": self.priority_class.value,
+                "state": self.state,
+            }
+        )
         return d
 
 
@@ -182,11 +186,11 @@ class EvidencePriorityEngine:
 
     def __init__(
         self,
-        embedding_model: Optional[EmbeddingModel] = None,
-        weights: Optional[EvidencePriorityWeights] = None,
-        query_cache: Optional[EmbeddingCache] = None,
-        evidence_cache: Optional[EmbeddingCache] = None,
-        semantic_gate: Optional[LexicalSemanticGate] = None,
+        embedding_model: EmbeddingModel | None = None,
+        weights: EvidencePriorityWeights | None = None,
+        query_cache: EmbeddingCache | None = None,
+        evidence_cache: EmbeddingCache | None = None,
+        semantic_gate: LexicalSemanticGate | None = None,
     ):
         self._embedder = embedding_model or EmbeddingModel()
         self.weights = weights or EvidencePriorityWeights()
@@ -197,8 +201,8 @@ class EvidencePriorityEngine:
     def rank(
         self,
         query: str,
-        chunks: List[Dict[str, Any]],
-    ) -> Tuple[List[Dict[str, Any]], PriorityMetrics]:
+        chunks: list[dict[str, Any]],
+    ) -> tuple[list[dict[str, Any]], PriorityMetrics]:
         """
         Produce a deterministic ranked list of prioritized chunks and metrics.
         """
@@ -229,8 +233,8 @@ class EvidencePriorityEngine:
         compute_semantic = self.weights.semantic_weight > 0.0
 
         # Step 1: Pre-filter chunks using LexicalSemanticGate (if enabled)
-        gate_decisions: Dict[int, FastPathDecision] = {}
-        chunks_requiring_semantic: List[Tuple[int, str]] = []
+        gate_decisions: dict[int, FastPathDecision] = {}
+        chunks_requiring_semantic: list[tuple[int, str]] = []
 
         for i, chunk in enumerate(chunks):
             chunk_text = chunk.get("text", "")
@@ -247,20 +251,20 @@ class EvidencePriorityEngine:
                     chunks_requiring_semantic.append((i, chunk_text))
 
         # Step 2: Resolve Query Embedding (if any chunks require semantic scoring)
-        query_vec: Optional[np.ndarray] = None
+        query_vec: np.ndarray | None = None
         if compute_semantic and chunks_requiring_semantic:
             t_sem_0 = time.perf_counter()
             if self.query_cache is not None:
                 t_c0 = time.perf_counter()
                 query_vec = self.query_cache.get_or_compute(query, self._embedder.embed)
-                cache_latency += (time.perf_counter() - t_c0)
+                cache_latency += time.perf_counter() - t_c0
             else:
                 query_vec = self._embedder.embed(query)
                 semantic_calls += 1
-            sem_latency += (time.perf_counter() - t_sem_0)
+            sem_latency += time.perf_counter() - t_sem_0
 
         # Step 3: Resolve Chunk Embeddings (only for chunks requiring semantic scoring)
-        chunk_vec_map: Dict[int, np.ndarray] = {}
+        chunk_vec_map: dict[int, np.ndarray] = {}
         if compute_semantic and chunks_requiring_semantic and query_vec is not None:
             indices_to_fetch = [idx for idx, _ in chunks_requiring_semantic]
             texts_to_fetch = [txt for _, txt in chunks_requiring_semantic]
@@ -277,8 +281,8 @@ class EvidencePriorityEngine:
                     compute_batch_fn=self._embedder.embed_batch,
                     precomputed_keys=fingerprints,
                 )
-                cache_latency += (time.perf_counter() - t_c1)
-                for idx, vec in zip(indices_to_fetch, vectors):
+                cache_latency += time.perf_counter() - t_c1
+                for idx, vec in zip(indices_to_fetch, vectors, strict=False):
                     chunk_vec_map[idx] = vec
             else:
                 batch_vecs = self._embedder.embed_batch(texts_to_fetch)
@@ -286,7 +290,7 @@ class EvidencePriorityEngine:
                 for k, idx in enumerate(indices_to_fetch):
                     chunk_vec_map[idx] = batch_vecs[k]
 
-            sem_latency += (time.perf_counter() - t_sem_1)
+            sem_latency += time.perf_counter() - t_sem_1
 
         # Step 4: Scoring and Classification
         prioritized = []
@@ -402,7 +406,7 @@ class EvidencePriorityEngine:
             f"EvidencePriorityEngine: Ranked {len(chunks)} chunks -> "
             f"HIGH={high_cnt}, MEDIUM={med_cnt}, LOW={low_cnt} "
             f"[Active={active_cnt}, Retained={retained_cnt}] "
-            f"in {total_latency*1000:.3f}ms"
+            f"in {total_latency * 1000:.3f}ms"
         )
 
         return ranked_dict_chunks, metrics

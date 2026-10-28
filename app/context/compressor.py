@@ -1,4 +1,4 @@
-﻿"""
+"""
 S2 Context Compressor — compressed_v1
 
 Deterministic, rule-based context compression applied after
@@ -15,9 +15,8 @@ no external API dependencies, and no randomness.
 """
 
 import re
-from typing import List, Dict, Any
 from difflib import SequenceMatcher
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Configuration defaults (overridable via environment / config)
@@ -30,24 +29,25 @@ DEFAULT_DEDUP_THRESHOLD = 0.90
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _normalize_whitespace(text: str) -> str:
     """Collapse runs of 3+ newlines to 2; strip per-line."""
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    lines = [line.strip() for line in text.split('\n')]
-    return '\n'.join(lines)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    lines = [line.strip() for line in text.split("\n")]
+    return "\n".join(lines)
 
 
 def _remove_structural_markers(text: str) -> str:
     """Remove S1-style structural headers if present."""
     patterns = [
-        r'\[Source:[^\]]*\]',
-        r'\[Relevance:[^\]]*\]',
-        r'\[Chunk ID:[^\]]*\]',
-        r'\[Score:[^\]]*\]',
-        r'---+',
+        r"\[Source:[^\]]*\]",
+        r"\[Relevance:[^\]]*\]",
+        r"\[Chunk ID:[^\]]*\]",
+        r"\[Score:[^\]]*\]",
+        r"---+",
     ]
     for pat in patterns:
-        text = re.sub(pat, '', text)
+        text = re.sub(pat, "", text)
     return text.strip()
 
 
@@ -63,17 +63,17 @@ def _truncate_at_sentence(text: str, max_chars: int) -> str:
     truncated = text[:max_chars]
 
     # Find last sentence boundary within the truncated text
-    boundaries = [m.end() for m in re.finditer(r'[.!?](?:\s|$)', truncated)]
+    boundaries = [m.end() for m in re.finditer(r"[.!?](?:\s|$)", truncated)]
 
     if boundaries:
-        return truncated[:boundaries[-1]].strip()
+        return truncated[: boundaries[-1]].strip()
     else:
-        return truncated.rstrip() + '...'
+        return truncated.rstrip() + "..."
 
 
-def _extract_sentences(text: str) -> List[str]:
+def _extract_sentences(text: str) -> list[str]:
     """Split text into sentences (simple heuristic)."""
-    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
     return [s.strip() for s in sentences if s.strip()]
 
 
@@ -86,11 +86,12 @@ def _sentence_similarity(s1: str, s2: str) -> float:
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def compress_chunks(
-    chunks: List[Dict[str, Any]],
+    chunks: list[dict[str, Any]],
     max_chunk_chars: int = DEFAULT_MAX_CHUNK_CHARS,
     dedup_threshold: float = DEFAULT_DEDUP_THRESHOLD,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Compress a list of retrieved chunks.
 
@@ -121,17 +122,19 @@ def compress_chunks(
         text = _remove_structural_markers(text)
         text = _truncate_at_sentence(text, max_chunk_chars)
 
-        compressed.append({
-            "chunk_id": chunk.get("chunk_id", "unknown"),
-            "text": text,
-            "score": chunk.get("score", 0.0),
-        })
+        compressed.append(
+            {
+                "chunk_id": chunk.get("chunk_id", "unknown"),
+                "text": text,
+                "score": chunk.get("score", 0.0),
+            }
+        )
 
     # --- Step 4: cross-chunk deduplication ---
     # Sort by score descending so higher-scored chunks keep their sentences
     compressed.sort(key=lambda c: c["score"], reverse=True)
 
-    seen_sentences: List[str] = []
+    seen_sentences: list[str] = []
 
     for chunk in compressed:
         sentences = _extract_sentences(chunk["text"])
@@ -147,7 +150,7 @@ def compress_chunks(
                 kept_sentences.append(sent)
                 seen_sentences.append(sent)
 
-        chunk["text"] = ' '.join(kept_sentences)
+        chunk["text"] = " ".join(kept_sentences)
 
     # Re-sort by original chunk order (by chunk_id to be deterministic)
     # Actually, preserve retrieval order by re-sorting by score desc
@@ -158,7 +161,7 @@ def compress_chunks(
 
 
 def build_compressed_context(
-    chunks: List[Dict[str, Any]],
+    chunks: list[dict[str, Any]],
     max_chunk_chars: int = DEFAULT_MAX_CHUNK_CHARS,
     dedup_threshold: float = DEFAULT_DEDUP_THRESHOLD,
 ) -> str:
@@ -182,4 +185,4 @@ def build_compressed_context(
         if chunk["text"].strip():
             parts.append(f"[{i}] {chunk['text'].strip()}")
 
-    return '\n\n'.join(parts)
+    return "\n\n".join(parts)

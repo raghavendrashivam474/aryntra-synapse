@@ -1,6 +1,7 @@
-import time
 import logging
-from typing import List, Dict, Any, Tuple
+import time
+from typing import Any
+
 from app.context.compressor import build_compressed_context
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class ProgressiveContextEngine:
         self.max_chunk_chars = max_chunk_chars
         self.dedup_threshold = dedup_threshold
 
-    def build_stage_context(self, chunks: List[Dict[str, Any]]) -> str:
+    def build_stage_context(self, chunks: list[dict[str, Any]]) -> str:
         """Compress and format the active subset of chunks."""
         return build_compressed_context(
             chunks=chunks,
@@ -45,7 +46,7 @@ class ProgressiveContextEngine:
             dedup_threshold=self.dedup_threshold,
         )
 
-    def evaluate_sufficiency(self, query: str, context: str) -> Tuple[bool, str, float]:
+    def evaluate_sufficiency(self, query: str, context: str) -> tuple[bool, str, float]:
         """
         Prompt LLM to determine if active context is sufficient.
         Returns: (is_sufficient, raw_judgment, latency)
@@ -63,8 +64,8 @@ class ProgressiveContextEngine:
     def run(
         self,
         query: str,
-        retrieved_chunks: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        retrieved_chunks: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """
         Execute the progressive context lifecycle loop.
         """

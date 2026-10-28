@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/context/representation.py
 
 Aryntra Synapse — Sprint 1 & Sprint 2
@@ -12,11 +12,12 @@ Responsibilities:
 - Measure representation build latency
 """
 
-import time
 import re
+import time
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
-from app.context.compressor import build_compressed_context, compress_chunks
+from typing import Any
+
+from app.context.compressor import build_compressed_context
 
 
 class BaseContextRepresenter(ABC):
@@ -28,7 +29,7 @@ class BaseContextRepresenter(ABC):
         pass
 
     @abstractmethod
-    def represent(self, query: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def represent(self, query: str, chunks: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Represent retrieved chunks for consumption by the LLM.
 
@@ -47,7 +48,6 @@ class BaseContextRepresenter(ABC):
             'representation_metadata': dict (metadata, compression stats, graph)
             'build_latency': float (latency in seconds)
         """
-        pass
 
 
 class FlatRepresenter(BaseContextRepresenter):
@@ -60,7 +60,7 @@ class FlatRepresenter(BaseContextRepresenter):
     def representation_type(self) -> str:
         return "flat"
 
-    def represent(self, query: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def represent(self, query: str, chunks: list[dict[str, Any]]) -> dict[str, Any]:
         t0 = time.perf_counter()
 
         if not chunks:
@@ -101,15 +101,39 @@ class StructuredRepresenterV1(BaseContextRepresenter):
 
     def _extract_keywords(self, text: str) -> set:
         stopwords = {
-            "the", "and", "for", "that", "with", "this", "from",
-            "which", "have", "been", "were", "when", "where", "what",
-            "into", "more", "some", "used", "will", "first", "also",
-            "than", "only", "does", "each", "other", "their", "about"
+            "the",
+            "and",
+            "for",
+            "that",
+            "with",
+            "this",
+            "from",
+            "which",
+            "have",
+            "been",
+            "were",
+            "when",
+            "where",
+            "what",
+            "into",
+            "more",
+            "some",
+            "used",
+            "will",
+            "first",
+            "also",
+            "than",
+            "only",
+            "does",
+            "each",
+            "other",
+            "their",
+            "about",
         }
         tokens = re.findall(r"[a-zA-Z0-9_\-]{3,}", text.lower())
         return {tok for tok in tokens if tok not in stopwords and not tok.isdigit()}
 
-    def represent(self, query: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def represent(self, query: str, chunks: list[dict[str, Any]]) -> dict[str, Any]:
         t0 = time.perf_counter()
 
         if not chunks:
@@ -133,12 +157,14 @@ class StructuredRepresenterV1(BaseContextRepresenter):
             chunk_indices.append(seq_idx)
             chunk_keywords.append(kws)
 
-            nodes.append({
-                "rank": i,
-                "chunk_id": cid,
-                "score": chunk.get("score", 0.0),
-                "sequence_index": seq_idx,
-            })
+            nodes.append(
+                {
+                    "rank": i,
+                    "chunk_id": cid,
+                    "score": chunk.get("score", 0.0),
+                    "sequence_index": seq_idx,
+                }
+            )
 
         edges = []
         relationship_notes = []
@@ -147,11 +173,13 @@ class StructuredRepresenterV1(BaseContextRepresenter):
             for j in range(len(chunks)):
                 if i != j and chunk_indices[i] >= 0 and chunk_indices[j] >= 0:
                     if chunk_indices[j] == chunk_indices[i] + 1:
-                        edges.append({
-                            "source": nodes[i]["chunk_id"],
-                            "target": nodes[j]["chunk_id"],
-                            "relation": "immediately_precedes",
-                        })
+                        edges.append(
+                            {
+                                "source": nodes[i]["chunk_id"],
+                                "target": nodes[j]["chunk_id"],
+                                "relation": "immediately_precedes",
+                            }
+                        )
                         relationship_notes.append(
                             f"• Document Continuity: [{nodes[i]['chunk_id']}] is immediately followed by [{nodes[j]['chunk_id']}] in source document."
                         )
@@ -159,14 +187,16 @@ class StructuredRepresenterV1(BaseContextRepresenter):
         for i in range(len(chunks)):
             for j in range(i + 1, len(chunks)):
                 shared = chunk_keywords[i].intersection(chunk_keywords[j])
-                shared_sample = sorted(list(shared))[:4]
+                shared_sample = sorted(shared)[:4]
                 if shared_sample:
-                    edges.append({
-                        "source": nodes[i]["chunk_id"],
-                        "target": nodes[j]["chunk_id"],
-                        "relation": "shares_concepts",
-                        "shared_concepts": shared_sample,
-                    })
+                    edges.append(
+                        {
+                            "source": nodes[i]["chunk_id"],
+                            "target": nodes[j]["chunk_id"],
+                            "relation": "shares_concepts",
+                            "shared_concepts": shared_sample,
+                        }
+                    )
                     relationship_notes.append(
                         f"• Conceptual Link [{nodes[i]['chunk_id']} & {nodes[j]['chunk_id']}]: relates via ({', '.join(shared_sample)})"
                     )
@@ -184,7 +214,7 @@ class StructuredRepresenterV1(BaseContextRepresenter):
         for i, chunk in enumerate(chunks, start=1):
             cid = chunk.get("chunk_id", f"chunk_{i}")
             score = chunk.get("score", 0.0)
-            seq_info = f" | Seq #{chunk_indices[i-1]}" if chunk_indices[i-1] >= 0 else ""
+            seq_info = f" | Seq #{chunk_indices[i - 1]}" if chunk_indices[i - 1] >= 0 else ""
             lines.append(f"[Evidence {i} | ID: {cid} | Score: {score}{seq_info}]")
             lines.append(chunk.get("text", ""))
             lines.append("")
@@ -222,7 +252,7 @@ class CompressedRepresenterV1(BaseContextRepresenter):
     def representation_type(self) -> str:
         return "compressed_v1"
 
-    def represent(self, query: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def represent(self, query: str, chunks: list[dict[str, Any]]) -> dict[str, Any]:
         t0 = time.perf_counter()
 
         if not chunks:
@@ -247,13 +277,9 @@ class CompressedRepresenterV1(BaseContextRepresenter):
 
         compressed_length = len(context_string)
         reduction_pct = (
-            round((original_length - compressed_length) / original_length * 100, 2)
-            if original_length > 0 else 0.0
+            round((original_length - compressed_length) / original_length * 100, 2) if original_length > 0 else 0.0
         )
-        compression_ratio = (
-            round(compressed_length / original_length, 4)
-            if original_length > 0 else 1.0
-        )
+        compression_ratio = round(compressed_length / original_length, 4) if original_length > 0 else 1.0
 
         build_latency = round(time.perf_counter() - t0, 6)
 
@@ -272,9 +298,10 @@ class CompressedRepresenterV1(BaseContextRepresenter):
         }
 
 
-def get_representer(name: str = None) -> BaseContextRepresenter:
+def get_representer(name: str | None = None) -> BaseContextRepresenter:
     """Factory function to obtain the configured context representer."""
     from app.core.config import settings
+
     rep_name = (name or settings.context_representation).lower().strip()
 
     if rep_name == "flat":

@@ -1,17 +1,77 @@
-import re
 import logging
-from typing import List, Dict, Any, Tuple
+import re
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 STOPWORDS = {
-    "the", "and", "for", "that", "with", "this", "from", "which", "have",
-    "been", "were", "when", "where", "what", "into", "more", "some", "used",
-    "will", "first", "also", "than", "only", "does", "each", "other", "their",
-    "about", "how", "who", "why", "are", "can", "may", "was", "its", "not",
-    "but", "has", "had", "his", "her", "they", "them", "would", "could",
-    "should", "there", "these", "those", "is", "it", "an", "or", "in", "on",
-    "at", "to", "of", "a", "by", "do", "if", "no", "so", "up", "as",
+    "the",
+    "and",
+    "for",
+    "that",
+    "with",
+    "this",
+    "from",
+    "which",
+    "have",
+    "been",
+    "were",
+    "when",
+    "where",
+    "what",
+    "into",
+    "more",
+    "some",
+    "used",
+    "will",
+    "first",
+    "also",
+    "than",
+    "only",
+    "does",
+    "each",
+    "other",
+    "their",
+    "about",
+    "how",
+    "who",
+    "why",
+    "are",
+    "can",
+    "may",
+    "was",
+    "its",
+    "not",
+    "but",
+    "has",
+    "had",
+    "his",
+    "her",
+    "they",
+    "them",
+    "would",
+    "could",
+    "should",
+    "there",
+    "these",
+    "those",
+    "is",
+    "it",
+    "an",
+    "or",
+    "in",
+    "on",
+    "at",
+    "to",
+    "of",
+    "a",
+    "by",
+    "do",
+    "if",
+    "no",
+    "so",
+    "up",
+    "as",
 }
 
 
@@ -74,7 +134,7 @@ class SufficiencyEngine:
     def evaluate(
         self,
         query: str,
-        active_chunks: List[Dict[str, Any]],
+        active_chunks: list[dict[str, Any]],
     ) -> SufficiencyResult:
         """
         Evaluate whether the active evidence is sufficient for the query.
@@ -126,16 +186,14 @@ class SufficiencyEngine:
             top_score=top_score,
             coverage_ratio=coverage_ratio,
             query_keywords=len(query_kw),
-            matched_keywords=len(query_kw & extract_keywords(
-                " ".join(c.get("text", "") for c in active_chunks)
-            )) if query_kw else 0,
+            matched_keywords=len(query_kw & extract_keywords(" ".join(c.get("text", "") for c in active_chunks)))
+            if query_kw
+            else 0,
         )
 
-        logger.info(
-            f"Sufficiency: {result.reason} "
-            f"(score={top_score:.3f}, coverage={coverage_ratio:.2f})"
-        )
+        logger.info(f"Sufficiency: {result.reason} (score={top_score:.3f}, coverage={coverage_ratio:.2f})")
         return result
+
 
 # ============================================================
 # S6 EXTENSION: Semantic-Aware Sufficiency
@@ -145,7 +203,7 @@ class SufficiencyEngine:
 # See S6 spec §13: "S5 SufficiencyEngine + S6 semantic signal"
 # ============================================================
 
-from app.context.semantic_gate import SemanticGate, SemanticResult
+from app.context.semantic_gate import SemanticGate
 
 
 class SemanticSufficiencyResult:
@@ -219,7 +277,7 @@ class SemanticSufficiencyEngine:
     def evaluate(
         self,
         query: str,
-        active_chunks: List[Dict[str, Any]],
+        active_chunks: list[dict[str, Any]],
     ) -> SemanticSufficiencyResult:
         """
         Evaluate sufficiency using both lexical and semantic signals.
@@ -253,9 +311,7 @@ class SemanticSufficiencyEngine:
                 reason = "lexical_pass_semantic_insufficient"
 
         # Combined score for observability (simple average, not used for decision)
-        combined = (
-            lexical_result.coverage_ratio + semantic_result.semantic_score
-        ) / 2.0
+        combined = (lexical_result.coverage_ratio + semantic_result.semantic_score) / 2.0
 
         result = SemanticSufficiencyResult(
             is_sufficient=is_sufficient,

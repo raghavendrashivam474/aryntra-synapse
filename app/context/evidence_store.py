@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/context/evidence_store.py
 
 Aryntra Synapse — Sprint 7
@@ -17,9 +17,9 @@ It is the mechanism by which Synapse answers:
 It does NOT decide sufficiency (S5/S6) or promotion (S4/S8).
 """
 
-import time
 import logging
-from typing import List, Dict, Any, Tuple
+import time
+from typing import Any
 
 from app.retrieval.evidence_fingerprint import EvidenceFingerprint
 
@@ -70,13 +70,11 @@ class EvidenceStore:
 
     def __init__(self, fingerprinter: EvidenceFingerprint = None):
         self._fingerprinter = fingerprinter or EvidenceFingerprint()
-        self._store: Dict[str, Dict[str, Any]] = {}
+        self._store: dict[str, dict[str, Any]] = {}
         self._total_processed = 0
         self._total_reused = 0
 
-    def process(
-        self, chunks: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], ReuseMetrics]:
+    def process(self, chunks: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], ReuseMetrics]:
         """
         Process a batch of retrieved chunks.
 
@@ -157,7 +155,7 @@ class EvidenceStore:
 
         return tagged, metrics
 
-    def lookup(self, fingerprint: str) -> Dict[str, Any]:
+    def lookup(self, fingerprint: str) -> dict[str, Any]:
         """Look up evidence by fingerprint. Returns empty dict if not found."""
         return self._store.get(fingerprint, {})
 
@@ -177,14 +175,10 @@ class EvidenceStore:
         return len(self._store)
 
     @property
-    def cumulative_stats(self) -> Dict[str, Any]:
+    def cumulative_stats(self) -> dict[str, Any]:
         return {
             "store_size": self.size,
             "total_processed": self._total_processed,
             "total_reused": self._total_reused,
-            "cumulative_reuse_rate": (
-                self._total_reused / self._total_processed
-                if self._total_processed > 0
-                else 0.0
-            ),
+            "cumulative_reuse_rate": (self._total_reused / self._total_processed if self._total_processed > 0 else 0.0),
         }
