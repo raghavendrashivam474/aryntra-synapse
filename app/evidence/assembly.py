@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 14 + Sprint 15 + Sprint 16 + Sprint 17
 Progressive Evidence Assembly Engine with Minimum Sufficient Evidence Control
 and Evidence Relationship Graph.
@@ -16,15 +16,16 @@ instead of:
 S17 adds:
   "How do these evidence chunks relate to one another?"
 """
-import time
-import logging
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 
-from app.evidence.contradiction import ContradictionDetector, ConflictReport
+import logging
+import time
+from dataclasses import dataclass
+from typing import Any
+
+from app.evidence.config import S14ResolutionConfig
+from app.evidence.contradiction import ConflictReport, ContradictionDetector
 from app.evidence.coverage import CoverageAnalyzer, CoverageReport
 from app.evidence.state import EvidenceState, RelationalEvidenceState
-from app.evidence.config import S14ResolutionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class AssemblyMetrics:
     relationship_edges: int = 0
     relationship_nodes: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_candidates": self.total_candidates,
             "selected_count": self.selected_count,
@@ -70,15 +71,15 @@ class AssemblyMetrics:
 
 @dataclass
 class AssemblyResult:
-    selected_chunks: List[Dict[str, Any]]
+    selected_chunks: list[dict[str, Any]]
     relational_state: RelationalEvidenceState
     coverage_report: CoverageReport
     conflict_report: ConflictReport
     metrics: AssemblyMetrics
     # S17 addition
-    evidence_graph: Optional[Any] = None  # EvidenceGraph or None
+    evidence_graph: Any | None = None  # EvidenceGraph or None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = {
             "selected_chunks": self.selected_chunks,
             "relational_state": self.relational_state.to_dict(),
@@ -103,10 +104,10 @@ class EvidenceAssembler:
 
     def __init__(
         self,
-        config: Optional[S14ResolutionConfig] = None,
-        contradiction_detector: Optional[ContradictionDetector] = None,
-        coverage_analyzer: Optional[CoverageAnalyzer] = None,
-        sufficiency_evaluator: Optional[Any] = None,  # SufficiencyEvaluator
+        config: S14ResolutionConfig | None = None,
+        contradiction_detector: ContradictionDetector | None = None,
+        coverage_analyzer: CoverageAnalyzer | None = None,
+        sufficiency_evaluator: Any | None = None,  # SufficiencyEvaluator
     ):
         self.config = config or S14ResolutionConfig.full_resolution()
         self.contradiction_detector = contradiction_detector or ContradictionDetector()
@@ -120,12 +121,12 @@ class EvidenceAssembler:
     @classmethod
     def with_sufficiency(
         cls,
-        s14_config: Optional[S14ResolutionConfig] = None,
-        s15_config: Optional[Any] = None,
+        s14_config: S14ResolutionConfig | None = None,
+        s15_config: Any | None = None,
     ) -> "EvidenceAssembler":
         """Convenience factory: assembler with S15 MSE evaluator enabled."""
-        from app.evidence.sufficiency import SufficiencyEvaluator
         from app.evidence.config import S15SufficiencyConfig
+        from app.evidence.sufficiency import SufficiencyEvaluator
 
         s14 = s14_config or S14ResolutionConfig.full_resolution()
         ca = CoverageAnalyzer(min_facet_coverage_threshold=s14.min_coverage_target)
@@ -147,15 +148,11 @@ class EvidenceAssembler:
         s16_config=None,
     ) -> "EvidenceAssembler":
         """S16: Assembler with sufficiency AND temporal awareness."""
-        from app.evidence.temporal import TemporalAnalyzer
         from app.evidence.config import S16TemporalConfig
+        from app.evidence.temporal import TemporalAnalyzer
 
-        assembler = cls.with_sufficiency(
-            s14_config=s14_config, s15_config=s15_config
-        )
-        assembler.temporal_analyzer = TemporalAnalyzer(
-            config=s16_config or S16TemporalConfig.balanced()
-        )
+        assembler = cls.with_sufficiency(s14_config=s14_config, s15_config=s15_config)
+        assembler.temporal_analyzer = TemporalAnalyzer(config=s16_config or S16TemporalConfig.balanced())
         return assembler
 
     @classmethod
@@ -167,8 +164,8 @@ class EvidenceAssembler:
         s17_config=None,
     ) -> "EvidenceAssembler":
         """S17: Assembler with sufficiency, temporal, AND relationship awareness."""
-        from app.evidence.relationships import RelationshipAnalyzer
         from app.evidence.config import S17RelationshipConfig
+        from app.evidence.relationships import RelationshipAnalyzer
 
         assembler = cls.with_temporal(
             s14_config=s14_config,
@@ -185,7 +182,7 @@ class EvidenceAssembler:
     def assemble(
         self,
         query: str,
-        ranked_chunks: List[Dict[str, Any]],
+        ranked_chunks: list[dict[str, Any]],
     ) -> AssemblyResult:
         """
         Assemble the best coherent, multi-concept evidence set from ranked candidates.
@@ -197,6 +194,7 @@ class EvidenceAssembler:
             empty_conf = ConflictReport(detected=False, conflict_score=0.0)
             latency = time.perf_counter() - t0
             from app.evidence.relationships import EvidenceGraph
+
             return AssemblyResult(
                 selected_chunks=[],
                 relational_state=RelationalEvidenceState(
@@ -222,55 +220,40 @@ class EvidenceAssembler:
 
         # S16: Enrich chunks with temporal scores before assembly
         if self.temporal_analyzer:
-            ranked_chunks = self.temporal_analyzer.enrich_chunks(
-                query, ranked_chunks
-            )
+            ranked_chunks = self.temporal_analyzer.enrich_chunks(query, ranked_chunks)
 
         # S17: Build evidence relationship graph over candidate pool
         evidence_graph = None
         if self.relationship_analyzer:
-            from app.evidence.config import S17RelationshipConfig
             r_cfg = self.relationship_analyzer.config
             if getattr(r_cfg, "relationship_enabled", True):
                 evidence_graph = self.relationship_analyzer.build_graph(ranked_chunks)
                 # S17: Relationship-aware candidate reordering
-                ranked_chunks = self._relationship_aware_reorder(
-                    ranked_chunks, evidence_graph
-                )
+                ranked_chunks = self._relationship_aware_reorder(ranked_chunks, evidence_graph)
 
         # Step 1: Start with strongest individual candidate
-        selected: List[Dict[str, Any]] = [ranked_chunks[0]]
-        remaining: List[Dict[str, Any]] = ranked_chunks[1:]
+        selected: list[dict[str, Any]] = [ranked_chunks[0]]
+        remaining: list[dict[str, Any]] = ranked_chunks[1:]
         iterations = 1
 
         # Check baseline coverage of top-1
         cov_report = self.coverage_analyzer.evaluate(query, selected)
 
         # S15: Initial sufficiency evaluation
-        suff_result = self._evaluate_sufficiency(
-            query, selected, remaining, cov_report
-        )
+        suff_result = self._evaluate_sufficiency(query, selected, remaining, cov_report)
         keep_going = self._should_continue(cov_report, suff_result)
 
         # Step 2: Bounded greedy complementary addition
         max_chunks = self.config.max_assembly_chunks
         max_iter = self.config.max_assembly_iterations
 
-        while (
-            len(selected) < max_chunks
-            and iterations < max_iter
-            and remaining
-            and keep_going
-        ):
+        while len(selected) < max_chunks and iterations < max_iter and remaining and keep_going:
             iterations += 1
             best_candidate_idx = -1
             best_gain = 0.0
-            best_penalty = 1.0
 
             for idx, candidate in enumerate(remaining):
-                gain = self.coverage_analyzer.marginal_coverage_gain(
-                    query, selected, candidate
-                )
+                gain = self.coverage_analyzer.marginal_coverage_gain(query, selected, candidate)
                 if gain <= 0.0:
                     continue
 
@@ -284,16 +267,13 @@ class EvidenceAssembler:
                 if effective_value > best_gain:
                     best_gain = effective_value
                     best_candidate_idx = idx
-                    best_penalty = penalty
 
             if best_candidate_idx >= 0 and best_gain > 0.0:
                 selected.append(remaining.pop(best_candidate_idx))
                 cov_report = self.coverage_analyzer.evaluate(query, selected)
 
                 # S15: Re-evaluate sufficiency after expansion
-                suff_result = self._evaluate_sufficiency(
-                    query, selected, remaining, cov_report
-                )
+                suff_result = self._evaluate_sufficiency(query, selected, remaining, cov_report)
                 keep_going = self._should_continue(cov_report, suff_result)
             else:
                 # No further complementary gains available
@@ -302,13 +282,15 @@ class EvidenceAssembler:
         # Step 3: Global contradiction check on assembled set + candidate pool context
         conflict_report = self.contradiction_detector.analyze(selected)
         pool_conflict = self.contradiction_detector.analyze(ranked_chunks[:max_chunks])
-        if not conflict_report.detected and pool_conflict.detected and pool_conflict.conflict_score >= self.config.contradiction_threshold:
+        if (
+            not conflict_report.detected
+            and pool_conflict.detected
+            and pool_conflict.conflict_score >= self.config.contradiction_threshold
+        ):
             conflict_report = pool_conflict
 
         # Step 4: Determine final relational evidence state
-        state, decision = self._determine_final_state(
-            cov_report, conflict_report, suff_result
-        )
+        state, decision = self._determine_final_state(cov_report, conflict_report, suff_result)
 
         latency = time.perf_counter() - t0
 
@@ -365,9 +347,9 @@ class EvidenceAssembler:
 
     def _relationship_aware_reorder(
         self,
-        chunks: List[Dict[str, Any]],
+        chunks: list[dict[str, Any]],
         graph: Any,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         S17: Reorder candidates using relationship graph signals.
 
@@ -375,7 +357,6 @@ class EvidenceAssembler:
         - Boost chunks that are the current head of a version chain.
         - NEVER remove chunks (safety invariant).
         """
-        from app.evidence.relationships import RelationshipType
 
         r_cfg = self.relationship_analyzer.config
         demotion = getattr(r_cfg, "superseded_candidate_demotion", 0.20)
@@ -397,9 +378,7 @@ class EvidenceAssembler:
             supersedes = graph.get_supersedes(cid)
             if supersedes and not chunk.get("_s17_superseded"):
                 current_score = chunk.get("combined_score", chunk.get("priority_score", chunk.get("score", 0.5)))
-                chunk["combined_score"] = round(
-                    min(1.0, current_score + boost), 4
-                )
+                chunk["combined_score"] = round(min(1.0, current_score + boost), 4)
                 chunk["_s17_version_head"] = True
 
         # Stable re-sort by combined_score
@@ -414,10 +393,10 @@ class EvidenceAssembler:
     def _evaluate_sufficiency(
         self,
         query: str,
-        selected: List[Dict[str, Any]],
-        remaining: List[Dict[str, Any]],
+        selected: list[dict[str, Any]],
+        remaining: list[dict[str, Any]],
         cov_report: CoverageReport,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Run S15 sufficiency evaluation if evaluator is configured."""
         if not self.sufficiency_evaluator:
             return None
@@ -436,7 +415,7 @@ class EvidenceAssembler:
     def _should_continue(
         self,
         cov_report: CoverageReport,
-        suff_result: Optional[Any],
+        suff_result: Any | None,
     ) -> bool:
         """Determine whether the assembly loop should continue."""
         if suff_result is None:
@@ -444,6 +423,7 @@ class EvidenceAssembler:
             return not cov_report.is_sufficient
 
         from app.evidence.sufficiency import SufficiencyDecision
+
         # S15: Continue if INSUFFICIENT or UNCERTAIN (conservative)
         return suff_result.decision in (
             SufficiencyDecision.INSUFFICIENT,
@@ -454,7 +434,7 @@ class EvidenceAssembler:
         self,
         cov_report: CoverageReport,
         conflict_report: ConflictReport,
-        suff_result: Optional[Any],
+        suff_result: Any | None,
     ) -> tuple:
         """Determine final EvidenceState and decision string."""
         # Conflict always takes priority (S14 invariant)
@@ -464,6 +444,7 @@ class EvidenceAssembler:
         # S15-aware state assignment
         if suff_result is not None:
             from app.evidence.sufficiency import SufficiencyDecision
+
             if suff_result.decision == SufficiencyDecision.SUFFICIENT:
                 return EvidenceState.SUFFICIENT, "mse_sufficient"
             elif suff_result.decision == SufficiencyDecision.UNCERTAIN:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 S19 — Provenance & Decision Archaeology
 
 Turns the reasoning happening across S14–S18 into a first-class,
@@ -19,10 +19,9 @@ import json
 import logging
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
-
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +34,15 @@ logger = logging.getLogger(__name__)
 class DecisionStage(str, Enum):
     """Pipeline stage that produced an event."""
 
-    CANDIDATE = "candidate"        # candidate discovery / initial pool
-    RANKING = "ranking"            # ranking / scoring (S14)
-    TEMPORAL = "temporal"          # temporal analysis (S16)
+    CANDIDATE = "candidate"  # candidate discovery / initial pool
+    RANKING = "ranking"  # ranking / scoring (S14)
+    TEMPORAL = "temporal"  # temporal analysis (S16)
     RELATIONSHIP = "relationship"  # inter-chunk relationships (S17)
-    CONFLICT = "conflict"          # contradiction handling (S14)
-    SUFFICIENCY = "sufficiency"    # sufficiency evaluation (S15)
-    EXPANSION = "expansion"        # progressive assembly (S15)
+    CONFLICT = "conflict"  # contradiction handling (S14)
+    SUFFICIENCY = "sufficiency"  # sufficiency evaluation (S15)
+    EXPANSION = "expansion"  # progressive assembly (S15)
     ADJUDICATION = "adjudication"  # semantic adjudication (S18)
-    SAFETY = "safety"              # deterministic safety veto (S18)
+    SAFETY = "safety"  # deterministic safety veto (S18)
     FINALIZATION = "finalization"  # final outcome
 
 
@@ -97,12 +96,12 @@ class DecisionEvent:
     stage: str
     action: str
     reason: str
-    evidence_id: Optional[str] = None
-    related_evidence_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    evidence_id: str | None = None
+    related_evidence_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "stage": self.stage,
             "action": self.action,
@@ -114,7 +113,7 @@ class DecisionEvent:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DecisionEvent":
+    def from_dict(cls, data: dict[str, Any]) -> DecisionEvent:
         return cls(
             stage=data["stage"],
             action=data["action"],
@@ -136,18 +135,18 @@ class AdjudicationRecord:
     """S18 adjudication trace."""
 
     invoked: bool = False
-    candidate_ids: List[str] = field(default_factory=list)
-    decision: Optional[str] = None      # "accept" | "abstain" | None
-    confidence: Optional[float] = None
-    reason: Optional[str] = None
+    candidate_ids: list[str] = field(default_factory=list)
+    decision: str | None = None  # "accept" | "abstain" | None
+    confidence: float | None = None
+    reason: str | None = None
     veto_applied: bool = False
-    veto_reason: Optional[str] = None
+    veto_reason: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AdjudicationRecord":
+    def from_dict(cls, data: dict[str, Any]) -> AdjudicationRecord:
         return cls(
             invoked=bool(data.get("invoked", False)),
             candidate_ids=list(data.get("candidate_ids", [])),
@@ -178,17 +177,17 @@ class DecisionRecord:
     query: str = ""
     created_at: float = field(default_factory=time.time)
 
-    candidate_ids: List[str] = field(default_factory=list)
-    selected_ids: List[str] = field(default_factory=list)
-    rejected_ids: List[str] = field(default_factory=list)
+    candidate_ids: list[str] = field(default_factory=list)
+    selected_ids: list[str] = field(default_factory=list)
+    rejected_ids: list[str] = field(default_factory=list)
 
-    events: List[DecisionEvent] = field(default_factory=list)
+    events: list[DecisionEvent] = field(default_factory=list)
 
     adjudication: AdjudicationRecord = field(default_factory=AdjudicationRecord)
 
-    final_status: Optional[str] = None
-    final_confidence: Optional[float] = None
-    final_reason: Optional[str] = None
+    final_status: str | None = None
+    final_confidence: float | None = None
+    final_reason: str | None = None
 
     trace_complete: bool = False
     trace_truncated: bool = False
@@ -199,44 +198,42 @@ class DecisionRecord:
     def candidate_count(self) -> int:
         return len(self.candidate_ids)
 
-    def events_for_stage(self, stage: str) -> List[DecisionEvent]:
+    def events_for_stage(self, stage: str) -> list[DecisionEvent]:
         return [e for e in self.events if e.stage == stage]
 
     @property
-    def ranking_events(self) -> List[DecisionEvent]:
+    def ranking_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.RANKING.value)
 
     @property
-    def temporal_events(self) -> List[DecisionEvent]:
+    def temporal_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.TEMPORAL.value)
 
     @property
-    def relationship_events(self) -> List[DecisionEvent]:
+    def relationship_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.RELATIONSHIP.value)
 
     @property
-    def conflict_events(self) -> List[DecisionEvent]:
+    def conflict_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.CONFLICT.value)
 
     @property
-    def sufficiency_events(self) -> List[DecisionEvent]:
+    def sufficiency_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.SUFFICIENCY.value)
 
     @property
-    def expansion_events(self) -> List[DecisionEvent]:
+    def expansion_events(self) -> list[DecisionEvent]:
         return self.events_for_stage(DecisionStage.EXPANSION.value)
 
     @property
-    def safety_overrides(self) -> List[DecisionEvent]:
+    def safety_overrides(self) -> list[DecisionEvent]:
         return [
-            e for e in self.events
-            if e.stage == DecisionStage.SAFETY.value
-            and e.action == DecisionAction.VETO.value
+            e for e in self.events if e.stage == DecisionStage.SAFETY.value and e.action == DecisionAction.VETO.value
         ]
 
     # ---- serialization ---------------------------------------------------------
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "decision_id": self.decision_id,
             "query": self.query,
@@ -253,11 +250,11 @@ class DecisionRecord:
             "trace_truncated": self.trace_truncated,
         }
 
-    def to_json(self, indent: Optional[int] = 2) -> str:
+    def to_json(self, indent: int | None = 2) -> str:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=False)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DecisionRecord":
+    def from_dict(cls, data: dict[str, Any]) -> DecisionRecord:
         rec = cls(
             decision_id=data.get("decision_id", str(uuid.uuid4())),
             query=data.get("query", ""),
@@ -276,14 +273,14 @@ class DecisionRecord:
         return rec
 
     @classmethod
-    def from_json(cls, payload: str) -> "DecisionRecord":
+    def from_json(cls, payload: str) -> DecisionRecord:
         return cls.from_dict(json.loads(payload))
 
     # ---- human-readable explanation -------------------------------------------
 
     def explain(self) -> str:
         """Produce a human-readable decision narrative."""
-        lines: List[str] = []
+        lines: list[str] = []
         sep = "-" * 60
         lines.append(sep)
         lines.append("FINAL DECISION")
@@ -291,13 +288,14 @@ class DecisionRecord:
         lines.append(f"Decision ID : {self.decision_id}")
         lines.append(f"Query       : {self.query!r}")
         lines.append("")
-        lines.append(f"Candidates  : {self.candidate_count} "
-                     f"({', '.join(self.candidate_ids) if self.candidate_ids else '-'})")
+        lines.append(
+            f"Candidates  : {self.candidate_count} ({', '.join(self.candidate_ids) if self.candidate_ids else '-'})"
+        )
         lines.append(f"Selected    : {', '.join(self.selected_ids) or '-'}")
         lines.append(f"Rejected    : {', '.join(self.rejected_ids) or '-'}")
         lines.append("")
 
-        def _dump(title: str, events: List[DecisionEvent]) -> None:
+        def _dump(title: str, events: list[DecisionEvent]) -> None:
             if not events:
                 return
             lines.append(f"{title}:")
@@ -366,7 +364,7 @@ class DecisionRecorder:
     def __init__(
         self,
         query: str = "",
-        decision_id: Optional[str] = None,
+        decision_id: str | None = None,
         max_events: int = DEFAULT_MAX_EVENTS,
     ) -> None:
         self.record = DecisionRecord(
@@ -382,9 +380,9 @@ class DecisionRecorder:
         stage: str,
         action: str,
         reason: str,
-        evidence_id: Optional[str] = None,
-        related_evidence_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        evidence_id: str | None = None,
+        related_evidence_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         try:
             if len(self.record.events) >= self._max_events:
@@ -400,12 +398,12 @@ class DecisionRecorder:
                     metadata=dict(metadata or {}),
                 )
             )
-        except Exception as exc:  # pragma: no cover - defensive
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover - defensive
             logger.warning("provenance recording failed: %s", exc)
 
     # ---- candidate pool --------------------------------------------------------
 
-    def record_candidates(self, candidate_ids: List[str]) -> None:
+    def record_candidates(self, candidate_ids: list[str]) -> None:
         try:
             self.record.candidate_ids = [str(c) for c in candidate_ids]
             for cid in self.record.candidate_ids:
@@ -415,21 +413,22 @@ class DecisionRecorder:
                     reason="candidate in initial pool",
                     evidence_id=cid,
                 )
-        except Exception as exc:  # pragma: no cover - defensive
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover - defensive
             logger.warning("record_candidates failed: %s", exc)
 
     # ---- S14 conflict ----------------------------------------------------------
 
     def record_conflict(
-        self, evidence_id: str, other_id: str, reason: str,
-        resolved: bool = False, metadata: Optional[Dict[str, Any]] = None,
+        self,
+        evidence_id: str,
+        other_id: str,
+        reason: str,
+        resolved: bool = False,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         self.record_event(
             stage=DecisionStage.CONFLICT.value,
-            action=(
-                DecisionAction.CONFLICT_RESOLVED.value if resolved
-                else DecisionAction.CONFLICT_DETECTED.value
-            ),
+            action=(DecisionAction.CONFLICT_RESOLVED.value if resolved else DecisionAction.CONFLICT_DETECTED.value),
             reason=reason,
             evidence_id=evidence_id,
             related_evidence_id=other_id,
@@ -439,28 +438,29 @@ class DecisionRecorder:
     # ---- S15 sufficiency / expansion ------------------------------------------
 
     def record_sufficiency(
-        self, sufficient: bool, reason: str,
-        iteration: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        self,
+        sufficient: bool,
+        reason: str,
+        iteration: int | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         meta = dict(metadata or {})
         if iteration is not None:
             meta.setdefault("iteration", iteration)
         self.record_event(
             stage=DecisionStage.SUFFICIENCY.value,
-            action=(
-                DecisionAction.SUFFICIENT.value if sufficient
-                else DecisionAction.INSUFFICIENT.value
-            ),
+            action=(DecisionAction.SUFFICIENT.value if sufficient else DecisionAction.INSUFFICIENT.value),
             reason=reason,
             metadata=meta,
         )
 
     def record_expansion(
-        self, reason: str, iteration: Optional[int] = None,
-        added_ids: Optional[List[str]] = None,
+        self,
+        reason: str,
+        iteration: int | None = None,
+        added_ids: list[str] | None = None,
     ) -> None:
-        meta: Dict[str, Any] = {}
+        meta: dict[str, Any] = {}
         if iteration is not None:
             meta["iteration"] = iteration
         if added_ids:
@@ -472,8 +472,8 @@ class DecisionRecorder:
             metadata=meta,
         )
 
-    def record_stop(self, reason: str, iteration: Optional[int] = None) -> None:
-        meta: Dict[str, Any] = {}
+    def record_stop(self, reason: str, iteration: int | None = None) -> None:
+        meta: dict[str, Any] = {}
         if iteration is not None:
             meta["iteration"] = iteration
         self.record_event(
@@ -486,15 +486,15 @@ class DecisionRecorder:
     # ---- S16 temporal ----------------------------------------------------------
 
     def record_temporal(
-        self, evidence_id: str, compatible: bool, reason: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        self,
+        evidence_id: str,
+        compatible: bool,
+        reason: str,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         self.record_event(
             stage=DecisionStage.TEMPORAL.value,
-            action=(
-                DecisionAction.TEMPORAL_MATCH.value if compatible
-                else DecisionAction.TEMPORAL_MISMATCH.value
-            ),
+            action=(DecisionAction.TEMPORAL_MATCH.value if compatible else DecisionAction.TEMPORAL_MISMATCH.value),
             reason=reason,
             evidence_id=evidence_id,
             metadata=metadata,
@@ -503,9 +503,12 @@ class DecisionRecorder:
     # ---- S17 relationships -----------------------------------------------------
 
     def record_relationship(
-        self, evidence_id: str, related_id: str,
-        relationship: str, reason: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        self,
+        evidence_id: str,
+        related_id: str,
+        relationship: str,
+        reason: str,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         meta = dict(metadata or {})
         meta.setdefault("relationship", relationship)
@@ -529,7 +532,7 @@ class DecisionRecorder:
         try:
             if evidence_id not in self.record.selected_ids:
                 self.record.selected_ids.append(evidence_id)
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("record_selection failed: %s", exc)
         self.record_event(
             stage=DecisionStage.RANKING.value,
@@ -542,7 +545,7 @@ class DecisionRecorder:
         try:
             if evidence_id not in self.record.rejected_ids:
                 self.record.rejected_ids.append(evidence_id)
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("record_rejection failed: %s", exc)
         self.record_event(
             stage=DecisionStage.RANKING.value,
@@ -554,12 +557,14 @@ class DecisionRecorder:
     # ---- S18 adjudication ------------------------------------------------------
 
     def record_adjudication_invoked(
-        self, candidate_ids: List[str], reason: str,
+        self,
+        candidate_ids: list[str],
+        reason: str,
     ) -> None:
         try:
             self.record.adjudication.invoked = True
             self.record.adjudication.candidate_ids = [str(c) for c in candidate_ids]
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("record_adjudication_invoked failed: %s", exc)
         self.record_event(
             stage=DecisionStage.ADJUDICATION.value,
@@ -569,19 +574,18 @@ class DecisionRecorder:
         )
 
     def record_adjudication_result(
-        self, decision: str, confidence: Optional[float], reason: str,
+        self,
+        decision: str,
+        confidence: float | None,
+        reason: str,
     ) -> None:
         try:
             self.record.adjudication.decision = decision
             self.record.adjudication.confidence = confidence
             self.record.adjudication.reason = reason
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("record_adjudication_result failed: %s", exc)
-        action = (
-            DecisionAction.ACCEPT.value
-            if str(decision).lower() == "accept"
-            else DecisionAction.ABSTAIN.value
-        )
+        action = DecisionAction.ACCEPT.value if str(decision).lower() == "accept" else DecisionAction.ABSTAIN.value
         self.record_event(
             stage=DecisionStage.ADJUDICATION.value,
             action=action,
@@ -589,7 +593,7 @@ class DecisionRecorder:
             metadata={"confidence": confidence},
         )
 
-    def record_safety_veto(self, reason: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def record_safety_veto(self, reason: str, metadata: dict[str, Any] | None = None) -> None:
         """
         Deterministic safety veto — this is authoritative and must
         appear in the trace whenever it overrides an LLM ACCEPT.
@@ -597,7 +601,7 @@ class DecisionRecorder:
         try:
             self.record.adjudication.veto_applied = True
             self.record.adjudication.veto_reason = reason
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("record_safety_veto failed: %s", exc)
         self.record_event(
             stage=DecisionStage.SAFETY.value,
@@ -611,15 +615,15 @@ class DecisionRecorder:
     def finalize(
         self,
         status: str,
-        confidence: Optional[float] = None,
-        reason: Optional[str] = None,
+        confidence: float | None = None,
+        reason: str | None = None,
     ) -> DecisionRecord:
         try:
             self.record.final_status = str(status)
             self.record.final_confidence = confidence
             self.record.final_reason = reason
             self.record.trace_complete = True
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover
             logger.warning("finalize failed: %s", exc)
         self.record_event(
             stage=DecisionStage.FINALIZATION.value,
@@ -686,13 +690,13 @@ class NullDecisionRecorder(DecisionRecorder):
 
 
 __all__ = [
-    "DecisionStage",
-    "DecisionAction",
-    "FinalStatus",
-    "DecisionEvent",
+    "DEFAULT_MAX_EVENTS",
     "AdjudicationRecord",
+    "DecisionAction",
+    "DecisionEvent",
     "DecisionRecord",
     "DecisionRecorder",
+    "DecisionStage",
+    "FinalStatus",
     "NullDecisionRecorder",
-    "DEFAULT_MAX_EVENTS",
 ]

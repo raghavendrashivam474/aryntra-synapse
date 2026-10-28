@@ -11,10 +11,11 @@ Detects mutually incompatible claims across candidate evidence chunks:
 
 IMPORTANT: Detects conflict presence and pairs; DOES NOT adjudicate truth.
 """
+
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Any, Tuple, Set, Optional
+from typing import Any
 
 from app.context.sufficiency import extract_keywords
 
@@ -37,7 +38,7 @@ class ConflictPair:
     chunk_a_snippet: str = ""
     chunk_b_snippet: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "chunk_a_id": self.chunk_a_id,
             "chunk_b_id": self.chunk_b_id,
@@ -53,10 +54,10 @@ class ConflictPair:
 class ConflictReport:
     detected: bool
     conflict_score: float  # 0.0 (no conflict) to 1.0 (severe conflict)
-    conflicts: List[ConflictPair] = field(default_factory=list)
-    conflicted_chunk_ids: Set[str] = field(default_factory=set)
+    conflicts: list[ConflictPair] = field(default_factory=list)
+    conflicted_chunk_ids: set[str] = field(default_factory=set)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "detected": self.detected,
             "conflict_score": round(self.conflict_score, 4),
@@ -73,15 +74,31 @@ class ContradictionDetector:
     """
 
     _NEGATION_TERMS = {
-        "not", "no", "never", "cannot", "won't", "isn't", "aren't",
-        "doesn't", "don't", "didn't", "unsupported", "disabled", "failed", "impossible"
+        "not",
+        "no",
+        "never",
+        "cannot",
+        "won't",
+        "isn't",
+        "aren't",
+        "doesn't",
+        "don't",
+        "didn't",
+        "unsupported",
+        "disabled",
+        "failed",
+        "impossible",
     }
 
     _STATUS_PAIRS = [
-        ({"enabled", "active", "supported", "available", "true", "success", "approved"},
-         {"disabled", "deprecated", "unsupported", "unavailable", "false", "failed", "rejected"}),
-        ({"increased", "rose", "growth", "expanded", "positive"},
-         {"decreased", "dropped", "decline", "shrunk", "negative"}),
+        (
+            {"enabled", "active", "supported", "available", "true", "success", "approved"},
+            {"disabled", "deprecated", "unsupported", "unavailable", "false", "failed", "rejected"},
+        ),
+        (
+            {"increased", "rose", "growth", "expanded", "positive"},
+            {"decreased", "dropped", "decline", "shrunk", "negative"},
+        ),
         ({"allowed", "permitted"}, {"forbidden", "prohibited", "blocked"}),
         ({"compatible"}, {"incompatible"}),
         ({"mandatory", "required"}, {"optional", "prohibited"}),
@@ -93,15 +110,15 @@ class ContradictionDetector:
     def __init__(self, topic_similarity_threshold: float = 0.30):
         self.topic_threshold = topic_similarity_threshold
 
-    def analyze(self, chunks: List[Dict[str, Any]]) -> ConflictReport:
+    def analyze(self, chunks: list[dict[str, Any]]) -> ConflictReport:
         """
         Analyze a list of evidence chunks for pairwise contradictions.
         """
         if len(chunks) < 2:
             return ConflictReport(detected=False, conflict_score=0.0)
 
-        conflicts: List[ConflictPair] = []
-        conflicted_ids: Set[str] = set()
+        conflicts: list[ConflictPair] = []
+        conflicted_ids: set[str] = set()
 
         for i in range(len(chunks)):
             for j in range(i + 1, len(chunks)):
@@ -133,9 +150,9 @@ class ContradictionDetector:
 
     def analyze_pair(
         self,
-        chunk_a: Dict[str, Any],
-        chunk_b: Dict[str, Any],
-    ) -> List[ConflictPair]:
+        chunk_a: dict[str, Any],
+        chunk_b: dict[str, Any],
+    ) -> list[ConflictPair]:
         """Check if two chunks present conflicting statements on the same subject."""
         text_a = chunk_a.get("text", "")
         text_b = chunk_b.get("text", "")
@@ -167,15 +184,17 @@ class ContradictionDetector:
         dates_b = set(self._DATE_PATTERN.findall(text_b))
         if dates_a and dates_b and dates_a != dates_b:
             # Different dates claimed on high topic overlap
-            conflicts.append(ConflictPair(
-                chunk_a_id=id_a,
-                chunk_b_id=id_b,
-                conflict_type=ConflictType.DATE,
-                description=f"Temporal mismatch: {dates_a} vs {dates_b}",
-                overlap_score=jaccard,
-                chunk_a_snippet=text_a,
-                chunk_b_snippet=text_b,
-            ))
+            conflicts.append(
+                ConflictPair(
+                    chunk_a_id=id_a,
+                    chunk_b_id=id_b,
+                    conflict_type=ConflictType.DATE,
+                    description=f"Temporal mismatch: {dates_a} vs {dates_b}",
+                    overlap_score=jaccard,
+                    chunk_a_snippet=text_a,
+                    chunk_b_snippet=text_b,
+                )
+            )
 
         # 2. Status / Antonym contradiction
         tokens_a_lower = {w.lower() for w in re.findall(r"\w+", text_a)}
@@ -188,43 +207,49 @@ class ContradictionDetector:
             b_has_neg = bool(tokens_b_lower & neg_set)
 
             if (a_has_pos and b_has_neg) or (a_has_neg and b_has_pos):
-                conflicts.append(ConflictPair(
-                    chunk_a_id=id_a,
-                    chunk_b_id=id_b,
-                    conflict_type=ConflictType.STATUS,
-                    description=f"Opposing status claims detected on topic {list(intersection)[:3]}",
-                    overlap_score=jaccard,
-                    chunk_a_snippet=text_a,
-                    chunk_b_snippet=text_b,
-                ))
+                conflicts.append(
+                    ConflictPair(
+                        chunk_a_id=id_a,
+                        chunk_b_id=id_b,
+                        conflict_type=ConflictType.STATUS,
+                        description=f"Opposing status claims detected on topic {list(intersection)[:3]}",
+                        overlap_score=jaccard,
+                        chunk_a_snippet=text_a,
+                        chunk_b_snippet=text_b,
+                    )
+                )
                 break
 
         # 3. Explicit Negation mismatch on same core predicates
         neg_a = bool(tokens_a_lower & self._NEGATION_TERMS)
         neg_b = bool(tokens_b_lower & self._NEGATION_TERMS)
         if neg_a != neg_b and jaccard >= 0.40:
-            conflicts.append(ConflictPair(
-                chunk_a_id=id_a,
-                chunk_b_id=id_b,
-                conflict_type=ConflictType.NEGATION,
-                description="Direct claim polarity mismatch (affirmative vs negated)",
-                overlap_score=jaccard,
-                chunk_a_snippet=text_a,
-                chunk_b_snippet=text_b,
-            ))
+            conflicts.append(
+                ConflictPair(
+                    chunk_a_id=id_a,
+                    chunk_b_id=id_b,
+                    conflict_type=ConflictType.NEGATION,
+                    description="Direct claim polarity mismatch (affirmative vs negated)",
+                    overlap_score=jaccard,
+                    chunk_a_snippet=text_a,
+                    chunk_b_snippet=text_b,
+                )
+            )
 
         # 4. Numeric disagreement
         nums_a = set(self._NUMBER_PATTERN.findall(text_a)) - dates_a
         nums_b = set(self._NUMBER_PATTERN.findall(text_b)) - dates_b
         if nums_a and nums_b and nums_a != nums_b and jaccard >= 0.45:
-            conflicts.append(ConflictPair(
-                chunk_a_id=id_a,
-                chunk_b_id=id_b,
-                conflict_type=ConflictType.NUMERIC,
-                description=f"Metric value disagreement: {nums_a} vs {nums_b}",
-                overlap_score=jaccard,
-                chunk_a_snippet=text_a,
-                chunk_b_snippet=text_b,
-            ))
+            conflicts.append(
+                ConflictPair(
+                    chunk_a_id=id_a,
+                    chunk_b_id=id_b,
+                    conflict_type=ConflictType.NUMERIC,
+                    description=f"Metric value disagreement: {nums_a} vs {nums_b}",
+                    overlap_score=jaccard,
+                    chunk_a_snippet=text_a,
+                    chunk_b_snippet=text_b,
+                )
+            )
 
         return conflicts

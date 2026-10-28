@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 15 + Sprint 16
 Minimum Sufficient Evidence (MSE) Controller.
 
@@ -16,33 +16,36 @@ Multi-signal evaluation (all deterministic, zero LLM calls):
 
 Design invariant: This module NEVER calls an LLM or embedding model.
 """
-import logging
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import List, Dict, Any, Optional
 
-from app.evidence.coverage import CoverageAnalyzer, CoverageReport
+import logging
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
+
 from app.evidence.contradiction import ConflictReport
+from app.evidence.coverage import CoverageAnalyzer, CoverageReport
 
 logger = logging.getLogger(__name__)
 
 
 class SufficiencyDecision(str, Enum):
     """S15 sufficiency decision for the assembly control loop."""
-    SUFFICIENT = "sufficient"      # STOP  — evidence set is adequate
+
+    SUFFICIENT = "sufficient"  # STOP  — evidence set is adequate
     INSUFFICIENT = "insufficient"  # EXPAND — more evidence needed
-    UNCERTAIN = "uncertain"        # CONSERVATIVE — defer to safe expansion
+    UNCERTAIN = "uncertain"  # CONSERVATIVE — defer to safe expansion
 
 
 @dataclass
 class SufficiencyResult:
     """Structured output of the sufficiency evaluation."""
+
     decision: SufficiencyDecision
     sufficiency_score: float  # 0.0 (clearly insufficient) to 1.0 (clearly sufficient)
-    signals: Dict[str, float]
+    signals: dict[str, float]
     reason: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "decision": self.decision.value,
             "sufficiency_score": round(self.sufficiency_score, 4),
@@ -61,18 +64,19 @@ class SufficiencyEvaluator:
 
     def __init__(
         self,
-        config: Optional[Any] = None,
-        coverage_analyzer: Optional[CoverageAnalyzer] = None,
+        config: Any | None = None,
+        coverage_analyzer: CoverageAnalyzer | None = None,
     ):
         from app.evidence.config import S15SufficiencyConfig
+
         self.config = config or S15SufficiencyConfig()
         self.coverage_analyzer = coverage_analyzer or CoverageAnalyzer()
 
     def evaluate(
         self,
         query: str,
-        selected_chunks: List[Dict[str, Any]],
-        remaining_candidates: List[Dict[str, Any]],
+        selected_chunks: list[dict[str, Any]],
+        remaining_candidates: list[dict[str, Any]],
         coverage_report: CoverageReport,
         conflict_report: ConflictReport,
     ) -> SufficiencyResult:
@@ -91,10 +95,7 @@ class SufficiencyEvaluator:
         s_coverage = coverage_report.coverage_ratio
 
         # ── Signal 2: Evidence support (mean relevance, 0-1) ──
-        scores = [
-            c.get("priority_score", c.get("score", 0.5))
-            for c in selected_chunks
-        ]
+        scores = [c.get("priority_score", c.get("score", 0.5)) for c in selected_chunks]
         s_support = sum(scores) / len(scores) if scores else 0.0
 
         # ── Signal 3: Unresolved concepts (0-1, higher = fewer gaps) ──
@@ -112,9 +113,7 @@ class SufficiencyEvaluator:
         s_temporal = self._compute_temporal_signal(selected_chunks)
 
         # ── Signals 5 & 6: Redundancy and Marginal gain ──
-        s_marginal, s_redundancy = self._compute_marginal_signals(
-            query, selected_chunks, remaining_candidates
-        )
+        s_marginal, s_redundancy = self._compute_marginal_signals(query, selected_chunks, remaining_candidates)
 
         # ── Weighted base combination ──
         t_weight = getattr(self.config, "temporal_weight", 0.0)
@@ -130,19 +129,14 @@ class SufficiencyEvaluator:
 
         # ── Special Rules & Priority Invariants ──
         has_severe_conflict = (
-            conflict_report.detected
-            and conflict_report.conflict_score >= self.config.conflict_veto_threshold
+            conflict_report.detected and conflict_report.conflict_score >= self.config.conflict_veto_threshold
         )
 
         # Rule A: Redundancy / exhaustion boost ONLY if NO severe conflict
         if not has_severe_conflict:
             # No remaining candidates + adequate coverage → declare sufficient
-            if not remaining_candidates and s_coverage >= self.config.sufficient_threshold:
-                score = max(score, self.config.sufficient_threshold)
-            # High redundancy + decent coverage → lean stop
-            elif (
-                s_redundancy >= 0.90
-                and s_coverage >= self.config.sufficient_threshold * 0.85
+            if (not remaining_candidates and s_coverage >= self.config.sufficient_threshold) or (
+                s_redundancy >= 0.90 and s_coverage >= self.config.sufficient_threshold * 0.85
             ):
                 score = max(score, self.config.sufficient_threshold)
 
@@ -177,7 +171,9 @@ class SufficiencyEvaluator:
 
         logger.debug(
             "SufficiencyEvaluator: score=%.3f → %s (%s)",
-            score, decision.value, reason,
+            score,
+            decision.value,
+            reason,
         )
 
         return SufficiencyResult(
@@ -192,8 +188,8 @@ class SufficiencyEvaluator:
     def _compute_marginal_signals(
         self,
         query: str,
-        selected_chunks: List[Dict[str, Any]],
-        remaining_candidates: List[Dict[str, Any]],
+        selected_chunks: list[dict[str, Any]],
+        remaining_candidates: list[dict[str, Any]],
     ) -> tuple:
         """Compute marginal gain and redundancy signals from top remaining candidates."""
         if not remaining_candidates:
@@ -203,9 +199,7 @@ class SufficiencyEvaluator:
         best_gain = 0.0
 
         for candidate in remaining_candidates[:probe_limit]:
-            gain = self.coverage_analyzer.marginal_coverage_gain(
-                query, selected_chunks, candidate
-            )
+            gain = self.coverage_analyzer.marginal_coverage_gain(query, selected_chunks, candidate)
             best_gain = max(best_gain, gain)
 
         # Normalize: a gain of 0.20 maps to 1.0
@@ -216,16 +210,14 @@ class SufficiencyEvaluator:
 
     @staticmethod
     def _compute_temporal_signal(
-        selected_chunks: List[Dict[str, Any]],
+        selected_chunks: list[dict[str, Any]],
     ) -> float:
         """S16: Mean temporal compatibility of selected evidence."""
-        scores = [
-            c.get("temporal_score", 0.5) for c in selected_chunks
-        ]
+        scores = [c.get("temporal_score", 0.5) for c in selected_chunks]
         return sum(scores) / len(scores) if scores else 0.5
 
     @staticmethod
-    def _empty_signals() -> Dict[str, float]:
+    def _empty_signals() -> dict[str, float]:
         return {
             "coverage": 0.0,
             "support": 0.0,

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 17
 Evidence Relationship Graph & Coherent Evidence Assembly Engine.
 
@@ -14,19 +14,20 @@ Design Invariants:
   - Conservative on SUPPORTS/ELABORATES: edges created only upon explicit deterministic references.
 """
 
-import re
 import logging
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Any, Optional, Set, Tuple
+from typing import Any
 
-from app.evidence.contradiction import ContradictionDetector, ConflictPair, ConflictType
-from app.evidence.temporal import TemporalAnalyzer, TemporalMetadata, TemporalState
+from app.evidence.contradiction import ContradictionDetector
+from app.evidence.temporal import TemporalAnalyzer, TemporalMetadata
 
 logger = logging.getLogger(__name__)
 
 
 # ── Relationship Vocabulary ──────────────────────────────────────────
+
 
 class RelationshipType(str, Enum):
     SUPERSEDES = "SUPERSEDES"
@@ -41,17 +42,19 @@ class RelationshipType(str, Enum):
 
 # ── Relationship Edge Representation ─────────────────────────────────
 
+
 @dataclass(frozen=True)
 class Relationship:
     """A directed edge in the EvidenceGraph."""
+
     source_id: str
     target_id: str
     relation: RelationshipType
     confidence: float = 1.0
     evidence: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source_id": self.source_id,
             "target_id": self.target_id,
@@ -64,18 +67,20 @@ class Relationship:
 
 # ── Evidence Graph Representation ────────────────────────────────────
 
+
 @dataclass
 class EvidenceGraph:
     """
     Lightweight, bounded relationship graph over candidate or selected chunks.
     """
-    nodes: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    edges: List[Relationship] = field(default_factory=list)
 
-    def add_node(self, chunk_id: str, chunk_data: Dict[str, Any]) -> None:
+    nodes: dict[str, dict[str, Any]] = field(default_factory=dict)
+    edges: list[Relationship] = field(default_factory=list)
+
+    def add_node(self, chunk_id: str, chunk_data: dict[str, Any]) -> None:
         self.nodes[chunk_id] = chunk_data
 
-    def add_edge(self, edge: Relationship, max_edges: Optional[int] = None) -> bool:
+    def add_edge(self, edge: Relationship, max_edges: int | None = None) -> bool:
         """Add an edge if not already present and if within max_edges limit."""
         if max_edges is not None and len(self.edges) >= max_edges:
             return False
@@ -90,37 +95,32 @@ class EvidenceGraph:
         self.edges.append(edge)
         return True
 
-    def get_edges_for(self, chunk_id: str) -> List[Relationship]:
+    def get_edges_for(self, chunk_id: str) -> list[Relationship]:
         """Return all edges where chunk_id is either source or target."""
-        return [
-            e for e in self.edges
-            if e.source_id == chunk_id or e.target_id == chunk_id
-        ]
+        return [e for e in self.edges if e.source_id == chunk_id or e.target_id == chunk_id]
 
-    def get_outgoing_edges(self, chunk_id: str) -> List[Relationship]:
+    def get_outgoing_edges(self, chunk_id: str) -> list[Relationship]:
         return [e for e in self.edges if e.source_id == chunk_id]
 
-    def get_incoming_edges(self, chunk_id: str) -> List[Relationship]:
+    def get_incoming_edges(self, chunk_id: str) -> list[Relationship]:
         return [e for e in self.edges if e.target_id == chunk_id]
 
-    def get_relationships_by_type(self, relation: RelationshipType) -> List[Relationship]:
+    def get_relationships_by_type(self, relation: RelationshipType) -> list[Relationship]:
         return [e for e in self.edges if e.relation == relation]
 
-    def get_superseded_by(self, chunk_id: str) -> List[str]:
+    def get_superseded_by(self, chunk_id: str) -> list[str]:
         """Return IDs of chunks that supersede chunk_id."""
         return [
-            e.source_id for e in self.edges
-            if e.target_id == chunk_id and e.relation == RelationshipType.SUPERSEDES
+            e.source_id for e in self.edges if e.target_id == chunk_id and e.relation == RelationshipType.SUPERSEDES
         ]
 
-    def get_supersedes(self, chunk_id: str) -> List[str]:
+    def get_supersedes(self, chunk_id: str) -> list[str]:
         """Return IDs of chunks superseded by chunk_id."""
         return [
-            e.target_id for e in self.edges
-            if e.source_id == chunk_id and e.relation == RelationshipType.SUPERSEDES
+            e.target_id for e in self.edges if e.source_id == chunk_id and e.relation == RelationshipType.SUPERSEDES
         ]
 
-    def get_contradictions(self, chunk_id: str) -> List[str]:
+    def get_contradictions(self, chunk_id: str) -> list[str]:
         """Return IDs of chunks in factual contradiction with chunk_id."""
         contradicted = set()
         for e in self.edges:
@@ -131,7 +131,7 @@ class EvidenceGraph:
                     contradicted.add(e.source_id)
         return list(contradicted)
 
-    def get_version_chain(self, chunk_id: str) -> List[str]:
+    def get_version_chain(self, chunk_id: str) -> list[str]:
         """Return IDs of all chunks in the same version chain."""
         chain_members = {chunk_id}
         for e in self.edges:
@@ -154,7 +154,7 @@ class EvidenceGraph:
     def edge_count(self) -> int:
         return len(self.edges)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "node_count": len(self.nodes),
             "edge_count": len(self.edges),
@@ -172,6 +172,7 @@ class EvidenceGraph:
 
 
 # ── Relationship Analyzer ─────────────────────────────────────────────
+
 
 class RelationshipAnalyzer:
     """
@@ -198,11 +199,12 @@ class RelationshipAnalyzer:
 
     def __init__(
         self,
-        config: Optional[Any] = None,
-        contradiction_detector: Optional[ContradictionDetector] = None,
-        temporal_analyzer: Optional[TemporalAnalyzer] = None,
+        config: Any | None = None,
+        contradiction_detector: ContradictionDetector | None = None,
+        temporal_analyzer: TemporalAnalyzer | None = None,
     ):
         from app.evidence.config import S17RelationshipConfig
+
         self.config = config or S17RelationshipConfig()
         self.contradiction_detector = contradiction_detector or ContradictionDetector()
         self.temporal_analyzer = temporal_analyzer or TemporalAnalyzer()
@@ -211,13 +213,13 @@ class RelationshipAnalyzer:
 
     def analyze_pair(
         self,
-        chunk_a: Dict[str, Any],
-        chunk_b: Dict[str, Any],
-    ) -> List[Relationship]:
+        chunk_a: dict[str, Any],
+        chunk_b: dict[str, Any],
+    ) -> list[Relationship]:
         """
         Analyze a pair of evidence chunks and return all deterministic relationships.
         """
-        relationships: List[Relationship] = []
+        relationships: list[Relationship] = []
         id_a = str(chunk_a.get("chunk_id", chunk_a.get("id", "A")))
         id_b = str(chunk_b.get("chunk_id", chunk_b.get("id", "B")))
 
@@ -297,9 +299,7 @@ class RelationshipAnalyzer:
 
         # ── 4. Temporal Adjacency ──
         if getattr(self.config, "enable_temporal_adjacency_edges", True):
-            temp_edge = self._detect_temporal_adjacency(
-                id_a, id_b, meta_a, meta_b, same_lineage or same_doc
-            )
+            temp_edge = self._detect_temporal_adjacency(id_a, id_b, meta_a, meta_b, same_lineage or same_doc)
             if temp_edge:
                 relationships.append(temp_edge)
 
@@ -312,7 +312,7 @@ class RelationshipAnalyzer:
 
     # ── Graph Construction ────────────────────────────────────────────
 
-    def build_graph(self, chunks: List[Dict[str, Any]]) -> EvidenceGraph:
+    def build_graph(self, chunks: list[dict[str, Any]]) -> EvidenceGraph:
         """
         Construct an EvidenceGraph from a candidate or selected list of chunks.
         Bounded pairwise analysis O(n^2).
@@ -355,14 +355,14 @@ class RelationshipAnalyzer:
         self,
         id_a: str,
         id_b: str,
-        chunk_a: Dict[str, Any],
-        chunk_b: Dict[str, Any],
+        chunk_a: dict[str, Any],
+        chunk_b: dict[str, Any],
         meta_a: TemporalMetadata,
         meta_b: TemporalMetadata,
         related_lineage: bool,
-    ) -> List[Relationship]:
+    ) -> list[Relationship]:
         """Detect explicit and version-based supersession."""
-        edges: List[Relationship] = []
+        edges: list[Relationship] = []
 
         v_a = self._parse_version(meta_a.version or chunk_a.get("version"))
         v_b = self._parse_version(meta_b.version or chunk_b.get("version"))
@@ -371,53 +371,51 @@ class RelationshipAnalyzer:
         sup_a = str(meta_a.supersedes or chunk_a.get("supersedes", "")).strip()
         sup_b = str(meta_b.supersedes or chunk_b.get("supersedes", "")).strip()
 
-        if sup_a:
-            if sup_a == id_b or (v_b and str(v_b[0]) in sup_a):
-                edges.append(
-                    Relationship(
-                        source_id=id_a,
-                        target_id=id_b,
-                        relation=RelationshipType.SUPERSEDES,
-                        confidence=1.0,
-                        evidence=f"Explicit supersession: chunk {id_a} supersedes {sup_a}",
-                        metadata={"explicit": True},
-                    )
+        if sup_a and (sup_a == id_b or (v_b and str(v_b[0]) in sup_a)):
+            edges.append(
+                Relationship(
+                    source_id=id_a,
+                    target_id=id_b,
+                    relation=RelationshipType.SUPERSEDES,
+                    confidence=1.0,
+                    evidence=f"Explicit supersession: chunk {id_a} supersedes {sup_a}",
+                    metadata={"explicit": True},
                 )
-                edges.append(
-                    Relationship(
-                        source_id=id_b,
-                        target_id=id_a,
-                        relation=RelationshipType.SUPERSEDED_BY,
-                        confidence=1.0,
-                        evidence=f"Explicit supersession: chunk {id_a} supersedes {sup_a}",
-                        metadata={"explicit": True},
-                    )
+            )
+            edges.append(
+                Relationship(
+                    source_id=id_b,
+                    target_id=id_a,
+                    relation=RelationshipType.SUPERSEDED_BY,
+                    confidence=1.0,
+                    evidence=f"Explicit supersession: chunk {id_a} supersedes {sup_a}",
+                    metadata={"explicit": True},
                 )
-                return edges
+            )
+            return edges
 
-        if sup_b:
-            if sup_b == id_a or (v_a and str(v_a[0]) in sup_b):
-                edges.append(
-                    Relationship(
-                        source_id=id_b,
-                        target_id=id_a,
-                        relation=RelationshipType.SUPERSEDES,
-                        confidence=1.0,
-                        evidence=f"Explicit supersession: chunk {id_b} supersedes {sup_b}",
-                        metadata={"explicit": True},
-                    )
+        if sup_b and (sup_b == id_a or (v_a and str(v_a[0]) in sup_b)):
+            edges.append(
+                Relationship(
+                    source_id=id_b,
+                    target_id=id_a,
+                    relation=RelationshipType.SUPERSEDES,
+                    confidence=1.0,
+                    evidence=f"Explicit supersession: chunk {id_b} supersedes {sup_b}",
+                    metadata={"explicit": True},
                 )
-                edges.append(
-                    Relationship(
-                        source_id=id_a,
-                        target_id=id_b,
-                        relation=RelationshipType.SUPERSEDED_BY,
-                        confidence=1.0,
-                        evidence=f"Explicit supersession: chunk {id_b} supersedes {sup_b}",
-                        metadata={"explicit": True},
-                    )
+            )
+            edges.append(
+                Relationship(
+                    source_id=id_a,
+                    target_id=id_b,
+                    relation=RelationshipType.SUPERSEDED_BY,
+                    confidence=1.0,
+                    evidence=f"Explicit supersession: chunk {id_b} supersedes {sup_b}",
+                    metadata={"explicit": True},
                 )
-                return edges
+            )
+            return edges
 
         # Case 2: Version hierarchy (requires related lineage or shared doc context)
         if v_a is not None and v_b is not None and (related_lineage or v_a != v_b):
@@ -473,7 +471,7 @@ class RelationshipAnalyzer:
         meta_a: TemporalMetadata,
         meta_b: TemporalMetadata,
         related_lineage: bool,
-    ) -> Optional[Relationship]:
+    ) -> Relationship | None:
         """Detect contiguous temporal sequence between related chunks."""
         if meta_a.years_mentioned and meta_b.years_mentioned:
             try:
@@ -520,13 +518,13 @@ class RelationshipAnalyzer:
         self,
         id_a: str,
         id_b: str,
-        chunk_a: Dict[str, Any],
-        chunk_b: Dict[str, Any],
-        doc_a: Optional[str],
-        doc_b: Optional[str],
-    ) -> List[Relationship]:
+        chunk_a: dict[str, Any],
+        chunk_b: dict[str, Any],
+        doc_a: str | None,
+        doc_b: str | None,
+    ) -> list[Relationship]:
         """Detect deterministic elaboration or support based on explicit references."""
-        edges: List[Relationship] = []
+        edges: list[Relationship] = []
         text_a = chunk_a.get("text", "")
         text_b = chunk_b.get("text", "")
 
@@ -586,11 +584,10 @@ class RelationshipAnalyzer:
         If A SUPERSEDES B and B SUPERSEDES C, then A SUPERSEDES C.
         """
         direct_supersedes = [
-            (e.source_id, e.target_id)
-            for e in graph.get_relationships_by_type(RelationshipType.SUPERSEDES)
+            (e.source_id, e.target_id) for e in graph.get_relationships_by_type(RelationshipType.SUPERSEDES)
         ]
 
-        transitive_edges: List[Relationship] = []
+        transitive_edges: list[Relationship] = []
         for a, b in direct_supersedes:
             for b2, c in direct_supersedes:
                 if b == b2 and a != c:
@@ -620,7 +617,7 @@ class RelationshipAnalyzer:
                 break
 
     @classmethod
-    def _parse_version(cls, version_val: Any) -> Optional[Tuple[int, ...]]:
+    def _parse_version(cls, version_val: Any) -> tuple[int, ...] | None:
         """Parse version string or numeric into a comparable tuple of ints."""
         if version_val is None:
             return None

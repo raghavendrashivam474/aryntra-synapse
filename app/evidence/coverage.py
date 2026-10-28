@@ -5,26 +5,40 @@ Multi-Concept Evidence Coverage Analyzer.
 Identifies discrete concept facets required by the query and evaluates
 how comprehensively candidate chunks cover those facets.
 """
+
 import re
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Set
-from app.context.sufficiency import extract_keywords, STOPWORDS
+from typing import Any
+
+from app.context.sufficiency import STOPWORDS, extract_keywords
 
 # Additional interrogative/auxiliary words to exclude from standalone concept facets
 FACET_EXCLUSIONS = STOPWORDS | {
-    "did", "does", "done", "happened", "occurred", "what", "when", "where",
-    "why", "how", "who", "which", "whose", "whom"
+    "did",
+    "does",
+    "done",
+    "happened",
+    "occurred",
+    "what",
+    "when",
+    "where",
+    "why",
+    "how",
+    "who",
+    "which",
+    "whose",
+    "whom",
 }
 
 
 @dataclass
 class ConceptFacet:
     name: str
-    keywords: Set[str]
+    keywords: set[str]
     is_covered: bool = False
-    covered_by_chunks: List[str] = field(default_factory=list)
+    covered_by_chunks: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "keywords": list(self.keywords),
@@ -35,14 +49,14 @@ class ConceptFacet:
 
 @dataclass
 class CoverageReport:
-    query_concepts: List[str]
-    covered_concepts: List[str]
-    missing_concepts: List[str]
+    query_concepts: list[str]
+    covered_concepts: list[str]
+    missing_concepts: list[str]
     coverage_ratio: float  # 0.0 to 1.0
     is_sufficient: bool
-    facet_details: List[ConceptFacet] = field(default_factory=list)
+    facet_details: list[ConceptFacet] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "query_concepts": self.query_concepts,
             "covered_concepts": self.covered_concepts,
@@ -63,15 +77,50 @@ class CoverageAnalyzer:
     FACET_PATTERNS = {
         "cause": {
             "patterns": [r"\b(cause|caused|causing|reason|origin|why|due to|because)\b"],
-            "chunk_indicators": {"cause", "caused", "reason", "due", "because", "source", "bug", "exception", "failure", "overload", "error"},
+            "chunk_indicators": {
+                "cause",
+                "caused",
+                "reason",
+                "due",
+                "because",
+                "source",
+                "bug",
+                "exception",
+                "failure",
+                "overload",
+                "error",
+            },
         },
         "time": {
             "patterns": [r"\b(when|date|year|timestamp|timeline|time|period|at \d{1,2}:\d{2})\b"],
-            "chunk_indicators": {"date", "time", "year", "occurred", "happened", "timestamp", "utc", "gmt", "during", "schedule", "scheduled"},
+            "chunk_indicators": {
+                "date",
+                "time",
+                "year",
+                "occurred",
+                "happened",
+                "timestamp",
+                "utc",
+                "gmt",
+                "during",
+                "schedule",
+                "scheduled",
+            },
         },
         "outcome": {
             "patterns": [r"\b(outcome|result|effect|impact|consequence|aftermath|resolution|status)\b"],
-            "chunk_indicators": {"outcome", "result", "effect", "impact", "loss", "rollback", "restored", "resolved", "fixed", "recovery"},
+            "chunk_indicators": {
+                "outcome",
+                "result",
+                "effect",
+                "impact",
+                "loss",
+                "rollback",
+                "restored",
+                "resolved",
+                "fixed",
+                "recovery",
+            },
         },
         "location": {
             "patterns": [r"\b(where|region|location|place|datacenter|cluster|site)\b"],
@@ -86,11 +135,10 @@ class CoverageAnalyzer:
     def __init__(self, min_facet_coverage_threshold: float = 0.70):
         self.min_coverage_threshold = min_facet_coverage_threshold
 
-    def extract_facets(self, query: str) -> List[ConceptFacet]:
+    def extract_facets(self, query: str) -> list[ConceptFacet]:
         """Deconstruct query into conceptual facets."""
         q_lower = query.lower()
-        facets: List[ConceptFacet] = []
-        covered_kw = set()
+        facets: list[ConceptFacet] = []
 
         # 1. Structural intent facets (cause, time, outcome, location, mechanism)
         for facet_name, config in self.FACET_PATTERNS.items():
@@ -112,7 +160,7 @@ class CoverageAnalyzer:
 
         return facets
 
-    def evaluate(self, query: str, chunks: List[Dict[str, Any]]) -> CoverageReport:
+    def evaluate(self, query: str, chunks: list[dict[str, Any]]) -> CoverageReport:
         """Evaluate concept coverage of query across the given chunks."""
         facets = self.extract_facets(query)
         if not facets:
@@ -139,7 +187,7 @@ class CoverageAnalyzer:
                 chunk_kw = extract_keywords(chunk_text)
 
                 # Match if keywords intersect OR any facet keyword string is in chunk text
-                has_year = (facet.name == "time" and bool(re.search(r"\b(19|20)\d{2}\b", chunk_text)))
+                has_year = facet.name == "time" and bool(re.search(r"\b(19|20)\d{2}\b", chunk_text))
                 if (facet.keywords & chunk_kw) or any(k in chunk_text for k in facet.keywords) or has_year:
                     facet.is_covered = True
                     if chunk_id not in facet.covered_by_chunks:
@@ -166,8 +214,8 @@ class CoverageAnalyzer:
     def marginal_coverage_gain(
         self,
         query: str,
-        current_chunks: List[Dict[str, Any]],
-        candidate_chunk: Dict[str, Any],
+        current_chunks: list[dict[str, Any]],
+        candidate_chunk: dict[str, Any],
     ) -> float:
         """Calculate additional coverage ratio provided by adding candidate_chunk."""
         current_rep = self.evaluate(query, current_chunks)

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Aryntra Synapse - Sprint 16
 Temporal & Version-Aware Evidence Analysis.
 
@@ -13,20 +13,23 @@ Design invariants:
   - Complements S14 contradiction detection (ConflictType.DATE), does not replace it
   - Extends S15 sufficiency as an additional signal
 """
-import re
-import logging
+
 import datetime
+import logging
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 # ── Enums ──────────────────────────────────────────────────────────────
 
+
 class TemporalState(str, Enum):
     """Temporal classification of an evidence chunk."""
+
     CURRENT = "current"
     HISTORICAL = "historical"
     FUTURE = "future"
@@ -37,6 +40,7 @@ class TemporalState(str, Enum):
 
 class QueryTemporalIntent(str, Enum):
     """Temporal intent extracted from a user query."""
+
     CURRENT = "current"
     HISTORICAL = "historical"
     FUTURE = "future"
@@ -47,22 +51,24 @@ class QueryTemporalIntent(str, Enum):
 
 # ── Data Classes ───────────────────────────────────────────────────────
 
+
 @dataclass
 class TemporalMetadata:
     """Structured temporal information extracted from an evidence chunk."""
-    timestamp: Optional[str] = None
-    valid_from: Optional[str] = None
-    valid_until: Optional[str] = None
-    version: Optional[str] = None
-    supersedes: Optional[str] = None
-    document_id: Optional[str] = None
-    published_at: Optional[str] = None
-    effective_from: Optional[str] = None
-    effective_until: Optional[str] = None
-    temporal_state: TemporalState = TemporalState.UNKNOWN
-    years_mentioned: List[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    timestamp: str | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    version: str | None = None
+    supersedes: str | None = None
+    document_id: str | None = None
+    published_at: str | None = None
+    effective_from: str | None = None
+    effective_until: str | None = None
+    temporal_state: TemporalState = TemporalState.UNKNOWN
+    years_mentioned: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp,
             "valid_from": self.valid_from,
@@ -81,12 +87,13 @@ class TemporalMetadata:
 @dataclass
 class TemporalCompatibilityResult:
     """Result of matching query temporal intent against evidence metadata."""
+
     compatibility_score: float
     query_intent: QueryTemporalIntent
     evidence_state: TemporalState
     reason: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "compatibility_score": round(self.compatibility_score, 4),
             "query_intent": self.query_intent.value,
@@ -96,6 +103,7 @@ class TemporalCompatibilityResult:
 
 
 # ── Analyzer ──────────────────────────────────────────────────────────
+
 
 class TemporalAnalyzer:
     """
@@ -108,46 +116,87 @@ class TemporalAnalyzer:
     """
 
     MONTH_MAP = {
-        "january": "01", "jan": "01",
-        "february": "02", "feb": "02",
-        "march": "03", "mar": "03",
-        "april": "04", "apr": "04",
+        "january": "01",
+        "jan": "01",
+        "february": "02",
+        "feb": "02",
+        "march": "03",
+        "mar": "03",
+        "april": "04",
+        "apr": "04",
         "may": "05",
-        "june": "06", "jun": "06",
-        "july": "07", "jul": "07",
-        "august": "08", "aug": "08",
-        "september": "09", "sep": "09", "sept": "09",
-        "october": "10", "oct": "10",
-        "november": "11", "nov": "11",
-        "december": "12", "dec": "12",
+        "june": "06",
+        "jun": "06",
+        "july": "07",
+        "jul": "07",
+        "august": "08",
+        "aug": "08",
+        "september": "09",
+        "sep": "09",
+        "sept": "09",
+        "october": "10",
+        "oct": "10",
+        "november": "11",
+        "nov": "11",
+        "december": "12",
+        "dec": "12",
     }
 
     # ── Query intent patterns ──
     _CURRENT_INDICATORS = {
-        "current", "latest", "now", "today", "newest", "recent",
-        "present", "active", "currently",
+        "current",
+        "latest",
+        "now",
+        "today",
+        "newest",
+        "recent",
+        "present",
+        "active",
+        "currently",
     }
     _CURRENT_PHRASES = [
-        r"\bmost recent\b", r"\bup.to.date\b", r"\bas of now\b",
-        r"\bright now\b", r"\bat present\b",
+        r"\bmost recent\b",
+        r"\bup.to.date\b",
+        r"\bas of now\b",
+        r"\bright now\b",
+        r"\bat present\b",
     ]
 
     _HISTORICAL_INDICATORS = {
-        "previously", "formerly", "past", "history", "historical",
-        "ago", "originally", "deprecated", "legacy", "prior", "back in",
+        "previously",
+        "formerly",
+        "past",
+        "history",
+        "historical",
+        "ago",
+        "originally",
+        "deprecated",
+        "legacy",
+        "prior",
+        "back in",
     }
     _HISTORICAL_PHRASES = [
-        r"\bused to\b", r"\bin the past\b", r"\bback in\b",
+        r"\bused to\b",
+        r"\bin the past\b",
+        r"\bback in\b",
     ]
     _WEAK_HISTORICAL = {"was", "were", "old", "before", "earlier", "during", "in"}
 
     _FUTURE_INDICATORS = {
-        "upcoming", "planned", "expected", "future",
-        "scheduled", "projected", "anticipated",
+        "upcoming",
+        "planned",
+        "expected",
+        "future",
+        "scheduled",
+        "projected",
+        "anticipated",
     }
     _FUTURE_PHRASES = [
-        r"\bwill be\b", r"\bgoing to\b", r"\bset to\b",
-        r"\bslated for\b", r"\bnext (?:year|quarter|month)\b",
+        r"\bwill be\b",
+        r"\bgoing to\b",
+        r"\bset to\b",
+        r"\bslated for\b",
+        r"\bnext (?:year|quarter|month)\b",
     ]
 
     _TIME_RANGE_PHRASES = [
@@ -163,9 +212,7 @@ class TemporalAnalyzer:
         r"\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\s+((?:19|20)\d{2})\b",
         re.IGNORECASE,
     )
-    _VERSION_PATTERN = re.compile(
-        r"\b[vV](?:ersion\s*)?(\d+(?:\.\d+)*)\b"
-    )
+    _VERSION_PATTERN = re.compile(r"\b[vV](?:ersion\s*)?(\d+(?:\.\d+)*)\b")
     _DATE_RANGE_PATTERN = re.compile(
         r"(?:effective\s+|valid\s+)?(?:from|starting)\s+((?:19|20)\d{2}(?:-\d{2}-\d{2})?)\s+(?:until|through|to|ending)\s+((?:19|20)\d{2}(?:-\d{2}-\d{2})?)",
         re.IGNORECASE,
@@ -183,9 +230,10 @@ class TemporalAnalyzer:
         re.IGNORECASE,
     )
 
-    def __init__(self, config: Optional[Any] = None):
+    def __init__(self, config: Any | None = None):
         if config is None:
             from app.evidence.config import S16TemporalConfig
+
             config = S16TemporalConfig()
         self.config = config
 
@@ -226,7 +274,7 @@ class TemporalAnalyzer:
 
         return QueryTemporalIntent.UNKNOWN
 
-    def extract_query_target_date(self, query: str) -> Optional[str]:
+    def extract_query_target_date(self, query: str) -> str | None:
         """Extract target date/year/month representation from query."""
         q_lower = query.lower()
         my_match = self._MONTH_YEAR_PATTERN.search(q_lower)
@@ -246,9 +294,7 @@ class TemporalAnalyzer:
 
         return None
 
-    def extract_evidence_metadata(
-        self, chunk: Dict[str, Any]
-    ) -> TemporalMetadata:
+    def extract_evidence_metadata(self, chunk: dict[str, Any]) -> TemporalMetadata:
         """Extract temporal metadata from chunk dict fields and text."""
         text = chunk.get("text", "")
 
@@ -307,7 +353,7 @@ class TemporalAnalyzer:
         self,
         query_intent: QueryTemporalIntent,
         evidence_meta: TemporalMetadata,
-        query_target_date: Optional[str] = None,
+        query_target_date: str | None = None,
     ) -> TemporalCompatibilityResult:
         """Compute temporal compatibility between query intent and evidence."""
         # Safety invariant: UNKNOWN evidence -> neutral
@@ -331,7 +377,10 @@ class TemporalAnalyzer:
         # Specific point-in-time evaluation
         if query_intent == QueryTemporalIntent.POINT_IN_TIME and query_target_date:
             # 1. Check effective date range bounds
-            if evidence_meta.effective_from and query_target_date < evidence_meta.effective_from[:len(query_target_date)]:
+            if (
+                evidence_meta.effective_from
+                and query_target_date < evidence_meta.effective_from[: len(query_target_date)]
+            ):
                 # Chunk only becomes effective AFTER query target date
                 return TemporalCompatibilityResult(
                     compatibility_score=0.20,
@@ -343,7 +392,7 @@ class TemporalAnalyzer:
             if evidence_meta.effective_until or evidence_meta.valid_until:
                 bound = evidence_meta.effective_until or evidence_meta.valid_until
                 start = evidence_meta.effective_from or evidence_meta.valid_from or "1900"
-                if start[:len(query_target_date)] <= query_target_date <= bound[:len(query_target_date)]:
+                if start[: len(query_target_date)] <= query_target_date <= bound[: len(query_target_date)]:
                     return TemporalCompatibilityResult(
                         compatibility_score=1.0,
                         query_intent=query_intent,
@@ -369,15 +418,10 @@ class TemporalAnalyzer:
                 )
 
         # Lookup from config compatibility matrix
-        score = self.config.get_compatibility(
-            query_intent.value, evidence_meta.temporal_state.value
-        )
+        score = self.config.get_compatibility(query_intent.value, evidence_meta.temporal_state.value)
 
         # Hard rule: superseded evidence + current query -> strong penalty
-        if (
-            query_intent == QueryTemporalIntent.CURRENT
-            and evidence_meta.temporal_state == TemporalState.SUPERSEDED
-        ):
+        if query_intent == QueryTemporalIntent.CURRENT and evidence_meta.temporal_state == TemporalState.SUPERSEDED:
             score = min(score, self.config.superseded_penalty)
 
         # Version boost: versioned current evidence for current queries
@@ -397,7 +441,7 @@ class TemporalAnalyzer:
             reason=reason,
         )
 
-    def score_chunk(self, query: str, chunk: Dict[str, Any]) -> float:
+    def score_chunk(self, query: str, chunk: dict[str, Any]) -> float:
         """Compute temporal compatibility score for a single chunk."""
         intent = self.extract_query_intent(query)
         target_date = self.extract_query_target_date(query)
@@ -408,9 +452,9 @@ class TemporalAnalyzer:
     def enrich_chunks(
         self,
         query: str,
-        chunks: List[Dict[str, Any]],
+        chunks: list[dict[str, Any]],
         rerank: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Add temporal_score, temporal metadata, and combined_score to each chunk.
         If rerank=True, re-orders chunks deterministically by combined_score.
@@ -434,13 +478,9 @@ class TemporalAnalyzer:
 
         for chunk in chunks:
             meta = self.extract_evidence_metadata(chunk)
-            
+
             # Version chain awareness: older versions in pool get marked superseded for current queries
-            if (
-                intent == QueryTemporalIntent.CURRENT
-                and max_version is not None
-                and meta.version
-            ):
+            if intent == QueryTemporalIntent.CURRENT and max_version is not None and meta.version:
                 try:
                     cur_v = float(re.sub(r"[^\d.]", "", meta.version))
                     if cur_v < max_version:
@@ -474,9 +514,7 @@ class TemporalAnalyzer:
 
     # ── Internal ──────────────────────────────────────────────────────
 
-    def _classify_temporal_state(
-        self, meta: TemporalMetadata, text: str = ""
-    ) -> TemporalState:
+    def _classify_temporal_state(self, meta: TemporalMetadata, text: str = "") -> TemporalState:
         """Classify temporal state from extracted metadata and text."""
         # Explicit supersession -> SUPERSEDED
         if meta.supersedes:
@@ -501,9 +539,7 @@ class TemporalAnalyzer:
         if meta.years_mentioned:
             current_year = datetime.datetime.now().year
             latest_year = int(max(meta.years_mentioned))
-            if latest_year >= current_year - 1:
-                return TemporalState.CURRENT
-            elif latest_year >= current_year - 3:
+            if latest_year >= current_year - 1 or latest_year >= current_year - 3:
                 return TemporalState.CURRENT
             else:
                 return TemporalState.HISTORICAL

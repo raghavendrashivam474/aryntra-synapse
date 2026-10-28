@@ -1,39 +1,43 @@
-﻿"""
+"""
 Aryntra Synapse — Sprint 14 + Sprint 15
 Conflict-Aware Evidence Resolution, Progressive Assembly,
 and Minimum Sufficient Evidence Control Package.
 """
-from app.evidence.state import EvidenceState, RelationalEvidenceState
+
+from app.evidence.assembly import (
+    AssemblyMetrics,
+    AssemblyResult,
+    EvidenceAssembler,
+)
+from app.evidence.config import (
+    S14ResolutionConfig,
+    S15SufficiencyConfig,
+    S16TemporalConfig,
+)
 from app.evidence.contradiction import (
-    ConflictType,
     ConflictPair,
     ConflictReport,
+    ConflictType,
     ContradictionDetector,
 )
 from app.evidence.coverage import (
     ConceptFacet,
-    CoverageReport,
     CoverageAnalyzer,
+    CoverageReport,
 )
-from app.evidence.config import S14ResolutionConfig, S15SufficiencyConfig
-from app.evidence.assembly import (
-    EvidenceAssembler,
-    AssemblyResult,
-    AssemblyMetrics,
-)
+from app.evidence.state import EvidenceState, RelationalEvidenceState
 from app.evidence.sufficiency import (
     SufficiencyDecision,
-    SufficiencyResult,
     SufficiencyEvaluator,
+    SufficiencyResult,
 )
 from app.evidence.temporal import (
-    TemporalState,
     QueryTemporalIntent,
-    TemporalMetadata,
-    TemporalCompatibilityResult,
     TemporalAnalyzer,
+    TemporalCompatibilityResult,
+    TemporalMetadata,
+    TemporalState,
 )
-from app.evidence.config import S16TemporalConfig
 
 __all__ = [
     # S14 state
