@@ -35,3 +35,22 @@ Thumbs.db
 patch_s16.py
 verify_temporal.py
 s16_full_test_results.txt
+
+# Frontend dependencies (sc_s3)
+node_modules/
+experiments/synapse_compare/sc_s3/frontend/node_modules/
+experiments/synapse_compare/sc_s3/frontend/dist/
+
+# Build artifacts
+*.map
+*.tsbuildinfo
+
+# Data files (tracked via DVC or similar, not Git)
+*.mat
+*.npy
+*.npz
+*.pkl
+*.sav
+*.arff
+*.wav
+*.fits

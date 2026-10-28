@@ -1,0 +1,51 @@
+[project]
+name = "aryntra-synapse"
+requires-python = ">=3.13"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "RUF",
+    "TRY",
+    "BLE",
+    "C4",
+    "PIE",
+]
+ignore = [
+    "RUF012",
+    "E501",
+    "SIM102",
+    "UP042",
+    "TRY003",
+    "RUF002",
+    "RUF005",
+    "SIM108",
+    "TRY300",
+    "E402",
+    "RUF022",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = true
